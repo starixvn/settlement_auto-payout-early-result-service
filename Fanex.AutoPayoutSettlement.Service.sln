@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{B02A72C3-96FF-4B8C-95EE-2A73223B9FFA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoPayoutSettlement", "Sources\AutoPayoutSettlement\AutoPayoutSettlement.csproj", "{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fanex.AutoPayoutSettlement.Service", "Sources\Fanex.AutoPayoutSettlement.Service\Fanex.AutoPayoutSettlement.Service.csproj", "{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fanex.Library", "Sources\Fanex.Library\Fanex.Library.csproj", "{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{DBFCD6AE-8366-4D6E-95E9-85DFB0BD6EB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fanex.AutoPayoutSettlement.Core", "Sources\Fanex.AutoPayoutSettlement.Core\Fanex.AutoPayoutSettlement.Core.csproj", "{B7C135AC-18DD-42EC-A871-36684CFD5750}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7C135AC-18DD-42EC-A871-36684CFD5750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7C135AC-18DD-42EC-A871-36684CFD5750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7C135AC-18DD-42EC-A871-36684CFD5750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7C135AC-18DD-42EC-A871-36684CFD5750}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2F9FED6C-8609-4BFC-B6E8-B6775049EBCA} = {B02A72C3-96FF-4B8C-95EE-2A73223B9FFA}
+		{0BABE2ED-B48F-4A5D-97B3-B0FF1A617609} = {B02A72C3-96FF-4B8C-95EE-2A73223B9FFA}
+		{CA59C2CD-EABC-438D-9FCD-56D2829FC9F6} = {B02A72C3-96FF-4B8C-95EE-2A73223B9FFA}
+		{DBFCD6AE-8366-4D6E-95E9-85DFB0BD6EB6} = {B02A72C3-96FF-4B8C-95EE-2A73223B9FFA}
+		{B7C135AC-18DD-42EC-A871-36684CFD5750} = {DBFCD6AE-8366-4D6E-95E9-85DFB0BD6EB6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A181E68A-710E-4850-9F6D-160B0147D436}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Functions>
+  <Function Name="AutoPayout">
+    <Setting Key="NAP_Set_AutoPayoutOS_ScheduleSel" SpName="NAP_Set_AutoPayoutOS_ScheduleSel_UAT2" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_Admin_Settlement_Validation_PrePush" SpName="NAP_Admin_Settlement_Validation_PrePush" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_Set_AutoPayout_MatchSelDetail" SpName="NAP_Set_AutoPayout_MatchSelDetail" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_Set_AutoPayoutOS_ResultSel" SpName="NAP_Set_AutoPayoutOS_ResultSel_UAT2" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_SettlementLog_Ins" SpName="NAP_SettlementLog_Ins" DbName="DBLOG.bodb_CustomerLog.bodbAdminNet" />
+    <Setting Key="NAP_UserLog_WriteLogPreSettlement" SpName="NAP_UserLog_WriteLogPreSettlement" DbName="DBUserLog.LogTDB.bodbAdminNet" />
+    <Setting Key="NAP_Set_AutoPayoutResultOS_Update" SpName="NAP_Set_AutoPayoutResultOS_Update_UAT2" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="WriteLog_UserLog_Settle" SpName="WriteLog_UserLog_Settle" DbName="DBLOG.bodb_CustomerLog.bodbAdminNet" TimeOut="20" />
+    <Setting Key="NAP_Set_AutoPayout_ResultDetailByMatchIdSel_OS" SpName="NAP_Set_AutoPayout_ResultDetailByMatchIdSel_OS" DbName="DBPRO.bodb02.bodbAdminNet" TimeOut="20" />
+    <Setting Key="NAP_Admin_MatchInfoUpd" SpName="NAP_Admin_MatchInfoUpd" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_Admin_Settlement_Validation_Event" SpName="NAP_Admin_Settlement_Validation_Event" DbName="DBPRO.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_Set_MatchSelHedge" SpName="NAP_Set_MatchSelHedge" DbName="DBPRO.bodb02.bodbAdminNet" />
+  </Function>
+
+  <Function Name="Scale Out TransDb">
+    <Function Name="NAP_Admin_Settlement_Validation_Ticket">
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBTXN" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBTXN.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID01" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID02" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID02.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID03" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID03.bodb02.bodbAdminNet" />
+    </Function>
+    <Function Name="NAP_Admin_Settlement_Profile_Push">
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBTXN" SpName="NAP_Admin_Settlement_Profile_Push_UAT2" DbName="DBTXN.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID01" SpName="NAP_Admin_Settlement_Profile_Push_UAT2" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID02" SpName="NAP_Admin_Settlement_Profile_Push_UAT2" DbName="DBSID02.bodb02.bodbAdminNet" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID03" SpName="NAP_Admin_Settlement_Profile_Push_UAT2" DbName="DBSID03.bodb02.bodbAdminNet" />
+    </Function>
+  </Function>
+</Functions>
