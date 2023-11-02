@@ -1,0 +1,10 @@
+﻿global using AutoPayout.Conditions.Constants;
+global using AutoPayout.Conditions.Criteria;
+global using AutoPayout.Conditions.Exceptions;
+global using AutoPayout.Conditions.Models;
+global using AutoPayout.Models;
+global using AutoPayout.Services;
+global using Fanex.Data.Repository;
+global using Fanex.Settlement.Converter.Services;
+global using Fanex.Settlement.ScaleOut.Request;
+global using Fanex.Settlement.ScaleOut.Services;

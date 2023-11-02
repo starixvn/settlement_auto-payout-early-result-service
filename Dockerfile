@@ -1,19 +1,19 @@
 FROM hub.nexdev.net/base/dotnet/core/sdk:7.0-alpine AS builder
 WORKDIR /src
 
-COPY ./Sources/Fanex.AutoPayoutSettlement.Core/*.csproj ./Sources/Fanex.AutoPayoutSettlement.Core/
-COPY ./Sources/AutoPayoutSettlement/*.csproj ./Sources/AutoPayoutSettlement/
-COPY ./Sources/Fanex.Library/*.csproj ./Sources/Fanex.Library/
-COPY ./Sources/Fanex.AutoPayoutSettlement.Service/Fanex.AutoPayoutSettlement.Service.csproj  ./Sources/Fanex.AutoPayoutSettlement.Service/
+COPY ./Sources/AutoPayout/*.csproj ./Sources/AutoPayout/
+COPY ./Sources/AutoPayout.EarlyResult/*.csproj ./Sources/AutoPayout.EarlyResult/
+COPY ./Sources/AutoPayout.Conditions/*.csproj ./Sources/AutoPayout.Conditions/
+COPY ./Sources/AutoPayout.EarlyResult.Service/AutoPayout.EarlyResult.Service.csproj  ./Sources/AutoPayout.EarlyResult.Service/
 
 RUN dotnet nuget add source https://nuget.nexdev.net/api/v2
 RUN --mount=type=cache,target=/root/.nuget/packages \ 
-dotnet restore -r linux-x64 Sources/Fanex.AutoPayoutSettlement.Service/Fanex.AutoPayoutSettlement.Service.csproj 
+dotnet restore -r linux-x64 Sources/AutoPayout.EarlyResult.Service/AutoPayout.EarlyResult.Service.csproj 
   
 COPY ./Sources/.  ./Sources
 
 RUN ls /src -l
-WORKDIR /src/Sources/Fanex.AutoPayoutSettlement.Service
+WORKDIR /src/Sources/AutoPayout.EarlyResult.Service
 
 RUN --mount=type=cache,target=/root/.nuget/packages \
 dotnet publish -r linux-x64 --self-contained false -c release -o /app 
@@ -35,4 +35,4 @@ USER dotnetuser
 #
 
 
-ENTRYPOINT ["dotnet", "Fanex.AutoPayoutSettlement.Service.dll"]
+ENTRYPOINT ["dotnet", "AutoPayout.EarlyResult.Service.dll"]
