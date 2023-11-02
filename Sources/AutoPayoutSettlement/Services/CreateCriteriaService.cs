@@ -38,22 +38,17 @@ public class CreateQueryServiceImp : CreateQueryService
             .SelectMany(r => r.ExternalSourceInfo)
             .GroupBy(item => (item.SourceId, item.SourceName)).ToList();
 
-        var provider = GetGroupedInfo(groupedItems, group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader, "Provider");
-        var trader = GetGroupedInfo(groupedItems, group => group.Key.Item1 == 0, "Trader");
-        var dash = string.IsNullOrEmpty(trader) || string.IsNullOrEmpty(provider) ? string.Empty : " - ";
+        var provider = GetGroupedInfo(groupedItems);
 
-        return $"{trader}{dash}{provider}";
+        return provider;
     }
 
-    private static string GetGroupedInfo(
-            IReadOnlyCollection<IGrouping<(int, string),
-            ExternalSourceInfo>> groupedItems, Func<IGrouping<(int, string), ExternalSourceInfo>,
-            bool> condition, string prefix)
+    private static string GetGroupedInfo(IReadOnlyCollection<IGrouping<(int, string), ExternalSourceInfo>> groupedItems)
     {
         if (groupedItems.Any())
         {
-            return $"{prefix}: " + string.Join(", ", groupedItems
-                .Where(condition)
+            return $"Provider: " + string.Join(", ", groupedItems
+                .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader)
                 .Select(group =>
                 {
                     var resourceIds = string.Join(", ", group.Select(item => item.ResourceId));

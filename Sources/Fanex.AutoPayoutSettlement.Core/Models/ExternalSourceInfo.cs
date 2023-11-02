@@ -4,7 +4,7 @@ public class ExternalSourceInfo
 {
     public int SourceId;
 
-    public string SourceName;
+    public string? SourceName;
 
-    public string ResourceId;
+    public string? ResourceId;
 };

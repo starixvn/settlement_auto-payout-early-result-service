@@ -1,19 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-Fanex.AutoSettlement.Service-f3637426-e8fc-4a37-907b-9ac189e71f3c</UserSecretsId>
-    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fanex.Data" Version="4.2.3" />
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.3" />
     <PackageReference Include="Fanex.Logging" Version="2.0.1.1" />
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
     <PackageReference Include="ONEbook.UM" Version="3.1.6" />
     <PackageReference Include="ONEbook.UM.AspNetCore" Version="3.1.1.1" />
     <PackageReference Include="ONEbook.UM.Transport" Version="3.1.2" />
@@ -36,7 +44,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SpName.xml">
+    <None Update="appsettings.LOCAL.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.PROD.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.SIT.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.UAT.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="App_Data\SpName.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

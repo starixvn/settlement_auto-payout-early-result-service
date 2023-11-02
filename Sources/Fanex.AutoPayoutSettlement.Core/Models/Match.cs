@@ -12,7 +12,7 @@ public class Match
 
     public int SportType { get; set; }
 
-    public IEnumerable<ResultDetail> ResultDetails { get; set; }
+    public IEnumerable<ResultDetail> ResultDetails { get; set; } = null;
 
     public override bool Equals(object obj)
     {

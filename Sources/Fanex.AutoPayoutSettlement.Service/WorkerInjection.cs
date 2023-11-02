@@ -13,6 +13,8 @@ using Fanex.Settlement.Converter.Services;
 using Fanex.Settlement.ScaleOut;
 using Fanex.Settlement.ScaleOut.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using ONEbook.UM;
 using ONEbook.UM.AspNetCore;
 using ONEbook.UM.Configurations;
@@ -26,6 +28,10 @@ public static class WorkerInjection
 {
     public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
     {
+        ConfigureAutoMapper(service);
+        service.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
+        service.AddTransient<GeneralService, GeneralServiceImp>();
+
         service.AddTransient<IMaintenanceService, MaintenanceServiceImp>();
         service.AddSingleton<IAutoService, AutoService>();
         service.AddSingleton<ProcessService, ProcessServiceImp>();
@@ -47,16 +53,13 @@ public static class WorkerInjection
         service.AddSingleton<VerifyBeforePushProfile>();
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
-        service.AddSingleton<IMapper, Mapper>();
-        service.AddSingleton<ScaleOutSettleService, ScaleOutSettleServiceImp>();
-        service.AddSingleton<GeneralService, GeneralServiceImp>();
         service.AddSingleton<IDynamicRepository, DynamicRepository>();
         service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
         service.AddSingleton<IUMCacheService, UMCacheService>();
         service.AddSingleton<IUMRestClient, UMRestClient>();
         service.AddSingleton<ONEbook.UM.Services.IMaintenanceService, ONEbook.UM.Services.MaintenanceService>();
         ConfigureRedis(service, configuration);
-        ConfigureAutoMapper(service);
+        StartLogSetting(configuration);
     }
 
     private static void ConfigureRedis(IServiceCollection service, IConfiguration configuration)
@@ -83,7 +86,7 @@ public static class WorkerInjection
             .UseRestClient(new UMRestClient(umConfig));
     }
 
-    public static void StartLogSetting(IConfiguration configuration)
+    private static void StartLogSetting(IConfiguration configuration)
     {
         var logEngine = new List<ILogEngine>();
 

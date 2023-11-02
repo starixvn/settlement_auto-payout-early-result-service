@@ -2,6 +2,8 @@ using AutoPayoutSettlement.Services;
 using Fanex.Logging;
 using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.Database;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace Fanex.AutoPayoutSettlement.Service;
 
