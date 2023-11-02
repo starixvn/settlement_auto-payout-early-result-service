@@ -2,9 +2,9 @@
 
 public class ExternalSourceInfo
 {
-    public int SourceId;
+    public int SourceId { get; set; }
 
-    public string? SourceName;
+    public string SourceName { get; set; }
 
-    public string? ResourceId;
+    public string ResourceId { get; set; }
 };

@@ -6,13 +6,13 @@ public class Match
 
     public int LeagueId { get; set; }
 
-    public string? Conditions { get; set; }
+    public string Conditions { get; set; }
 
     public int ResourceType { get; set; }
 
     public int SportType { get; set; }
 
-    public IEnumerable<ResultDetail> ResultDetails { get; set; } = null;
+    public IEnumerable<ResultDetail> ResultDetails { get; set; }
 
     public override bool Equals(object obj)
     {
