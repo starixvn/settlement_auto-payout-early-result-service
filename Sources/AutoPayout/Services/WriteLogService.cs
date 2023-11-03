@@ -10,7 +10,7 @@ public interface WriteLogService
 {
     void ExceptionLog(int matchId, Exception exception);
 
-    Task WriteLog(Match match, ServiceException exception);
+    void WriteLog(Match match, ServiceException exception);
 
     void WriteLog(Match match, string message);
 
@@ -38,12 +38,12 @@ public class WriteLogServiceImp : WriteLogService
         LogService.Error(logMessage);
     }
 
-    public async Task WriteLog(Match match, ServiceException exception)
+    public void WriteLog(Match match, ServiceException exception)
     {
         var message = exception.Description;
         var errorMessage = GenerateErrorLogMessage(match, message);
         var criteria = new WriteLogCriteria(match.MatchId, errorMessage);
-        await repository.ExecuteAsync(criteria);
+        repository.Execute(criteria);
     }
 
     public void WriteLog(Match match, string message)

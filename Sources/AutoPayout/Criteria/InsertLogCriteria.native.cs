@@ -1,6 +1,6 @@
 ﻿namespace AutoPayout.Criteria;
 
-internal class InsertLogCriteria : NonQueryCommand
+public class InsertLogCriteria : NonQueryCommand
 {
     public InsertLogCriteria(SettleCriteria criteria, int sportType)
     {

@@ -53,7 +53,7 @@ public class ProcessServiceImp : ProcessService
         {
             if (exception.MarkFail)
             {
-                await writeLogService.WriteLog(match, exception);
+                writeLogService.WriteLog(match, exception);
                 await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed);
             }
         }
