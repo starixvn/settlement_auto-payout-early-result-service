@@ -1,6 +1,6 @@
-﻿using AutoPayoutSettlement.Constants;
-using AutoPayoutSettlement.Criteria;
-using AutoPayoutSettlement.Models;
+﻿using AutoPayout.EarlyResult.Constants;
+using AutoPayout.EarlyResult.Criteria;
+using AutoPayout.EarlyResult.Models;
 using Fanex.Caching;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;

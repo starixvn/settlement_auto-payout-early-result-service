@@ -21,7 +21,7 @@ internal class InsertLogCriteria : NonQueryCommand
 
     public int AdminId { get; }
 
-    public string? SelectedResources { get; set; }
+    public string SelectedResources { get; set; }
 
     public override string GetSettingKey() => "NAP_SettlementLog_Ins";
 

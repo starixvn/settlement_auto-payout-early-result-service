@@ -1,4 +1,4 @@
-﻿namespace AutoPayoutSettlement.Models;
+﻿namespace AutoPayout.EarlyResult.Models;
 
 public class HedgeMatchDetail
 {

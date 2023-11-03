@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Exceptions;
+﻿using AutoPayout.Exceptions;
 
 namespace AutoPayout.Conditions.Exceptions;
 

@@ -1,8 +1,8 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.EarlyResult.Constants;
+using AutoPayout.EarlyResult.Criteria;
+using AutoPayout.EarlyResult.Models;
 using AutoPayout.Services;
-using AutoPayoutSettlement.Constants;
-using AutoPayoutSettlement.Criteria;
-using AutoPayoutSettlement.Models;
 using Fanex.Data.Repository;
 using Fanex.Settlement.ScaleOut.Request;
 using Fanex.Settlement.ScaleOut.Services;

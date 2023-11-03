@@ -8,7 +8,7 @@ public class SettleCriteria : NonQueryCommand
 
     public int MatchId { get; set; }
 
-    public string? SelectedResources { get; set; }
+    public string SelectedResources { get; set; }
 
     public string Action { get; } = "CAL";
 
@@ -16,16 +16,16 @@ public class SettleCriteria : NonQueryCommand
 
     public bool IsAuto { get; } = true;
 
-    public string? AutoSourceInfo { get; set; }
+    public string AutoSourceInfo { get; set; }
 
     public int ErrCode { get; set; }
 
-    public string? ErrMsg { get; set; }
+    public string ErrMsg { get; set; }
 
     public string BroadcastSessionId { get; } = Guid.NewGuid().ToString();
 
     [SpParam(Ignored = true)]
-    public string? DbServer { get; set; }
+    public string DbServer { get; set; }
 
     [SpParam(Ignored = true)]
     public string SpName { get; } = "NAP_Admin_Settlement_Profile_Push";

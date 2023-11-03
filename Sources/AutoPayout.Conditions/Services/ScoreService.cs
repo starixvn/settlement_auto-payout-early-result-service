@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services;

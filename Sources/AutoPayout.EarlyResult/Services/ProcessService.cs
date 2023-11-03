@@ -1,8 +1,7 @@
 ﻿using AutoPayout.Conditions.Services;
-using AutoPayout.Constants;
+using AutoPayout.EarlyResult.Models;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
-using AutoPayoutSettlement.Models;
 using Microsoft.Extensions.Options;
 using Polly;
 

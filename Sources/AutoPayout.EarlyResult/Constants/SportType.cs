@@ -1,4 +1,4 @@
-﻿namespace AutoPayoutSettlement.Constants;
+﻿namespace AutoPayout.EarlyResult.Constants;
 
 public static class SportType
 {

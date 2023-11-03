@@ -1,6 +1,6 @@
 ﻿using Fanex.Data.Repository;
 
-namespace AutoPayoutSettlement.Criteria;
+namespace AutoPayout.EarlyResult.Criteria;
 
 public class GetResultCriteria : CriteriaBase
 {
