@@ -1,7 +1,6 @@
 ﻿using AutoPayout.Criteria;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
-using AutoPayout.Services;
 using Fanex.Data.Repository;
 
 namespace AutoPayout.UnitTests.Services;

@@ -1,7 +1,6 @@
 ﻿using AutoPayout.Constants;
 using AutoPayout.Criteria;
 using AutoPayout.Models;
-using AutoPayout.Services;
 using Fanex.Data.Repository;
 using Fanex.Settlement.Converter.Services;
 

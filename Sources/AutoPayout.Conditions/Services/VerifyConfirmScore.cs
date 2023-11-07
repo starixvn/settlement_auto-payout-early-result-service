@@ -14,7 +14,22 @@ public class VerifyConfirmScore : ICondition
     public async Task HandleCondition(Match match)
     {
         var scores = await scoreService.GetScore(match);
+        CompareScore(match, scores);
 
+        if (match.ResultDetails.Any(r => !r.IsValid))
+        {
+            await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid));
+            match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
+        }
+
+        if (!match.ResultDetails.Any())
+        {
+            throw new ServiceException { MarkFail = false };
+        }
+    }
+
+    private void CompareScore(Match match, IEnumerable<Score> scores)
+    {
         var groupedScores = scores.GroupBy(s => s.ResourceId).ToList();
 
         groupedScores.ForEach(group =>
@@ -29,17 +44,9 @@ public class VerifyConfirmScore : ICondition
             }
             else
             {
-                scoreService.WriteLogResultInvalid(match.MatchId, resultDetail, group);
+                scoreService.WriteLogResultInvalid(match.MatchId, resultDetail, group.ToList());
                 resultDetail.IsValid = false;
             }
         });
-
-        await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid));
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid).ToList();
-
-        if (!match.ResultDetails.Any())
-        {
-            throw new ServiceException { MarkFail = false };
-        }
     }
 }

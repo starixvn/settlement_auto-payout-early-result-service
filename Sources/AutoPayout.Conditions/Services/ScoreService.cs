@@ -7,7 +7,7 @@ public interface ScoreService
 {
     Task<IEnumerable<Score>> GetScore(Match match);
 
-    void WriteLogResultInvalid(int matchId, ResultDetail result, IGrouping<string, Score> groupScore);
+    void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 }
@@ -40,12 +40,12 @@ public class ScoreServiceImp : ScoreService
         return await repository.FetchAsync<Score>(criteria);
     }
 
-    public void WriteLogResultInvalid(int matchId, ResultDetail result, IGrouping<string, Score> groupScore)
+    public void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
     {
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
-        var traderScore = TraderScore(groupScore);
-        var sourceScore = ProviderScore(groupScore);
+        var traderScore = TraderScore(scores);
+        var sourceScore = ProviderScore(scores);
         sourceScore.Insert(0, traderScore);
 
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
@@ -57,17 +57,17 @@ public class ScoreServiceImp : ScoreService
         await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed);
     }
 
-    private static List<string> ProviderScore(IEnumerable<Score> groupScore)
+    private static List<string> ProviderScore(IEnumerable<Score> scores)
     {
-        var provider = groupScore.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Trader).ToList();
+        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Trader).ToList();
         return provider.Any() ?
             provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
             : new List<string>();
     }
 
-    private static string TraderScore(IEnumerable<Score> groupScore)
+    private static string TraderScore(IEnumerable<Score> scores)
     {
-        var trader = groupScore.FirstOrDefault(r => r.SourceId == 0);
+        var trader = scores.FirstOrDefault(r => r.SourceId == 0);
 
         return trader is not null ? ScoreMessage(trader, "Trader") : string.Empty;
     }
