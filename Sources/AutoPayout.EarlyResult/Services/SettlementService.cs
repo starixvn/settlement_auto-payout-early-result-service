@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.Conditions.Services;
 using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Models;
@@ -31,12 +32,17 @@ public class SettlementServiceImp : SettlementService
 
     private readonly UpdateResultStatusService updateResultStatusService;
 
+    private readonly ScoreService scoreService;
+
+    private const int running = 0;
+
     public SettlementServiceImp(IOptions<AppSettingsKey> options,
         WriteLogService writeLogService,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
         CreateQueryService createQueryService,
-        UpdateResultStatusService updateResultStatusService)
+        UpdateResultStatusService updateResultStatusService,
+        ScoreService scoreService)
     {
         appSettingsKey = options.Value;
         this.writeLogService = writeLogService;
@@ -44,6 +50,7 @@ public class SettlementServiceImp : SettlementService
         this.scaleOutSettleService = scaleOutSettleService;
         this.createQueryService = createQueryService;
         this.updateResultStatusService = updateResultStatusService;
+        this.scoreService = scoreService;
     }
 
     public async Task Push(Match match)
@@ -60,16 +67,48 @@ public class SettlementServiceImp : SettlementService
         if (resultExpired.Any())
         {
             match.ResultDetails = match.ResultDetails.Except(resultExpired);
-            var resultExpiredIds = string.Join(',', resultExpired.Select(r => r.ResourceId));
-            var cloneMatch = new Match
-            {
-                MatchId = match.MatchId,
-                ResultDetails = resultExpired
-            };
-
-            writeLogService.WriteLog(match, string.Format(ErrorMessage.ResultExpired, resultExpiredIds));
-            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed);
+            await LogResultExpired(match, resultExpired);
         }
+    }
+
+    private async Task LogResultExpired(Match match, IReadOnlyCollection<ResultDetail> resultExpired)
+    {
+        var cloneMatch = new Match
+        {
+            MatchId = match.MatchId,
+            SportType = match.SportType,
+            ResultDetails = resultExpired
+        };
+        var scores = await scoreService.GetScore(cloneMatch);
+        var traderScoresSettled = scores
+            .Where(s => s.SourceId == 0 && s.SettlementStatusId != running)
+            .Select(s => s.ResourceId)
+            .ToHashSet();
+
+        var resultRunning = resultExpired
+            .Where(r => !traderScoresSettled.Contains(r.ResourceId))
+            .ToList();
+
+        var resultSettled = resultExpired.Except(resultRunning).ToList();
+
+        if (resultRunning.Any())
+        {
+            cloneMatch.ResultDetails = resultRunning;
+            await HandleResultRunning(cloneMatch);
+        }
+
+        if (resultSettled.Any())
+        {
+            cloneMatch.ResultDetails = resultSettled;
+            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.ResultSettled);
+        }
+    }
+
+    private async Task HandleResultRunning(Match match)
+    {
+        var resultExpiredIds = string.Join(',', match.ResultDetails.Select(r => r.ResourceId));
+        writeLogService.WriteLog(match, string.Format(ErrorMessage.ResultExpired, resultExpiredIds));
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed);
     }
 
     private async Task SettleHedgeMatch(SettleCriteria criteria, int sportType, bool isExistedFinalResource)

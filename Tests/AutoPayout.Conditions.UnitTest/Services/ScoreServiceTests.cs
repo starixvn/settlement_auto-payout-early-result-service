@@ -46,8 +46,7 @@ public class ScoreServiceTests
 
         await service.GetScore(match);
 
-        await repository.Received()
-             .FetchAsync<Score>(Arg.Is<GetConfirmScoreCriteria>(c => c.MatchId == 1 && c.ResourceIds == "01,02"));
+        await repository.Received().FetchAsync<Score>(Arg.Is<GetConfirmScoreCriteria>(c => c.MatchId == 1 && c.ResourceIds == "01,02"));
     }
 
     [Fact]
