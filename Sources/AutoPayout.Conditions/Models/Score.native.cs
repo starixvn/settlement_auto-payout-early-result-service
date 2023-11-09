@@ -13,6 +13,4 @@ public class Score
     public string HomeValue { get; set; }
 
     public string AwayValue { get; set; }
-
-    public int SettlementStatusId { get; set; }
 }

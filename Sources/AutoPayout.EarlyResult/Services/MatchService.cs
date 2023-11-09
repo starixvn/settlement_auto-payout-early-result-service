@@ -1,4 +1,4 @@
-﻿using AutoPayout.EarlyResult.Constants;
+﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Models;
 using Fanex.Caching;
