@@ -17,16 +17,20 @@ public class CreatorImp : Creator
 
     private readonly VerifyBeforePushProfile verifyBeforePushProfile;
 
+    private readonly VerifyInningStatus verifyInningStatus;
+
     public CreatorImp(
         VerifyMatchStatus verifyMatchStatus,
         VerifyRunningOdds verifyRunningOdds,
         VerifyConfirmScore verifyConfirmScore,
-        VerifyBeforePushProfile verifyBeforePushProfile)
+        VerifyBeforePushProfile verifyBeforePushProfile,
+        VerifyInningStatus verifyInningStatus)
     {
         this.verifyMatchStatus = verifyMatchStatus;
         this.verifyRunningOdds = verifyRunningOdds;
         this.verifyConfirmScore = verifyConfirmScore;
         this.verifyBeforePushProfile = verifyBeforePushProfile;
+        this.verifyInningStatus = verifyInningStatus;
     }
 
     public ICondition Create(string id)
@@ -37,6 +41,7 @@ public class CreatorImp : Creator
             ConditionId.VerifyRunningOdds => verifyRunningOdds,
             ConditionId.VerifyConfirmScore => verifyConfirmScore,
             ConditionId.VerifyBeforePush => verifyBeforePushProfile,
+            ConditionId.VerifyInningStatus => verifyInningStatus,
             _ => throw new NotImplementedException()
         };
     }

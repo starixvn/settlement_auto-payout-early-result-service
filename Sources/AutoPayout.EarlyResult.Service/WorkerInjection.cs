@@ -49,6 +49,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyRunningOdds>();
         service.AddSingleton<VerifyConfirmScore>();
         service.AddSingleton<VerifyBeforePushProfile>();
+        service.AddSingleton<VerifyInningStatus>();
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
         service.AddSingleton<IDynamicRepository, DynamicRepository>();

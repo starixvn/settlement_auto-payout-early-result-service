@@ -32,5 +32,8 @@ public class ResultDetail
     public bool IsValid { get; set; } = true;
 
     [XmlIgnore]
+    public byte ResultStatusId { get; set; }
+
+    [XmlIgnore]
     public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; }
 }

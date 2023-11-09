@@ -23,4 +23,6 @@ public static class ErrorMessage
     public const string InvalidStatus = "Failed: FT has been calculated already.";
 
     public const string MatchRunningOdds = "Failed: ERROR! Cannot calculate due to unclosed odds. Please make sure you select correct match/interval/result to calculate.";
+
+    public const string InningsNotSettled = "Failed: Result(00) corresponding Innings has not been calculated.";
 }

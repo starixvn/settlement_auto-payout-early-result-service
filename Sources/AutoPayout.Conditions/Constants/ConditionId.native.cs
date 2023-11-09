@@ -8,5 +8,7 @@ public static class ConditionId
 
     public const string VerifyConfirmScore = "3";
 
+    public const string VerifyInningStatus = "4";
+
     public const string VerifyBeforePush = "99";
 }
