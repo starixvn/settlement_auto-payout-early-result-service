@@ -34,8 +34,6 @@ public class SettlementServiceImp : SettlementService
 
     private readonly ScoreService scoreService;
 
-    private const int running = 0;
-
     public SettlementServiceImp(IOptions<AppSettingsKey> options,
         WriteLogService writeLogService,
         IDynamicRepository repository,
@@ -81,7 +79,7 @@ public class SettlementServiceImp : SettlementService
         };
         var scores = await scoreService.GetScore(cloneMatch);
         var traderScoresSettled = scores
-            .Where(s => s.SourceId == 0 && s.SettlementStatusId != running)
+            .Where(s => s.SourceId == 0 && s.SettlementStatusId != SettlementStatus.Running)
             .Select(s => s.ResourceId)
             .ToHashSet();
 
@@ -107,7 +105,7 @@ public class SettlementServiceImp : SettlementService
     private async Task HandleResultRunning(Match match)
     {
         var resultExpiredIds = string.Join(',', match.ResultDetails.Select(r => r.ResourceId));
-        writeLogService.WriteLog(match, string.Format(ErrorMessage.ResultExpired, resultExpiredIds));
+        await writeLogService.WriteLog(match, string.Format(ErrorMessage.ResultExpired, resultExpiredIds));
         await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed);
     }
 
@@ -127,8 +125,8 @@ public class SettlementServiceImp : SettlementService
 
         await UpdateMatchInfo(criteria);
 
-        writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
-        writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
+        await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
+        await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
 
         foreach (var server in appSettingsKey.SiteDbServer)
         {
@@ -145,8 +143,7 @@ public class SettlementServiceImp : SettlementService
 
     private static bool IsExistedFinalResource(IEnumerable<ResultDetail> resultDetails)
     {
-        const string resourceIdToSetFlag = "00";
-        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(resourceIdToSetFlag));
+        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceId.Final));
     }
 
     private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource)

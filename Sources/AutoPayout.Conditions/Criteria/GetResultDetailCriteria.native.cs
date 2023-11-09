@@ -8,13 +8,7 @@ public class GetResultDetailCriteria : CriteriaBase
 
     public int SportType { get; set; }
 
-    public override string GetSettingKey()
-    {
-        return "NAP_Set_MatchSelDetail_Resources";
-    }
+    public override string GetSettingKey() => "NAP_Set_MatchSelDetail_Resources";
 
-    public override bool IsValid()
-    {
-        return MatchId > 0;
-    }
+    public override bool IsValid() => MatchId > 0;
 }

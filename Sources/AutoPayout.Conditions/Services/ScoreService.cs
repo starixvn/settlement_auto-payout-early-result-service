@@ -74,6 +74,7 @@ public class ScoreServiceImp : ScoreService
 
     private static string ScoreMessage(Score score, string preFix)
     {
-        return $"{preFix}({score.HomeValue}{(!string.IsNullOrEmpty(score.AwayValue) ? '-' + score.AwayValue : string.Empty)})";
+        var awayValue = !string.IsNullOrEmpty(score.AwayValue) ? '-' + score.AwayValue : string.Empty;
+        return $"{preFix}({score.HomeValue}{awayValue})";
     }
 }

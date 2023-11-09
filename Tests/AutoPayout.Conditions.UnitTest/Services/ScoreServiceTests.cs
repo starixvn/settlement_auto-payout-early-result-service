@@ -39,8 +39,8 @@ public class ScoreServiceTests
                 },
                 new()
                 {
-                ResourceId = "02"
-            }
+                    ResourceId = "02"
+                }
             }
         };
 

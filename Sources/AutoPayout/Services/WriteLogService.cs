@@ -8,15 +8,15 @@ namespace AutoPayout.Services;
 
 public interface WriteLogService
 {
-    void ExceptionLog(int matchId, Exception exception);
+    Task ExceptionLog(int matchId, Exception exception);
 
-    void WriteLog(Match match, ServiceException exception);
+    Task WriteLog(Match match, ServiceException exception);
 
-    void WriteLog(Match match, string message);
+    Task WriteLog(Match match, string message);
 
-    void WriteLogDirectly(int matchId, string message);
+    Task WriteLogDirectly(int matchId, string message);
 
-    void InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch);
+    Task InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch);
 }
 
 public class WriteLogServiceImp : WriteLogService
@@ -28,32 +28,33 @@ public class WriteLogServiceImp : WriteLogService
         this.repository = repository;
     }
 
-    public void ExceptionLog(int matchId, Exception exception)
+    public async Task ExceptionLog(int matchId, Exception exception)
     {
         var logMessage = new LogMessage($"Match Id: {matchId} - {exception.Message}")
             .AddSection("Database Info", DatabaseInfoGetters.GetDbExceptionInfo(exception))
             .AddSection("Server Info", CommonInfoGetters.GetServerInfo())
             .AddSection("Exception Info", CommonInfoGetters.GetExceptionInfo(exception))
             .ToString();
-        LogService.Error(logMessage);
+
+        await LogService.ErrorAsync(logMessage);
     }
 
-    public void WriteLog(Match match, ServiceException exception)
+    public async Task WriteLog(Match match, ServiceException exception)
     {
         var message = exception.Description;
         var errorMessage = GenerateErrorLogMessage(match, message);
         var criteria = new WriteLogCriteria(match.MatchId, errorMessage);
-        repository.Execute(criteria);
+        await repository.ExecuteAsync(criteria);
     }
 
-    public void WriteLog(Match match, string message)
+    public async Task WriteLog(Match match, string message)
     {
         var errorMessage = GenerateErrorLogMessage(match, message);
         var criteria = new WriteLogCriteria(match.MatchId, errorMessage);
-        repository.Execute(criteria);
+        await repository.ExecuteAsync(criteria);
     }
 
-    public void WriteLogDirectly(int matchId, string message)
+    public async Task WriteLogDirectly(int matchId, string message)
     {
         try
         {
@@ -63,27 +64,27 @@ public class WriteLogServiceImp : WriteLogService
                 Doing = message,
             };
 
-            repository.Execute(criteria);
+            await repository.ExecuteAsync(criteria);
         }
         catch (Exception e)
         {
-            LogService.Error("Fanex.AutoPayoutSettlement.Service(Write Log Directly): ", e);
+            await LogService.ErrorAsync("AutoPayout.EarlyResult.Service(Write Log Directly): ", e);
         }
     }
 
-    public void InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch)
+    public async Task InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch)
     {
         try
         {
             if (isMainMatch)
             {
                 var insertLogCriteria = new InsertLogCriteria(criteria, sportType);
-                repository.Execute(insertLogCriteria);
+                await repository.ExecuteAsync(insertLogCriteria);
             }
         }
         catch (Exception e)
         {
-            LogService.Error("Fanex.AutoPayoutSettlement.Service(Write resettle Log): ", e);
+            await LogService.ErrorAsync("AutoPayout.EarlyResult.Service(Write resettle Log): ", e);
         }
     }
 

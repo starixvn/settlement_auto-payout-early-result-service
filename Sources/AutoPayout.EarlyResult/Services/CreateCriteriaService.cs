@@ -44,13 +44,15 @@ public class CreateQueryServiceImp : CreateQueryService
     {
         if (groupedItems.Any())
         {
-            return $"Provider: " + string.Join(", ", groupedItems
-                .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader)
-                .Select(group =>
-                {
-                    var resourceIds = string.Join(", ", group.Select(item => item.ResourceId));
-                    return $"{group.Key.Item2}({resourceIds})";
-                }));
+            var resourceIds = string.Join(", ", groupedItems
+                 .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader)
+                 .Select(group =>
+                 {
+                     var resourceIds = string.Join(", ", group.Select(item => item.ResourceId));
+                     return $"{group.Key.Item2}({resourceIds})";
+                 }));
+
+            return $"Provider: {resourceIds}";
         }
 
         return string.Empty;

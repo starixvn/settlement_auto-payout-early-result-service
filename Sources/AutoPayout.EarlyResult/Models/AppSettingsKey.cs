@@ -1,7 +1,5 @@
 ﻿namespace AutoPayout.EarlyResult.Models;
 
-#pragma warning disable VSSpell001
-
 public class AppSettingsKey
 #pragma warning restore VSSpell001
 {

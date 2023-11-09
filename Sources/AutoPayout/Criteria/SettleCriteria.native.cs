@@ -4,7 +4,7 @@ namespace AutoPayout.Criteria;
 
 public class SettleCriteria : NonQueryCommand
 {
-    public int AdminId { get; }
+    public int AdminId { get; set; }
 
     public int MatchId { get; set; }
 
