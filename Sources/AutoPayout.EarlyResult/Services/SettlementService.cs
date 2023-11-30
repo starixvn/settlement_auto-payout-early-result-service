@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Conditions.Services;
 using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Models;
@@ -32,15 +31,12 @@ public class SettlementServiceImp : SettlementService
 
     private readonly UpdateResultStatusService updateResultStatusService;
 
-    private readonly ScoreService scoreService;
-
     public SettlementServiceImp(IOptions<AppSettingsKey> options,
         WriteLogService writeLogService,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
         CreateQueryService createQueryService,
-        UpdateResultStatusService updateResultStatusService,
-        ScoreService scoreService)
+        UpdateResultStatusService updateResultStatusService)
     {
         appSettingsKey = options.Value;
         this.writeLogService = writeLogService;
@@ -48,7 +44,6 @@ public class SettlementServiceImp : SettlementService
         this.scaleOutSettleService = scaleOutSettleService;
         this.createQueryService = createQueryService;
         this.updateResultStatusService = updateResultStatusService;
-        this.scoreService = scoreService;
     }
 
     public async Task Push(Match match)

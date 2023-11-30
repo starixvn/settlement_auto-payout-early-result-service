@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿using AutoPayout.Constants;
+
+namespace AutoPayout.Conditions.Services;
 
 public class VerifyRunningOdds : ICondition
 {
@@ -43,7 +45,7 @@ public class VerifyRunningOdds : ICondition
         {
             MatchId = match.MatchId,
             SelectedResource = selectedResource,
-            Action = "CAL"
+            Action = ActionName.Calculate
         };
     }
 }

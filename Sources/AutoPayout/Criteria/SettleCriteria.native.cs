@@ -1,4 +1,5 @@
-﻿using Fanex.Data;
+﻿using AutoPayout.Constants;
+using Fanex.Data;
 
 namespace AutoPayout.Criteria;
 
@@ -10,7 +11,7 @@ public class SettleCriteria : NonQueryCommand
 
     public string SelectedResources { get; set; }
 
-    public string Action { get; } = "CAL";
+    public string Action { get; } = ActionName.Calculate;
 
     public bool IsLeader { get; } = true;
 
