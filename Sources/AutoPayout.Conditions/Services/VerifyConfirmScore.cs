@@ -35,7 +35,7 @@ public class VerifyConfirmScore : ICondition
         groupedScores.ForEach(group =>
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key);
-            if (group.DistinctBy(s => new { s.HomeValue, s.AwayValue }).Count() == 1)
+            if (group.Distinct(new ScoreComparer()).Count() == 1)
             {
                 resultDetail.HomeValue = group.First().HomeValue;
                 resultDetail.AwayValue = group.First().AwayValue;

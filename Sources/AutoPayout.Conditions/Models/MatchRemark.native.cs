@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Models;
+﻿using Fanex.Settlement.Converter.Helpers;
+
+namespace AutoPayout.Conditions.Models;
 
 public class MatchRemark
 {
@@ -10,6 +12,6 @@ public class MatchRemark
 
     public RemarkSetting Remark => new()
     {
-        SettlementStatus = Convert.ToString(SettlementStatus, ToBase).Reverse().ToString()
+        SettlementStatus = Convert.ToString(SettlementStatus, ToBase).Reverse()
     };
 }

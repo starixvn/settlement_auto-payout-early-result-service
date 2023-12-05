@@ -167,4 +167,56 @@ public class VerifyConfirmScoreTests
         Assert.False(((ServiceException)exception).MarkFail);
         await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2));
     }
+
+    [Fact]
+    public async void HandleCondition_IgnoreCase_PassCompareScore()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var secondResultDetail = new ResultDetail { ResourceId = "02" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "A",
+                SourceId = 100
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "a",
+                SourceId = 200
+            },
+            new()
+            {
+                ResourceId = "02",
+                HomeValue = "2",
+                AwayValue = "3",
+                SourceId = 200
+            }, new()
+            {
+                ResourceId = "02",
+                HomeValue = "2",
+                AwayValue = "3",
+                SourceId = 200
+            },
+        };
+
+        scoreService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.Null(exception);
+        Assert.Equal("A", firstResultDetail.HomeValue);
+        Assert.Null(firstResultDetail.AwayValue);
+        Assert.Equal("2", secondResultDetail.HomeValue);
+        Assert.Equal("3", secondResultDetail.AwayValue);
+        await scoreService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+    }
 }

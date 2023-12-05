@@ -13,11 +13,10 @@ public class VerifyMatchStatus : ICondition
     {
         var criteria = new MatchRemarkCriteria { MatchId = match.MatchId };
         var (matchStatus, _) = await repository.FetchMultipleAsync<MatchRemark, object>(criteria);
-        var matchStatusValue = matchStatus.First();
 
-        if (matchStatusValue is not null)
+        if (matchStatus.Any())
         {
-            VerifyMatch(matchStatusValue);
+            VerifyMatch(matchStatus.First());
         }
         else
         {
