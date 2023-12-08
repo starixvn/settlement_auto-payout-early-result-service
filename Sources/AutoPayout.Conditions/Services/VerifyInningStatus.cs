@@ -1,25 +1,14 @@
 ﻿namespace AutoPayout.Conditions.Services;
 
-public class VerifyInningStatus : ICondition
+public class VerifyInningStatus(IDynamicRepository repository, ScoreService scoreService,
+        WriteLogService writeLogService)
+    : ICondition
 {
-    private readonly IDynamicRepository repository;
-
-    private readonly ScoreService scoreService;
-
-    private readonly WriteLogService writeLogService;
-
     private const int MatchTestSession = 1;
 
     private static readonly string[] InningOneIds = { "H1", "A1" };
 
     private static readonly string[] InningIds = { "H1", "A1", "H2", "A2" };
-
-    public VerifyInningStatus(IDynamicRepository repository, ScoreService scoreService, WriteLogService writeLogService)
-    {
-        this.repository = repository;
-        this.scoreService = scoreService;
-        this.writeLogService = writeLogService;
-    }
 
     public async Task HandleCondition(Match match)
     {
@@ -50,12 +39,12 @@ public class VerifyInningStatus : ICondition
     private async Task<bool> ValidateStatus(string[] inningsToValidate, int matchId, int sportType)
     {
         var resultDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = matchId, SportType = sportType })).ToList();
-        var checkInningNotExisted = inningsToValidate.Any(i => resultDetails.All(r => r.ResourceId != i));
-        var checkInningRunning = inningsToValidate.Any(inning =>
-            resultDetails.Any(r => inning == r.ResourceId &&
+        var inningNotExisted = Array.Exists(inningsToValidate, i => resultDetails.TrueForAll(r => r.ResourceId != i));
+        var inningRunning = Array.Exists(inningsToValidate, inning =>
+            resultDetails.Exists(r => inning == r.ResourceId &&
                                    (r.ResultStatusId != ResultStatusId.ManualCompleted &&
                                     r.ResultStatusId != ResultStatusId.AutoCompleted)));
-        return checkInningNotExisted || checkInningRunning;
+        return inningNotExisted || inningRunning;
     }
 
     private async Task UpdateFinalResourceStatus(Match match)
@@ -63,7 +52,7 @@ public class VerifyInningStatus : ICondition
         var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceId.Final).ToList();
         match.ResultDetails = match.ResultDetails.Except(finalResource);
         await scoreService.UpdateResultStatus(match.MatchId, finalResource);
-        await writeLogService.WriteLog(new Match() { MatchId = match.MatchId, ResultDetails = finalResource },
+        await writeLogService.WriteLog(new Match { MatchId = match.MatchId, ResultDetails = finalResource },
             new InningNotSettledException());
     }
 }

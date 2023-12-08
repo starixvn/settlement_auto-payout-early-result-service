@@ -2,15 +2,8 @@
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyRunningOdds : ICondition
+public class VerifyRunningOdds(IDynamicRepository repository) : ICondition
 {
-    private readonly IDynamicRepository repository;
-
-    public VerifyRunningOdds(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task HandleCondition(Match match)
     {
         var criteria = CreateCriteria(match);

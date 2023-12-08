@@ -17,34 +17,15 @@ public interface SettlementService
     Task UpdateResultExpired(Match match);
 }
 
-public class SettlementServiceImp : SettlementService
-{
-    private readonly WriteLogService writeLogService;
-
-    private readonly IDynamicRepository repository;
-
-    private readonly CreateQueryService createQueryService;
-
-    private readonly AppSettingsKey appSettingsKey;
-
-    private readonly ScaleOutSettleService scaleOutSettleService;
-
-    private readonly UpdateResultStatusService updateResultStatusService;
-
-    public SettlementServiceImp(IOptions<AppSettingsKey> options,
+public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         WriteLogService writeLogService,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
         CreateQueryService createQueryService,
         UpdateResultStatusService updateResultStatusService)
-    {
-        appSettingsKey = options.Value;
-        this.writeLogService = writeLogService;
-        this.repository = repository;
-        this.scaleOutSettleService = scaleOutSettleService;
-        this.createQueryService = createQueryService;
-        this.updateResultStatusService = updateResultStatusService;
-    }
+    : SettlementService
+{
+    private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task Push(Match match)
     {

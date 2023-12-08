@@ -2,7 +2,7 @@
 
 namespace AutoPayout.Conditions.Exceptions;
 
-internal class InningNotSettledException : ServiceException
+public class InningNotSettledException : ServiceException
 {
     public InningNotSettledException()
     {
