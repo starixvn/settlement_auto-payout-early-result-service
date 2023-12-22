@@ -32,6 +32,9 @@ public class ResultDetail
     public bool IsValid { get; set; } = true;
 
     [XmlIgnore]
+    public bool Expired { get; set; } = false;
+
+    [XmlIgnore]
     public byte ResultStatusId { get; set; }
 
     [XmlIgnore]

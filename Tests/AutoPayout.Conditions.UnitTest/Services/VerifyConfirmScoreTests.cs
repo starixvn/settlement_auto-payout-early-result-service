@@ -1,6 +1,7 @@
 ﻿using AutoPayout.Conditions.Models;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.UnitTest.Services;
 
@@ -13,7 +14,9 @@ public class VerifyConfirmScoreTests
     public VerifyConfirmScoreTests()
     {
         scoreService = Substitute.For<ScoreService>();
-        condition = new VerifyConfirmScore(scoreService);
+        var appSetting = new AppSettingsKey { RetryProcessScore = 300000 };
+        var option = Options.Create(appSetting);
+        condition = new VerifyConfirmScore(scoreService, option);
     }
 
     [Fact]
@@ -63,7 +66,83 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await scoreService.DidNotReceive().UpdateResultStatus(Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>());
+        await scoreService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+    }
+
+    [Fact]
+    public async void HandleCondition_ScoreNotEqualAndTimeOverCurrentTime_MarkFail()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "1",
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-7)
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
+            },
+        };
+
+        scoreService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.IsType<ServiceException>(exception);
+        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+    }
+
+    [Fact]
+    public async void HandleCondition_TwoProviderDifferentTimes_CheckWithMaxDate()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "1",
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-7)
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-2)
+            },
+        };
+
+        scoreService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.IsType<ServiceException>(exception);
+        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
     }
 
     [Fact]
@@ -91,14 +170,16 @@ public class VerifyConfirmScoreTests
                 ResourceId = "01",
                 HomeValue = "1",
                 AwayValue = "1",
-                SourceId = 200
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "2",
-                SourceId = 200
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             },
         };
 
@@ -135,27 +216,31 @@ public class VerifyConfirmScoreTests
                 ResourceId = "01",
                 HomeValue = "1",
                 AwayValue = "2",
-                SourceId = 100
+                SourceId = 100,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
                 ResourceId = "01",
                 HomeValue = "1",
                 AwayValue = "1",
-                SourceId = 200
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
                 ResourceId = "02",
                 HomeValue = "1",
                 AwayValue = "2",
-                SourceId = 200
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             }, new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "2",
-                SourceId = 200
+                SourceId = 200,
+                ProviderTime = DateTime.Now.AddMinutes(-6)
             },
         };
 

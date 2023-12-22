@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.EarlyResult.Models;
+﻿namespace AutoPayout.Models;
 
 public class AppSettingsKey
 #pragma warning restore VSSpell001
@@ -12,6 +12,8 @@ public class AppSettingsKey
     public int RetryInterval { get; set; }
 
     public int RetryValidate { get; set; }
+
+    public int RetryProcessScore { get; set; }
 
     public string EnvironmentName { get; set; }
 
