@@ -14,5 +14,5 @@ public class Score
 
     public string AwayValue { get; set; }
 
-    public DateTime ProviderTime { get; set; }
+    public DateTime CreateDate { get; set; }
 }

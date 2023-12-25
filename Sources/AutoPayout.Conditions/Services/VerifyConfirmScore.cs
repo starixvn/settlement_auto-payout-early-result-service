@@ -6,6 +6,7 @@ namespace AutoPayout.Conditions.Services;
 public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsKey> options) : ICondition
 {
     private readonly AppSettingsKey appSettingsKey = options.Value;
+
     public async Task HandleCondition(Match match)
     {
         var scores = await scoreService.GetScore(match);
@@ -42,10 +43,9 @@ public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsK
         });
     }
 
-
     private void MarkFail(ResultDetail resultDetail, IGrouping<string, Score> groupScore, int matchId)
     {
-        var maxDate = groupScore.ToList().Max(t => t.ProviderTime);
+        var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTime.Now - maxDate;
         if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {

@@ -87,7 +87,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-7)
+                CreateDate = DateTime.Now.AddMinutes(-7)
             },
             new()
             {
@@ -95,7 +95,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
         };
 
@@ -125,7 +125,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-7)
+                CreateDate = DateTime.Now.AddMinutes(-7)
             },
             new()
             {
@@ -133,7 +133,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-2)
+                CreateDate = DateTime.Now.AddMinutes(-2)
             },
         };
 
@@ -171,7 +171,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
@@ -179,7 +179,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
         };
 
@@ -217,7 +217,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 100,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
@@ -225,7 +225,7 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
             new()
             {
@@ -233,14 +233,14 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             }, new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                ProviderTime = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6)
             },
         };
 
