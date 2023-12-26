@@ -1,5 +1,5 @@
-using AutoPayout.EarlyResult.Models;
 using AutoPayout.EarlyResult.Service;
+using AutoPayout.Models;
 using Fanex.Data.SqlServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

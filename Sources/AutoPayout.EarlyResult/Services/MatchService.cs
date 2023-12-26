@@ -1,6 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
-using AutoPayout.EarlyResult.Models;
 using Fanex.Caching;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
@@ -13,18 +12,10 @@ public interface MatchService
     Task<List<Match>> GetMatches();
 }
 
-public class MatchServiceImp : MatchService
+public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDynamicRepository repository)
+    : MatchService
 {
-    private readonly AppSettingsKey appSettingsKey;
-    private readonly ICache cache;
-    private readonly IDynamicRepository repository;
-
-    public MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDynamicRepository repository)
-    {
-        appSettingsKey = options.Value;
-        this.cache = cache;
-        this.repository = repository;
-    }
+    private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task<List<Match>> GetMatches()
     {

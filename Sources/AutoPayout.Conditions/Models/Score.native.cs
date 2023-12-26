@@ -13,4 +13,6 @@ public class Score
     public string HomeValue { get; set; }
 
     public string AwayValue { get; set; }
+
+    public DateTime CreateDate { get; set; }
 }

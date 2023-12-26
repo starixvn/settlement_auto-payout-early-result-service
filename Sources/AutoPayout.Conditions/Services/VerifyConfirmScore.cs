@@ -1,26 +1,19 @@
 ﻿using AutoPayout.Exceptions;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyConfirmScore : ICondition
+public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsKey> options) : ICondition
 {
-    private readonly ScoreService scoreService;
-
-    public VerifyConfirmScore(ScoreService scoreService)
-    {
-        this.scoreService = scoreService;
-    }
+    private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task HandleCondition(Match match)
     {
         var scores = await scoreService.GetScore(match);
         CompareScore(match, scores);
 
-        if (match.ResultDetails.Any(r => !r.IsValid))
-        {
-            await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid));
-            match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
-        }
+        await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
 
         if (!match.ResultDetails.Any())
         {
@@ -44,9 +37,21 @@ public class VerifyConfirmScore : ICondition
             }
             else
             {
-                scoreService.WriteLogResultInvalid(match.MatchId, resultDetail, group.ToList());
-                resultDetail.IsValid = false;
+                MarkFail(resultDetail, group, match.MatchId);
             }
         });
+    }
+
+    private void MarkFail(ResultDetail resultDetail, IGrouping<string, Score> groupScore, int matchId)
+    {
+        var maxDate = groupScore.Max(t => t.CreateDate);
+        var processTime = DateTime.Now - maxDate;
+        if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        {
+            scoreService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
+            resultDetail.Expired = true;
+        }
+
+        resultDetail.IsValid = false;
     }
 }

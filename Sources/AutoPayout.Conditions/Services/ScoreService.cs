@@ -12,21 +12,10 @@ public interface ScoreService
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 }
 
-public class ScoreServiceImp : ScoreService
+public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
+        UpdateResultStatusService updateResultStatusService)
+    : ScoreService
 {
-    private readonly IDynamicRepository repository;
-
-    private readonly WriteLogService writeLogService;
-
-    private readonly UpdateResultStatusService updateResultStatusService;
-
-    public ScoreServiceImp(IDynamicRepository repository, WriteLogService writeLogService, UpdateResultStatusService updateResultStatusService)
-    {
-        this.repository = repository;
-        this.writeLogService = writeLogService;
-        this.updateResultStatusService = updateResultStatusService;
-    }
-
     public async Task<IEnumerable<Score>> GetScore(Match match)
     {
         var resources = match.ResultDetails.Select(r => r.ResourceId);
