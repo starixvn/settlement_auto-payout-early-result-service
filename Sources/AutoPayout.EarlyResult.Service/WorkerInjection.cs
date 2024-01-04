@@ -2,6 +2,7 @@
 using AutoPayout.Conditions;
 using AutoPayout.Conditions.Services;
 using AutoPayout.EarlyResult.Services;
+using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.Services;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
@@ -44,12 +45,17 @@ public static class WorkerInjection
         service.AddSingleton<MatchPoolService, MatchPoolServiceImp>();
         service.AddSingleton<MatchService, MatchServiceImp>();
         service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
-        service.AddSingleton<ScoreService, ScoreServiceImp>();
+        service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
         service.AddSingleton<VerifyMatchStatus>();
         service.AddSingleton<VerifyRunningOdds>();
         service.AddSingleton<VerifyConfirmScore>();
         service.AddSingleton<VerifyBeforePushProfile>();
         service.AddSingleton<VerifyInningStatus>();
+        service.AddSingleton<VerifyFinalResult>();
+        service.AddSingleton<VerifyFinalResult>();
+
+        service.AddSingleton<TennisExtraStep>();
+        service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
         service.AddSingleton<IDynamicRepository, DynamicRepository>();

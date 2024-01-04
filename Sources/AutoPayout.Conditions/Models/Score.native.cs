@@ -15,4 +15,6 @@ public class Score
     public string AwayValue { get; set; }
 
     public DateTime CreateDate { get; set; }
+
+    public bool HasAwayValue { get; set; }
 }

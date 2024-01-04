@@ -2,6 +2,7 @@
 using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Models;
+using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 using Fanex.Settlement.ScaleOut.Request;
@@ -22,7 +23,8 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
         CreateQueryService createQueryService,
-        UpdateResultStatusService updateResultStatusService)
+        UpdateResultStatusService updateResultStatusService,
+        CreateExtraStepService createExtraStepService)
     : SettlementService
 {
     private readonly AppSettingsKey appSettingsKey = options.Value;
@@ -69,6 +71,9 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         await UpdateMatchInfo(criteria);
 
+        var extraStep = createExtraStepService.Create(sportType);
+
+        await extraStep.Process(criteria);
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
 

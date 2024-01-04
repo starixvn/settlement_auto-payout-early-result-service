@@ -24,5 +24,7 @@ public static class ErrorMessage
 
     public const string MatchRunningOdds = "Failed: ERROR! Cannot calculate due to unclosed odds. Please make sure you select correct match/interval/result to calculate.";
 
-    public const string InningsNotSettled = "Failed: Result(00) corresponding Innings has not been calculated.";
+    public const string IntervalNotSettled = "Failed: Result(00) corresponding Innings/Intervals has not been calculated.";
+
+    public const string FinalInconsistent = "Failed: FT(@score) is inconsistent with interval scores";
 }

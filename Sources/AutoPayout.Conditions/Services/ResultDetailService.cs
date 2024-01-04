@@ -3,18 +3,20 @@ using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services;
 
-public interface ScoreService
+public interface ResultDetailService
 {
     Task<IEnumerable<Score>> GetScore(Match match);
 
     void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
+    void WriteLogResult(int matchId, ResultDetail result, string message);
+
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 }
 
-public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
+public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
         UpdateResultStatusService updateResultStatusService)
-    : ScoreService
+    : ResultDetailService
 {
     public async Task<IEnumerable<Score>> GetScore(Match match)
     {
@@ -65,5 +67,12 @@ public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writ
     {
         var awayValue = !string.IsNullOrEmpty(score.AwayValue) ? '-' + score.AwayValue : string.Empty;
         return $"{preFix}({score.HomeValue}{awayValue})";
+    }
+
+    public void WriteLogResult(int matchId, ResultDetail result, string message)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+
+        writeLogService.WriteLog(cloneMatch, message);
     }
 }

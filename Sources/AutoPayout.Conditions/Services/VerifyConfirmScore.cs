@@ -3,16 +3,16 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsKey> options) : ICondition
+public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options) : ICondition
 {
     private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task HandleCondition(Match match)
     {
-        var scores = await scoreService.GetScore(match);
+        var scores = await resultDetailService.GetScore(match);
         CompareScore(match, scores);
 
-        await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
+        await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
 
         if (!match.ResultDetails.Any())
@@ -48,7 +48,7 @@ public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsK
         var processTime = DateTime.Now - maxDate;
         if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
-            scoreService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
+            resultDetailService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
             resultDetail.Expired = true;
         }
 

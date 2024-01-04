@@ -7,7 +7,7 @@ using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTest.Services;
 
-public class ScoreServiceTests
+public class resultDetailServiceTests
 {
     private readonly IDynamicRepository repository;
 
@@ -15,14 +15,14 @@ public class ScoreServiceTests
 
     private readonly UpdateResultStatusService updateResultStatusService;
 
-    private readonly ScoreService service;
+    private readonly ResultDetailService service;
 
-    public ScoreServiceTests()
+    public resultDetailServiceTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         writeLogService = Substitute.For<WriteLogService>();
         updateResultStatusService = Substitute.For<UpdateResultStatusService>();
-        service = new ScoreServiceImp(repository, writeLogService, updateResultStatusService);
+        service = new ResultDetailServiceImp(repository, writeLogService, updateResultStatusService);
     }
 
     [Fact]
