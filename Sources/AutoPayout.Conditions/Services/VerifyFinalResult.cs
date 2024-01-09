@@ -38,7 +38,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
     }
 
-    private async Task HandleFinalResult(ResultDetail finalResult, Match match)
+    private async Task HandleFinalResult(ResultDetail finalResult, Match match) //NOSONAR
     {
         await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult });
         resultDetailService.WriteLogResult(

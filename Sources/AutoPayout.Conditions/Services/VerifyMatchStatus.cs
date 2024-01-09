@@ -7,9 +7,10 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
         var criteria = new MatchRemarkCriteria { MatchId = match.MatchId };
         var (matchStatus, _) = await repository.FetchMultipleAsync<MatchRemark, object>(criteria);
 
-        if (matchStatus.Any())
+        var matchRemarks = matchStatus.ToList();
+        if (matchRemarks.Any())
         {
-            VerifyMatch(matchStatus.First());
+            VerifyMatch(matchRemarks[0]);
         }
         else
         {

@@ -5,18 +5,9 @@ public interface UpdateResultStatusService
     Task UpdateResultStatus(Match match, int status);
 }
 
-public class UpdateResultStatusServiceImp : UpdateResultStatusService
+public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConvertService xmlConvertService)
+    : UpdateResultStatusService
 {
-    private readonly IDynamicRepository repository;
-
-    private readonly XmlConvertService xmlConvertService;
-
-    public UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConvertService xmlConvertService)
-    {
-        this.xmlConvertService = xmlConvertService;
-        this.repository = repository;
-    }
-
     public async Task UpdateResultStatus(Match match, int status)
     {
         var resources = CreateResources(match.ResultDetails);

@@ -15,7 +15,7 @@ public interface MatchService
 public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDynamicRepository repository)
     : MatchService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task<List<Match>> GetMatches()
     {

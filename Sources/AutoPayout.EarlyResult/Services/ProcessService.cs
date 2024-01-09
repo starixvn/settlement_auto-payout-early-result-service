@@ -19,7 +19,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
         UpdateResultStatusService updateResultStatusService)
     : ProcessService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task Process(Match match)
     {

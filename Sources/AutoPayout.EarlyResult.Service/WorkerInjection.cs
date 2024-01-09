@@ -55,6 +55,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalResult>();
 
         service.AddSingleton<TennisExtraStep>();
+        service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();

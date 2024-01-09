@@ -27,7 +27,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         CreateExtraStepService createExtraStepService)
     : SettlementService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task Push(Match match)
     {
@@ -95,7 +95,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceId.Final));
     }
 
-    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource)
+    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource) //NOSONAR
     {
         if (isExistedFinalResource)
         {

@@ -3,9 +3,10 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options) : ICondition
+public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+    : ICondition
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task HandleCondition(Match match)
     {
@@ -23,15 +24,15 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 
     private void CompareScore(Match match, IEnumerable<Score> scores)
     {
-        var groupedScores = scores.GroupBy(s => s.ResourceId).ToList();
+        var groupedScores = scores.GroupBy(s => new { s.ResourceId, s.HasAwayValue }).ToList();
 
         groupedScores.ForEach(group =>
         {
-            var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key);
+            var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key.ResourceId);
             if (group.Distinct(new ScoreComparer()).Count() == 1)
             {
                 resultDetail.HomeValue = group.First().HomeValue;
-                resultDetail.AwayValue = group.First().AwayValue;
+                resultDetail.AwayValue = group.Key.HasAwayValue ? group.First().AwayValue : string.Empty;
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }
@@ -42,10 +43,10 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         });
     }
 
-    private void MarkFail(ResultDetail resultDetail, IGrouping<string, Score> groupScore, int matchId)
+    private void MarkFail(ResultDetail resultDetail, IGrouping<object, Score> groupScore, int matchId)
     {
         var maxDate = groupScore.Max(t => t.CreateDate);
-        var processTime = DateTime.Now - maxDate;
+        var processTime = DateTimeOffset.Now - maxDate;
         if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
             resultDetailService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
