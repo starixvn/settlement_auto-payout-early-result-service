@@ -1,7 +1,7 @@
 ﻿using Fanex.Data.Repository;
 
 namespace AutoPayout.EarlyResult.Criteria;
-internal class InsRefundResultOSCriteria : INonQueryCommand
+public class InsRefundResultOSCriteria : INonQueryCommand
 {
     public int MatchId { get; set; }
 

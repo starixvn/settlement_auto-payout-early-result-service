@@ -12,6 +12,8 @@ public interface ResultDetailService
     void WriteLogResult(int matchId, ResultDetail result, string message);
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
+
+    Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -81,5 +83,12 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
 
         writeLogService.WriteLog(cloneMatch, message);
+    }
+
+    public Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
+    {
+        var criteria = new GetResourceIndexCriteria(sportType);
+
+        return repository.FetchAsync<ResourceIndex>(criteria);
     }
 }

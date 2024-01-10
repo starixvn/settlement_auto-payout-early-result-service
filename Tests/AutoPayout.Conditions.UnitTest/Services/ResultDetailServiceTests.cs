@@ -163,18 +163,20 @@ public class ResultDetailServiceTests
     }
 
     [Fact]
-    public void UpdateResultStatus_TraderOnly_InvokeUpdateStatusWithFailStatus()
+    public async Task UpdateResultStatus_Always_CallUpdateStatusService()
     {
-        var resultDetails = new List<ResultDetail>()
+        var resultDetails = new List<ResultDetail>
         {
             new()
             {
-                ResourceId = "00"
+                ResourceId = "01"
             }
         };
 
-        service.UpdateResultStatus(1, resultDetails);
+        await service.UpdateResultStatus(1, resultDetails);
 
-        updateResultStatusService.Received().UpdateResultStatus(Arg.Is<Match>(m => m.MatchId == 1 && m.ResultDetails.Count() == 1), MatchStatus.Failed);
+        await updateResultStatusService.Received().UpdateResultStatus(Arg.Is<Match>(m => m.MatchId == 1
+            && m.ResultDetails.Count() == 1
+            && m.ResultDetails.First().ResourceId == "01"), MatchStatus.Failed);
     }
 }
