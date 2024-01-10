@@ -40,7 +40,11 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
         var traderScore = TraderScore(scores);
         var sourceScore = ProviderScore(scores);
-        sourceScore.Insert(0, traderScore);
+
+        if (!string.IsNullOrEmpty(traderScore))
+        {
+            sourceScore.Insert(0, traderScore);
+        }
 
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
     }

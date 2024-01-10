@@ -31,10 +31,13 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
     public async Task Push(Match match)
     {
-        var settleCriteria = createQueryService.QuerySettle(match);
-        var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
-        await Execute(settleCriteria, match.SportType, isExistedFinalResource);
-        await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+        if (match.ResultDetails.Any())
+        {
+            var settleCriteria = createQueryService.QuerySettle(match);
+            var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
+            await Execute(settleCriteria, match.SportType, isExistedFinalResource);
+            await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+        }
     }
 
     public async Task UpdateResultExpired(Match match)

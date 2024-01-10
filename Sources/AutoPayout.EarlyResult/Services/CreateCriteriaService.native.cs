@@ -7,15 +7,8 @@ public interface CreateQueryService
     SettleCriteria QuerySettle(Match match);
 }
 
-public class CreateQueryServiceImp : CreateQueryService
+public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : CreateQueryService
 {
-    private readonly XmlConvertService xmlConvertService;
-
-    public CreateQueryServiceImp(XmlConvertService xmlConvertService)
-    {
-        this.xmlConvertService = xmlConvertService;
-    }
-
     public SettleCriteria QuerySettle(Match match)
     {
         var resourcesResult = CreateResources(match.ResultDetails);

@@ -1,6 +1,7 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
@@ -72,5 +73,108 @@ public class ResultDetailServiceTests
 
         Assert.True(!result[0].HasAwayValue && result[0].ResourceId == "00");
         Assert.True(result[1].HasAwayValue && result[1].ResourceId == "01");
+    }
+
+    [Fact]
+    public void WriteLogResultInvalid_Always_WriteCorrectMessage()
+    {
+        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
+
+        var scores = new List<Score>()
+        {
+            new ()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceName = "SBO",
+                SourceId = 1
+            },
+            new ()
+            {
+            ResourceId = "01",
+            HomeValue = "2",
+            AwayValue = "2",
+            SourceName = "SEO",
+            SourceId = 2
+            },
+            new ()
+            {
+                ResourceId = "01",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceName = "SEO"
+            },
+        };
+
+        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
+
+        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
+    }
+
+    [Fact]
+    public void WriteLogResultInvalid_ProviderOnly_WriteCorrectMessage()
+    {
+        var expectedMessage = "Failed: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
+
+        var scores = new List<Score>()
+        {
+            new ()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceName = "SBO",
+                SourceId = 1
+            },
+            new ()
+            {
+                ResourceId = "01",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceName = "SEO",
+                SourceId = 2 },
+        };
+
+        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
+
+        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
+    }
+
+    [Fact]
+    public void WriteLogResultInvalid_TraderOnly_WriteCorrectMessage()
+    {
+        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2)";
+
+        var scores = new List<Score>()
+        {
+            new ()
+            {
+                ResourceId = "01",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceName = "SEO"
+            },
+        };
+
+        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
+
+        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
+    }
+
+    [Fact]
+    public void UpdateResultStatus_TraderOnly_InvokeUpdateStatusWithFailStatus()
+    {
+        var resultDetails = new List<ResultDetail>()
+        {
+            new()
+            {
+                ResourceId = "00"
+            }
+        };
+
+        service.UpdateResultStatus(1, resultDetails);
+
+        updateResultStatusService.Received().UpdateResultStatus(Arg.Is<Match>(m => m.MatchId == 1 && m.ResultDetails.Count() == 1), MatchStatus.Failed);
     }
 }
