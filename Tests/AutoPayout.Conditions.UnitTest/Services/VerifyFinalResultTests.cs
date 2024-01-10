@@ -65,7 +65,7 @@ public class VerifyFinalResultTests
                 }
             }
         };
-
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -126,7 +126,7 @@ public class VerifyFinalResultTests
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(resultsSettled);
-
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -172,7 +172,7 @@ public class VerifyFinalResultTests
         };
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(resultsSettled);
-
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -208,7 +208,43 @@ public class VerifyFinalResultTests
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
+        await condition.HandleCondition(match);
+
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+    }
+
+    [Fact]
+    public async Task HandleCondition_FinalResultNotConsistentWithGameSession_UpdateStatusFinalToInvalid()
+    {
+        var match = new Match
+        {
+            MatchId = 1,
+            ResourceType = ResourceType.MainResource,
+            ResultDetails = new List<ResultDetail>
+            {
+                new ()
+                {
+                    ResourceId = ResourceId.Final,
+                    HomeValue = "0",
+                    AwayValue = "1"
+                },
+                new ()
+                {
+                    ResourceId = "01",
+                    HomeValue = "1",
+                    AwayValue = "2"
+                },
+            }
+        };
+
+        var errorMessage = "Failed: FT(0-1) is inconsistent with interval scores";
+
+        repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 

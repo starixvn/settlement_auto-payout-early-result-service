@@ -10,6 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\ExtraStepService\**" />
+    <EmbeddedResource Remove="Services\ExtraStepService\**" />
+    <None Remove="Services\ExtraStepService\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="xunit" Version="2.4.2" />

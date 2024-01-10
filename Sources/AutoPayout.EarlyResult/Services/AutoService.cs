@@ -5,17 +5,9 @@ public interface IAutoService
     Task Handle();
 }
 
-public class AutoService : IAutoService
+public class AutoService(ProcessService processService, MatchPoolService matchPoolService)
+    : IAutoService
 {
-    private readonly ProcessService processService;
-    private readonly MatchPoolService matchPoolService;
-
-    public AutoService(ProcessService processService, MatchPoolService matchPoolService)
-    {
-        this.processService = processService;
-        this.matchPoolService = matchPoolService;
-    }
-
     public async Task Handle()
     {
         var matches = await matchPoolService.GetNewMatches();

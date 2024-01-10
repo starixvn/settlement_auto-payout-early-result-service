@@ -14,7 +14,7 @@ public static class ErrorMessage
 
     public const string InconsistentScore = "Failed: Result({0}) values inconsistent between ";
 
-    public const string MatchNotValid = "Failed: Match and sport type not supported";
+    public const string MatchNotValid = "Failed: Match and Sport are not supported";
 
     public const string ResultExpired = "Failed: Result({0}) insufficient Trader or Provider sources.";
 

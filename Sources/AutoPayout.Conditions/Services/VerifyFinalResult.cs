@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+
+namespace AutoPayout.Conditions.Services;
 public class VerifyFinalResult(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
 {
     public async Task HandleCondition(Match match)
@@ -10,7 +12,12 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         }
 
         var setsResults = await GetSetResults(match);
-        var isValid = VerifyResult(setsResults, finalResult) && IsMatchResultsConsecutive(setsResults);
+
+        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+        var isValid =
+            VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult)
+            && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
+            && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
 
         if (!isValid)
         {
@@ -39,19 +46,6 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = match.MatchId, SportType = match.SportType })).ToList();
 
         return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
-    }
-
-    private static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
-    {
-        var sumHomeScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) > Convert.ToInt32(set.AwayValue)).ToString();
-        var sumAwayScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) < Convert.ToInt32(set.AwayValue)).ToString();
-
-        return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
-    }
-
-    private static bool IsMatchResultsConsecutive(IEnumerable<ResultDetail> setsResults)
-    {
-        return !setsResults.Select((i, j) => Convert.ToInt32(i.ResourceId) - j).Distinct().Skip(1).Any();
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match) //NOSONAR
