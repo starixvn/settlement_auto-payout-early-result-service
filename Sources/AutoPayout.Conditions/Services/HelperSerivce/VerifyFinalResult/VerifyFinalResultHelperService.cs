@@ -17,8 +17,11 @@ public static class VerifyFinalResultHelper
 
     public static bool FinalScoreIsValid(MatchDetail matchDetail, ResultDetail finalResult)
     {
-        var minSetToWin = (double)matchDetail.GameSession / 2;
+        var minSetToWin = (matchDetail.GameSession + 1) / 2;
+        var homeValue = Convert.ToInt32(finalResult.HomeValue);
+        var awayValue = Convert.ToInt32(finalResult.AwayValue);
 
-        return Convert.ToInt32(finalResult.HomeValue) > minSetToWin || Convert.ToInt32(finalResult.AwayValue) > minSetToWin;
+        return (homeValue == minSetToWin || awayValue == minSetToWin)
+              && (homeValue + awayValue) <= matchDetail.GameSession;
     }
 }

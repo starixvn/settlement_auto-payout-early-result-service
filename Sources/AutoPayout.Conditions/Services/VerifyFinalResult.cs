@@ -14,14 +14,16 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         var setsResults = await GetSetResults(match);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+
+        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult);
         var isValid =
-            VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult)
+            isFinalConsistentWithGameSession
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
 
         if (!isValid)
         {
-            await HandleFinalResult(finalResult, match);
+            await HandleFinalResult(finalResult, match, !isFinalConsistentWithGameSession);
         }
     }
 
@@ -48,13 +50,14 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
 
-    private async Task HandleFinalResult(ResultDetail finalResult, Match match) //NOSONAR
+    private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
     {
+        var message = isFinalInconsistentWithGameSession ? ErrorMessage.FinalInconsistentWithGameSession : ErrorMessage.FinalInconsistent;
         await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult });
         resultDetailService.WriteLogResult(
             match.MatchId,
             finalResult,
-            ErrorMessage.FinalInconsistent.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}"));
+            message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}"));
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
     }
 }

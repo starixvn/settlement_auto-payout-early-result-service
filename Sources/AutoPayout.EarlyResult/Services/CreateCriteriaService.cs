@@ -35,20 +35,16 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
 
     private static string GetGroupedInfo(IReadOnlyCollection<IGrouping<(int, string), ExternalSourceInfo>> groupedItems)
     {
-        if (groupedItems.Any())
-        {
-            var resourceIds = string.Join(", ", groupedItems
-                 .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader)
-                 .Select(group =>
-                 {
-                     var resourceIds = string.Join(", ", group.Select(item => item.ResourceId));
-                     return $"{group.Key.Item2}({resourceIds})";
-                 }));
+        var resourceIds = string.Join(", ", groupedItems
+            .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Trader)
+            .Select(group =>
+            {
+                var resourceIds = string.Join(", ", group.Select(item => item.ResourceId));
+                return $"{group.Key.Item2}({resourceIds})";
+            }));
 
-            return $"Provider: {resourceIds}";
-        }
+        return $"Provider: {resourceIds}";
 
-        return string.Empty;
     }
 
     private string CreateResources(IEnumerable<ResultDetail> selectedResources)

@@ -26,5 +26,7 @@ public static class ErrorMessage
 
     public const string IntervalNotSettled = "Failed: Result(00) corresponding Innings/Intervals has not been calculated.";
 
-    public const string FinalInconsistent = "Failed: FT(@score) is inconsistent with interval scores";
+    public const string FinalInconsistent = "Failed: FT(@score) is inconsistent with interval scores.";
+
+    public const string FinalInconsistentWithGameSession = "Failed: FT(@score) is inconsistent with game session information.";
 }
