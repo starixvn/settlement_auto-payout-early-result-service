@@ -3,7 +3,7 @@ using AutoPayout.Conditions.Exceptions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyRunningOddsTests
 {
     private readonly IDynamicRepository repository;

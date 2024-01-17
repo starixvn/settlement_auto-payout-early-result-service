@@ -16,7 +16,6 @@ public class SettlementServiceTests
     private readonly IDynamicRepository repository;
     private readonly ScaleOutSettleService scaleOutSettleService;
     private readonly CreateQueryService createQueryService;
-    private readonly UpdateResultStatusService updateResultStatusService;
     private readonly CreateExtraStepService createExtraStepService;
     private readonly SettlementService service;
 
@@ -26,7 +25,7 @@ public class SettlementServiceTests
         repository = Substitute.For<IDynamicRepository>();
         scaleOutSettleService = Substitute.For<ScaleOutSettleService>();
         createQueryService = Substitute.For<CreateQueryService>();
-        updateResultStatusService = Substitute.For<UpdateResultStatusService>();
+        var updateResultStatusService = Substitute.For<UpdateResultStatusService>();
         createExtraStepService = Substitute.For<CreateExtraStepService>();
 
         var settings = new AppSettingsKey()
@@ -111,7 +110,7 @@ public class SettlementServiceTests
         await service.Push(match);
 
         await scaleOutSettleService.Received(2).UpdateMatchInfo(Arg.Any<UpdateMatchInfoRequest>());
-        createExtraStepService.Received(2).Create(5);
+        createExtraStepService.Received(1).Create(5);
         await writeLogService.Received(1).WriteLogDirectly(1, Arg.Any<string>());
         await writeLogService.Received(1).WriteLogDirectly(2, Arg.Any<string>());
         await writeLogService.Received(2).InsertResettleLog(Arg.Any<SettleCriteria>(), 5, Arg.Any<bool>());

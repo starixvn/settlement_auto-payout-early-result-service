@@ -74,9 +74,12 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         await UpdateMatchInfo(criteria);
 
-        var extraStep = createExtraStepService.Create(sportType);
+        if (isMainMatch)
+        {
+            var extraStep = createExtraStepService.Create(sportType);
+            await extraStep.Process(criteria);
+        }
 
-        await extraStep.Process(criteria);
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
 

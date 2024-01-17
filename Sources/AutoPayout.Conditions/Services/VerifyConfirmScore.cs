@@ -29,7 +29,8 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         groupedScores.ForEach(group =>
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key.ResourceId);
-            if (group.Distinct(new ScoreComparer()).Count() == 1)
+            var isAwayValueValid = !group.Key.HasAwayValue || !string.IsNullOrEmpty(group.First().AwayValue);
+            if (group.Distinct(new ScoreComparer()).Count() == 1 && isAwayValueValid)
             {
                 resultDetail.HomeValue = group.First().HomeValue;
                 resultDetail.AwayValue = group.Key.HasAwayValue ? group.First().AwayValue : string.Empty;

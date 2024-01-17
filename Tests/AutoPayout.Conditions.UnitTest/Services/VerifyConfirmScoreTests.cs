@@ -3,7 +3,7 @@ using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyConfirmScoreTests
 {
@@ -374,5 +374,45 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("3", secondResultDetail.AwayValue);
         await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+    }
+
+
+    [Fact]
+    public async void HandleCondition_AwayValueNotValid_MarkFail()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                SourceId = 200,
+                CreateDate = DateTime.Now.AddMinutes(-7),
+                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceId = 200,
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
+            },
+        };
+
+        resultDetailService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.IsType<ServiceException>(exception);
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
     }
 }

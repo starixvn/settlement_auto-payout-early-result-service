@@ -6,7 +6,7 @@ using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyInningStatusTests
 {
     private readonly IDynamicRepository repository;

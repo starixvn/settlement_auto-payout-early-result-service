@@ -6,7 +6,7 @@ using Fanex.Settlement.ScaleOut.Models;
 using Fanex.Settlement.ScaleOut.Request;
 using Fanex.Settlement.ScaleOut.Services;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyBeforePushProfileTests
 {

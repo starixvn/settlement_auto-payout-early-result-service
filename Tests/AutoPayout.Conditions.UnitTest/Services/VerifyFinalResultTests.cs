@@ -4,7 +4,7 @@ using AutoPayout.Conditions.Models;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyFinalResultTests
 {
     private readonly IDynamicRepository repository;

@@ -7,13 +7,11 @@ using Xunit;
 namespace AutoPayout.EarlyResult.UnitTests.Services;
 public class CreateConditionChainServiceTests
 {
-    private readonly Creator creator;
-
     private readonly CreateConditionChainService service;
 
     public CreateConditionChainServiceTests()
     {
-        creator = Substitute.For<Creator>();
+        var creator = Substitute.For<Creator>();
 
         service = new CreateConditionChainServiceImp(creator);
     }
@@ -30,7 +28,7 @@ public class CreateConditionChainServiceTests
     [Fact]
     public void CreateConditionChain_ConditionIdsNotEmpty_ReturnCorrectly()
     {
-        var conditionIds = new string[2] { ConditionId.VerifyConfirmScore, ConditionId.VerifyFinalResult };
+        var conditionIds = new[] { ConditionId.VerifyConfirmScore, ConditionId.VerifyFinalResult };
         var conditions = service.CreateConditionChain(conditionIds);
 
         Assert.Equal(2, conditions.Count);
