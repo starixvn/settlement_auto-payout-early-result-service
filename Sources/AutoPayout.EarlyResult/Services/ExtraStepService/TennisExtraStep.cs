@@ -7,7 +7,7 @@ public class TennisExtraStep(IDynamicRepository repository) : IExtraStepService
 {
     public async Task Process(SettleCriteria settleCriteria)
     {
-        var criteria = new InsRefundResultOSCriteria
+        var criteria = new InsRefundResultCriteria
         {
             MatchId = settleCriteria.MatchId
         };

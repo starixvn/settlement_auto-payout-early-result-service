@@ -2,7 +2,8 @@
 using AutoPayout.EarlyResult.Criteria;
 using Xunit;
 
-namespace AutoPayout.EarlyResult.UnitTests.Services.ExtraStepService;
+namespace AutoPayout.EarlyResult.UnitTests.Services;
+
 public class TennisExtraStepTests
 {
     private readonly IDynamicRepository repository;
@@ -20,6 +21,6 @@ public class TennisExtraStepTests
     {
         await extraStep.Process(new SettleCriteria() { MatchId = 1 });
 
-        await repository.Received().ExecuteAsync(Arg.Any<InsRefundResultOSCriteria>());
+        await repository.Received().ExecuteAsync(Arg.Any<InsRefundResultCriteria>());
     }
 }

@@ -3,12 +3,13 @@ using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers;
+
 public class VerifyFinalResultHelperServiceTests
 {
     [Theory]
     [InlineData("1", "2", "1", "3", true)]
     [InlineData("2", "1", "1", "3", false)]
-    public void VerifyResult_FinalAndSetInConsistent_ReturnFalse(string firstHome, string firstAway, string secondHome, string SecondAway, bool expected)
+    public void VerifyResult_FinalAndSetInConsistent_ReturnFalse(string firstHome, string firstAway, string secondHome, string secondAway, bool expected)
     {
         var resultDetails = new List<ResultDetail>()
         {
@@ -22,7 +23,7 @@ public class VerifyFinalResultHelperServiceTests
             {
                 ResourceId = "02",
                 HomeValue = secondHome,
-                AwayValue = SecondAway
+                AwayValue = secondAway
             }
         };
 
@@ -44,7 +45,6 @@ public class VerifyFinalResultHelperServiceTests
     public void IsMatchResultsConsecutive_Always_ReturnBySetPosition(string resourceIds, bool expected)
     {
         var resultDetails = resourceIds.Split(",").Select(r => new ResultDetail() { ResourceId = r });
-
 
         var actual = VerifyFinalResultHelper.IsMatchResultsConsecutive(resultDetails);
 
