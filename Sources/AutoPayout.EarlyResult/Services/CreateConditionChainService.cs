@@ -10,22 +10,15 @@ public interface CreateConditionChainService
     List<ICondition> CreateConditionChain(string[] conditionIds);
 }
 
-public class CreateConditionChainServiceImp : CreateConditionChainService
+public class CreateConditionChainServiceImp(Creator creator) : CreateConditionChainService
 {
-    private readonly Creator creator;
-
-    public CreateConditionChainServiceImp(Creator creator)
-    {
-        this.creator = creator;
-    }
-
     public List<ICondition> CreateConditionChain(string[] conditionIds)
     {
         if (!conditionIds.Any())
         {
             throw new ServiceException(ErrorMessage.MatchNotValid);
         }
-        var conditionHandlers = conditionIds.Select(condition => creator.Create(condition)).Where(condition => condition is not null).ToList();
+        var conditionHandlers = conditionIds.Select(creator.Create).Where(condition => condition is not null).ToList();
 
         return conditionHandlers;
     }

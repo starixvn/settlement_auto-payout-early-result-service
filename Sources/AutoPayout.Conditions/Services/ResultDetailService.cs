@@ -3,18 +3,22 @@ using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services;
 
-public interface ScoreService
+public interface ResultDetailService
 {
     Task<IEnumerable<Score>> GetScore(Match match);
 
     void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
+    void WriteLogResult(int matchId, ResultDetail result, string message);
+
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
+
+    Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
 }
 
-public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
+public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
         UpdateResultStatusService updateResultStatusService)
-    : ScoreService
+    : ResultDetailService
 {
     public async Task<IEnumerable<Score>> GetScore(Match match)
     {
@@ -26,7 +30,10 @@ public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writ
             ResourceIds = string.Join(',', resources)
         };
 
-        return await repository.FetchAsync<Score>(criteria);
+        var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
+        scores.ForEach(s => s.HasAwayValue = !SportType.SportMayNotHaveAwayValue.Contains(match.SportType) || s.HasAwayValue);
+
+        return scores;
     }
 
     public void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
@@ -35,7 +42,11 @@ public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writ
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
         var traderScore = TraderScore(scores);
         var sourceScore = ProviderScore(scores);
-        sourceScore.Insert(0, traderScore);
+
+        if (!string.IsNullOrEmpty(traderScore))
+        {
+            sourceScore.Insert(0, traderScore);
+        }
 
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
     }
@@ -65,5 +76,19 @@ public class ScoreServiceImp(IDynamicRepository repository, WriteLogService writ
     {
         var awayValue = !string.IsNullOrEmpty(score.AwayValue) ? '-' + score.AwayValue : string.Empty;
         return $"{preFix}({score.HomeValue}{awayValue})";
+    }
+
+    public void WriteLogResult(int matchId, ResultDetail result, string message)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+
+        writeLogService.WriteLog(cloneMatch, message);
+    }
+
+    public Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
+    {
+        var criteria = new GetResourceIndexCriteria(sportType);
+
+        return repository.FetchAsync<ResourceIndex>(criteria);
     }
 }

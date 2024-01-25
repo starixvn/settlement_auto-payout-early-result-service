@@ -2,26 +2,15 @@
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyBeforePushProfile : ICondition
+public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService,
+        XmlConvertService xmlConvertService)
+    : ICondition
 {
-    private readonly ScaleOutSettleService scaleOutSettleService;
-
-    private readonly XmlConvertService xmlConvertService;
-
     private const string SpProfile = "NAP_Admin_Settlement_Profile_Push";
 
     private const string Action = "CAL";
 
     private const string Mode = "ALL";
-
-    public VerifyBeforePushProfile(
-        ScaleOutSettleService scaleOutSettleService,
-        XmlConvertService xmlConvertService)
-
-    {
-        this.xmlConvertService = xmlConvertService;
-        this.scaleOutSettleService = scaleOutSettleService;
-    }
 
     public async Task HandleCondition(Match match)
     {

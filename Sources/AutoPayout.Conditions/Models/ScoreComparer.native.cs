@@ -14,8 +14,13 @@ public class ScoreComparer : IEqualityComparer<Score>
             return false;
         }
 
-        return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0 &&
-               string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
+        if (first.HasAwayValue)
+        {
+            return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0 &&
+                   string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
+        }
+
+        return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0;
 
     }
 

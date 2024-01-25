@@ -3,24 +3,77 @@ using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyConfirmScoreTests
 {
-    private readonly ScoreService scoreService;
+    private readonly ResultDetailService resultDetailService;
 
     private readonly VerifyConfirmScore condition;
 
     public VerifyConfirmScoreTests()
     {
-        scoreService = Substitute.For<ScoreService>();
+        resultDetailService = Substitute.For<ResultDetailService>();
         var appSetting = new AppSettingsKey { RetryProcessScore = 300000 };
         var option = Options.Create(appSetting);
-        condition = new VerifyConfirmScore(scoreService, option);
+        condition = new VerifyConfirmScore(resultDetailService, option);
     }
 
     [Fact]
     public async void HandleCondition_ScoresAreEqual_AttachValueToResult()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var secondResultDetail = new ResultDetail { ResourceId = "02" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceId = 100,
+                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceId = 200,
+                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "02",
+                HomeValue = "2",
+                AwayValue = "2",
+                SourceId = 200,
+                HasAwayValue = true
+            },
+        };
+
+        resultDetailService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.Null(exception);
+        Assert.Equal("1", firstResultDetail.HomeValue);
+        Assert.Equal("2", firstResultDetail.AwayValue);
+        Assert.Equal(2, firstResultDetail.ExternalSourceInfo.Count());
+        Assert.Equal("2", secondResultDetail.HomeValue);
+        Assert.Equal("2", secondResultDetail.AwayValue);
+        Assert.Single(secondResultDetail.ExternalSourceInfo);
+        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+    }
+
+    [Fact]
+    public async void HandleCondition_CheckScoreBasedOnAttributeHasAwayValue_Pass()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
@@ -43,30 +96,37 @@ public class VerifyConfirmScoreTests
             {
                 ResourceId = "01",
                 HomeValue = "1",
-                AwayValue = "2",
+                AwayValue = "3",
                 SourceId = 200
             },
             new()
             {
                 ResourceId = "02",
-                HomeValue = "2",
+                HomeValue = "1",
                 AwayValue = "2",
-                SourceId = 200
+                SourceId = 100,
+                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "02",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceId = 200,
+                HasAwayValue = true
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.Null(exception);
         Assert.Equal("1", firstResultDetail.HomeValue);
-        Assert.Equal("2", firstResultDetail.AwayValue);
-        Assert.Equal(2, firstResultDetail.ExternalSourceInfo.Count());
-        Assert.Equal("2", secondResultDetail.HomeValue);
+        Assert.Equal(string.Empty, firstResultDetail.AwayValue);
+        Assert.Equal("1", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
-        Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await scoreService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
     }
 
     [Fact]
@@ -87,7 +147,8 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-7)
+                CreateDate = DateTime.Now.AddMinutes(-7),
+                HasAwayValue = true
             },
             new()
             {
@@ -95,16 +156,17 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
     }
 
     [Fact]
@@ -137,12 +199,12 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
     }
 
     [Fact]
@@ -163,7 +225,8 @@ public class VerifyConfirmScoreTests
                 ResourceId = "01",
                 HomeValue = "1",
                 AwayValue = "2",
-                SourceId = 100
+                SourceId = 100,
+                HasAwayValue = true
             },
             new()
             {
@@ -171,7 +234,8 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
             new()
             {
@@ -179,11 +243,12 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -195,7 +260,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
     }
 
     [Fact]
@@ -217,7 +282,8 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 100,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
             new()
             {
@@ -225,7 +291,8 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "1",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
             new()
             {
@@ -233,24 +300,26 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             }, new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                CreateDate = DateTime.Now.AddMinutes(-6)
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
         Assert.False(((ServiceException)exception).MarkFail);
-        await scoreService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2));
     }
 
     [Fact]
@@ -283,25 +352,67 @@ public class VerifyConfirmScoreTests
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "3",
-                SourceId = 200
+                SourceId = 200,
+                HasAwayValue = true
             }, new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "3",
-                SourceId = 200
+                SourceId = 200,
+                HasAwayValue = true
             },
         };
 
-        scoreService.GetScore(match).Returns(scores);
+        resultDetailService.GetScore(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.Null(exception);
         Assert.Equal("A", firstResultDetail.HomeValue);
-        Assert.Null(firstResultDetail.AwayValue);
+        Assert.Equal(string.Empty, firstResultDetail.AwayValue);
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("3", secondResultDetail.AwayValue);
-        await scoreService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+        await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+    }
+
+
+    [Fact]
+    public async void HandleCondition_AwayValueNotValid_MarkFail()
+    {
+        var firstResultDetail = new ResultDetail { ResourceId = "01" };
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails = new List<ResultDetail> { firstResultDetail }
+        };
+
+        var scores = new List<Score>
+        {
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                SourceId = 200,
+                CreateDate = DateTime.Now.AddMinutes(-7),
+                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "01",
+                HomeValue = "1",
+                AwayValue = "2",
+                SourceId = 200,
+                CreateDate = DateTime.Now.AddMinutes(-6),
+                HasAwayValue = true
+            },
+        };
+
+        resultDetailService.GetScore(match).Returns(scores);
+
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
+
+        Assert.IsType<ServiceException>(exception);
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
     }
 }

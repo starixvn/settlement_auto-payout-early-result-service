@@ -1,22 +1,16 @@
 ﻿namespace AutoPayout.Conditions.Services;
 
-public class VerifyMatchStatus : ICondition
+public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
 {
-    private readonly IDynamicRepository repository;
-
-    public VerifyMatchStatus(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task HandleCondition(Match match)
     {
         var criteria = new MatchRemarkCriteria { MatchId = match.MatchId };
         var (matchStatus, _) = await repository.FetchMultipleAsync<MatchRemark, object>(criteria);
 
-        if (matchStatus.Any())
+        var matchRemarks = matchStatus.ToList();
+        if (matchRemarks.Any())
         {
-            VerifyMatch(matchStatus.First());
+            VerifyMatch(matchRemarks[0]);
         }
         else
         {

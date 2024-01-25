@@ -1,6 +1,6 @@
 ﻿namespace AutoPayout.Conditions.Services;
 
-public class VerifyInningStatus(IDynamicRepository repository, ScoreService scoreService,
+public class VerifyInningStatus(IDynamicRepository repository, ResultDetailService resultDetailService,
         WriteLogService writeLogService)
     : ICondition
 {
@@ -51,8 +51,8 @@ public class VerifyInningStatus(IDynamicRepository repository, ScoreService scor
     {
         var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceId.Final).ToList();
         match.ResultDetails = match.ResultDetails.Except(finalResource);
-        await scoreService.UpdateResultStatus(match.MatchId, finalResource);
+        await resultDetailService.UpdateResultStatus(match.MatchId, finalResource);
         await writeLogService.WriteLog(new Match { MatchId = match.MatchId, ResultDetails = finalResource },
-            new InningNotSettledException());
+            new IntervalNotSettledException());
     }
 }

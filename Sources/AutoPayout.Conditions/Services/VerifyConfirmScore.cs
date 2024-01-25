@@ -3,16 +3,17 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsKey> options) : ICondition
+public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+    : ICondition
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task HandleCondition(Match match)
     {
-        var scores = await scoreService.GetScore(match);
+        var scores = await resultDetailService.GetScore(match);
         CompareScore(match, scores);
 
-        await scoreService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
+        await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
 
         if (!match.ResultDetails.Any())
@@ -23,15 +24,16 @@ public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsK
 
     private void CompareScore(Match match, IEnumerable<Score> scores)
     {
-        var groupedScores = scores.GroupBy(s => s.ResourceId).ToList();
+        var groupedScores = scores.GroupBy(s => new { s.ResourceId, s.HasAwayValue }).ToList();
 
         groupedScores.ForEach(group =>
         {
-            var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key);
-            if (group.Distinct(new ScoreComparer()).Count() == 1)
+            var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key.ResourceId);
+            var isAwayValueValid = !group.Key.HasAwayValue || !string.IsNullOrEmpty(group.First().AwayValue);
+            if (group.Distinct(new ScoreComparer()).Count() == 1 && isAwayValueValid)
             {
                 resultDetail.HomeValue = group.First().HomeValue;
-                resultDetail.AwayValue = group.First().AwayValue;
+                resultDetail.AwayValue = group.Key.HasAwayValue ? group.First().AwayValue : string.Empty;
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }
@@ -42,13 +44,13 @@ public class VerifyConfirmScore(ScoreService scoreService, IOptions<AppSettingsK
         });
     }
 
-    private void MarkFail(ResultDetail resultDetail, IGrouping<string, Score> groupScore, int matchId)
+    private void MarkFail(ResultDetail resultDetail, IGrouping<object, Score> groupScore, int matchId)
     {
         var maxDate = groupScore.Max(t => t.CreateDate);
-        var processTime = DateTime.Now - maxDate;
+        var processTime = DateTimeOffset.Now - maxDate;
         if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
-            scoreService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
+            resultDetailService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
             resultDetail.Expired = true;
         }
 

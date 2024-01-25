@@ -19,15 +19,8 @@ public interface WriteLogService
     Task InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch);
 }
 
-public class WriteLogServiceImp : WriteLogService
+public class WriteLogServiceImp(IDynamicRepository repository) : WriteLogService
 {
-    private readonly IDynamicRepository repository;
-
-    public WriteLogServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task ExceptionLog(int matchId, Exception exception)
     {
         var logMessage = new LogMessage($"Match Id: {matchId} - {exception.Message}")

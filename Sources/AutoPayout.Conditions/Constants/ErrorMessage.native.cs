@@ -14,7 +14,7 @@ public static class ErrorMessage
 
     public const string InconsistentScore = "Failed: Result({0}) values inconsistent between ";
 
-    public const string MatchNotValid = "Failed: Match and sport type not supported";
+    public const string MatchNotValid = "Failed: Match and Sport are not supported";
 
     public const string ResultExpired = "Failed: Result({0}) insufficient Trader or Provider sources.";
 
@@ -24,5 +24,9 @@ public static class ErrorMessage
 
     public const string MatchRunningOdds = "Failed: ERROR! Cannot calculate due to unclosed odds. Please make sure you select correct match/interval/result to calculate.";
 
-    public const string InningsNotSettled = "Failed: Result(00) corresponding Innings has not been calculated.";
+    public const string IntervalNotSettled = "Failed: Result(00) corresponding Innings/Intervals has not been calculated.";
+
+    public const string FinalInconsistent = "Failed: FT(@score) is inconsistent with interval scores.";
+
+    public const string FinalInconsistentWithGameSession = "Failed: FT(@score) is inconsistent with game session information.";
 }

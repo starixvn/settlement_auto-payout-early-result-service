@@ -37,7 +37,7 @@ public class WriteLogServiceTests
         service.WriteLog(match, exception);
 
         repository.Received()
-            .Execute(Arg.Is<WriteLogCriteria>(c => c.MatchId == 1 && c.Remark == "NAP: Auto Payout: 01<br/>Message"));
+            .ExecuteAsync(Arg.Is<WriteLogCriteria>(c => c.MatchId == 1 && c.Remark == "NAP: Auto Payout: 01<br/>Message"));
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class WriteLogServiceTests
         service.WriteLog(match, "Message");
 
         repository.Received()
-            .Execute(Arg.Is<WriteLogCriteria>(c => c.MatchId == 1 && c.Remark == "NAP: Auto Payout: 01<br/>Message"));
+            .ExecuteAsync(Arg.Is<WriteLogCriteria>(c => c.MatchId == 1 && c.Remark == "NAP: Auto Payout: 01<br/>Message"));
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class WriteLogServiceTests
         service.WriteLogDirectly(1, "Message");
 
         repository.Received()
-            .Execute(Arg.Is<LogDirectlyCriteria>(c => c.Extend == 1 && c.Doing == "Message"));
+            .ExecuteAsync(Arg.Is<LogDirectlyCriteria>(c => c.Extend == 1 && c.Doing == "Message"));
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class WriteLogServiceTests
     {
         service.InsertResettleLog(new SettleCriteria(), 1, true);
 
-        repository.Received().Execute(Arg.Any<InsertLogCriteria>());
+        repository.Received().ExecuteAsync(Arg.Any<InsertLogCriteria>());
     }
 
     [Fact]
@@ -83,6 +83,6 @@ public class WriteLogServiceTests
     {
         service.InsertResettleLog(new SettleCriteria(), 1, false);
 
-        repository.DidNotReceive().Execute(Arg.Any<InsertLogCriteria>());
+        repository.DidNotReceive().ExecuteAsync(Arg.Any<InsertLogCriteria>());
     }
 }

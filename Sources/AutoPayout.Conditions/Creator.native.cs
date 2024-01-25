@@ -7,32 +7,15 @@ public interface Creator
     ICondition Create(string id);
 }
 
-public class CreatorImp : Creator
-{
-    private readonly VerifyMatchStatus verifyMatchStatus;
-
-    private readonly VerifyRunningOdds verifyRunningOdds;
-
-    private readonly VerifyConfirmScore verifyConfirmScore;
-
-    private readonly VerifyBeforePushProfile verifyBeforePushProfile;
-
-    private readonly VerifyInningStatus verifyInningStatus;
-
-    public CreatorImp(
-        VerifyMatchStatus verifyMatchStatus,
+public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
         VerifyRunningOdds verifyRunningOdds,
         VerifyConfirmScore verifyConfirmScore,
         VerifyBeforePushProfile verifyBeforePushProfile,
-        VerifyInningStatus verifyInningStatus)
-    {
-        this.verifyMatchStatus = verifyMatchStatus;
-        this.verifyRunningOdds = verifyRunningOdds;
-        this.verifyConfirmScore = verifyConfirmScore;
-        this.verifyBeforePushProfile = verifyBeforePushProfile;
-        this.verifyInningStatus = verifyInningStatus;
-    }
-
+        VerifyInningStatus verifyInningStatus,
+        VerifyFinalResult verifyFinalResult
+       )
+    : Creator
+{
     public ICondition Create(string id)
     {
         return id switch
@@ -42,6 +25,7 @@ public class CreatorImp : Creator
             ConditionId.VerifyConfirmScore => verifyConfirmScore,
             ConditionId.VerifyBeforePush => verifyBeforePushProfile,
             ConditionId.VerifyInningStatus => verifyInningStatus,
+            ConditionId.VerifyFinalResult => verifyFinalResult,
             _ => throw new NotImplementedException()
         };
     }

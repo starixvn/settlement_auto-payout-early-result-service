@@ -6,12 +6,12 @@ using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTest.Services;
+namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyInningStatusTests
 {
     private readonly IDynamicRepository repository;
 
-    private readonly ScoreService scoreService;
+    private readonly ResultDetailService resultDetailService;
 
     private readonly WriteLogService writeLogService;
 
@@ -20,9 +20,9 @@ public class VerifyInningStatusTests
     public VerifyInningStatusTests()
     {
         repository = Substitute.For<IDynamicRepository>();
-        scoreService = Substitute.For<ScoreService>();
+        resultDetailService = Substitute.For<ResultDetailService>();
         writeLogService = Substitute.For<WriteLogService>();
-        condition = new VerifyInningStatus(repository, scoreService, writeLogService);
+        condition = new VerifyInningStatus(repository, resultDetailService, writeLogService);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class VerifyInningStatusTests
 
         await condition.HandleCondition(match);
 
-        await writeLogService.DidNotReceive().WriteLog(Arg.Any<Match>(), Arg.Any<InningNotSettledException>());
+        await writeLogService.DidNotReceive().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class VerifyInningStatusTests
 
         await condition.HandleCondition(match);
 
-        await writeLogService.DidNotReceive().WriteLog(Arg.Any<Match>(), Arg.Any<InningNotSettledException>());
+        await writeLogService.DidNotReceive().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 
     [Fact]
@@ -129,9 +129,9 @@ public class VerifyInningStatusTests
 
 
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
-        await scoreService.Received().UpdateResultStatus(Arg.Any<int>(),
+        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
             Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceId.Final)));
-        await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<InningNotSettledException>());
+        await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 
     [Fact]
@@ -162,8 +162,8 @@ public class VerifyInningStatusTests
 
 
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
-        await scoreService.Received().UpdateResultStatus(Arg.Any<int>(),
+        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
             Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceId.Final)));
-        await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<InningNotSettledException>());
+        await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 }

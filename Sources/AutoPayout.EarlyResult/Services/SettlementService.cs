@@ -2,6 +2,7 @@
 using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Models;
+using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 using Fanex.Settlement.ScaleOut.Request;
@@ -22,17 +23,21 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
         CreateQueryService createQueryService,
-        UpdateResultStatusService updateResultStatusService)
+        UpdateResultStatusService updateResultStatusService,
+        CreateExtraStepService createExtraStepService)
     : SettlementService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
+    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
     public async Task Push(Match match)
     {
-        var settleCriteria = createQueryService.QuerySettle(match);
-        var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
-        await Execute(settleCriteria, match.SportType, isExistedFinalResource);
-        await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+        if (match.ResultDetails.Any())
+        {
+            var settleCriteria = createQueryService.QuerySettle(match);
+            var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
+            await Execute(settleCriteria, match.SportType, isExistedFinalResource);
+            await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+        }
     }
 
     public async Task UpdateResultExpired(Match match)
@@ -69,6 +74,12 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         await UpdateMatchInfo(criteria);
 
+        if (isMainMatch)
+        {
+            var extraStep = createExtraStepService.Create(sportType);
+            await extraStep.Process(criteria);
+        }
+
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
 
@@ -90,7 +101,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceId.Final));
     }
 
-    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource)
+    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource) //NOSONAR
     {
         if (isExistedFinalResource)
         {
