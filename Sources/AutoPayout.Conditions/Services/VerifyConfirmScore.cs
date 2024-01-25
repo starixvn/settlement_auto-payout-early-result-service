@@ -6,8 +6,6 @@ namespace AutoPayout.Conditions.Services;
 public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
     : ICondition
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
-
     public async Task HandleCondition(Match match)
     {
         var scores = await resultDetailService.GetScore(match);
@@ -28,7 +26,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 
         groupedScores.ForEach(group =>
         {
-            var resultDetail = match.ResultDetails.First(r => r.ResourceId == group.Key.ResourceId);
+            var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
             var isAwayValueValid = !group.Key.HasAwayValue || !string.IsNullOrEmpty(group.First().AwayValue);
             if (group.Distinct(new ScoreComparer()).Count() == 1 && isAwayValueValid)
             {
@@ -42,13 +40,16 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
                 MarkFail(resultDetail, group, match.MatchId);
             }
         });
+
+
+
     }
 
     private void MarkFail(ResultDetail resultDetail, IGrouping<object, Score> groupScore, int matchId)
     {
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
-        if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        if (processTime.TotalMilliseconds > options.Value.RetryProcessScore)
         {
             resultDetailService.WriteLogResultInvalid(matchId, resultDetail, groupScore.ToList());
             resultDetail.Expired = true;
