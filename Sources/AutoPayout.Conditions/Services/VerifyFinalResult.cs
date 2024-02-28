@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services;
 public class VerifyFinalResult(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
@@ -11,12 +12,12 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
             return;
         }
 
-        var setsResults = await GetSetResults(match);
+        var setsResults = await resultDetailService.GetResultsChecking(match);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
         var isFinalConsistentWithGameSession = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult);
-        var isValid =
+        var isValid = !setsResults.IsNullOrEmpty() &&
             isFinalConsistentWithGameSession
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
@@ -27,28 +28,6 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         }
     }
 
-    private async Task<List<ResultDetail>> GetSetResults(Match match)
-    {
-        var intervalSettled = await GetResultSettled(match);
-
-        var intervalChecking = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
-
-        var setsResults = intervalSettled.Concat(intervalChecking).ToList();
-
-        var setIndex = await resultDetailService.GetResourceIndex(match.SportType);
-
-        setsResults.ForEach(s => s.IntervalNo = setIndex.First(i => i.ResourceId == s.ResourceId).IntervalNo);
-
-        return setsResults.OrderBy(s => s.IntervalNo).ToList();
-    }
-
-
-    private async Task<List<ResultDetail>> GetResultSettled(Match match)
-    {
-        var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = match.MatchId, SportType = match.SportType })).ToList();
-
-        return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
-    }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
     {

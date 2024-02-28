@@ -14,6 +14,8 @@ public interface ResultDetailService
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 
     Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
+
+    Task<List<ResultDetail>> GetResultsChecking(Match match);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -90,5 +92,27 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var criteria = new GetResourceIndexCriteria(sportType);
 
         return repository.FetchAsync<ResourceIndex>(criteria);
+    }
+
+    public async Task<List<ResultDetail>> GetResultsChecking(Match match)
+    {
+        var resultSettled = await GetResultSettled(match);
+
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
+
+        var results = resultSettled.Concat(resultInBatch).ToList();
+
+        var indexes = await GetResourceIndex(match.SportType);
+
+        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
+
+        return results.OrderBy(s => s.IntervalNo).ToList();
+    }
+
+    private async Task<List<ResultDetail>> GetResultSettled(Match match)
+    {
+        var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = match.MatchId, SportType = match.SportType })).ToList();
+
+        return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
 }

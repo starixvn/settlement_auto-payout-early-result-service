@@ -29,4 +29,7 @@ public static class ErrorMessage
     public const string FinalInconsistent = "Failed: FT(@score) is inconsistent with interval scores.";
 
     public const string FinalInconsistentWithGameSession = "Failed: FT(@score) is inconsistent with game session information.";
+
+    public const string FinalESportsInconsistent =
+        "Failed: FT(@score) is inconsistent with Map information.";
 }
