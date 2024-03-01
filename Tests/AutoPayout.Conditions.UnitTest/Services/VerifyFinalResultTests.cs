@@ -97,7 +97,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -143,7 +143,7 @@ public class VerifyFinalResultTests
             },
         };
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -185,7 +185,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -226,7 +226,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-1) is inconsistent with game session information.";
 
-        repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -255,9 +255,9 @@ public class VerifyFinalResultTests
         };
 
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with game session information.";
+        var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);

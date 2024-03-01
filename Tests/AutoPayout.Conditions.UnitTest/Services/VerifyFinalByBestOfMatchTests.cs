@@ -11,13 +11,13 @@ public class VerifyFinalByBestOfMatchTests
 
     private readonly ResultDetailService resultDetailService;
 
-    private readonly VerifyFinalByBestOfMatch condition;
+    private readonly VerifyFinalByBestOfMap condition;
 
     public VerifyFinalByBestOfMatchTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        condition = new VerifyFinalByBestOfMatch(repository, resultDetailService);
+        condition = new VerifyFinalByBestOfMap(repository, resultDetailService);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class VerifyFinalByBestOfMatchTests
                 }
             }
         };
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 3 });
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -93,8 +93,8 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 3 });
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -142,8 +142,8 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 3 });
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -184,8 +184,8 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 3 });
+        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -216,7 +216,7 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed: FT(0-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 3 });
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -257,7 +257,7 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed: FT(1-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 1 });
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 1 });
 
         await condition.HandleCondition(match);
 
@@ -308,7 +308,7 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 2 });
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });
 
         await condition.HandleCondition(match);
 
@@ -338,7 +338,7 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMatch = 2 });
+        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });
 
         await condition.HandleCondition(match);
 

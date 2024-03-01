@@ -13,9 +13,7 @@ public interface ResultDetailService
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 
-    Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
-
-    Task<List<ResultDetail>> GetResultsChecking(Match match);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -87,14 +85,15 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, message);
     }
 
-    public Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
+    private async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
     {
         var criteria = new GetResourceIndexCriteria(sportType);
 
-        return repository.FetchAsync<ResourceIndex>(criteria);
+        var indexes = await repository.FetchAsync<ResourceIndex>(criteria);
+        return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
     }
 
-    public async Task<List<ResultDetail>> GetResultsChecking(Match match)
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match)
     {
         var resultSettled = await GetResultSettled(match);
 
@@ -102,11 +101,13 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
-        var indexes = await GetResourceIndex(match.SportType);
+        var indexes = (await GetResourceIndex(match.SportType)).ToList();
 
         results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
 
-        return results.OrderBy(s => s.IntervalNo).ToList();
+        var resultOrdered = results.OrderBy(s => s.IntervalNo).ToList();
+
+        return (resultOrdered, indexes);
     }
 
     private async Task<List<ResultDetail>> GetResultSettled(Match match)

@@ -8,7 +8,7 @@ public static class ConditionId
 
     public const string VerifyConfirmScore = "3";
 
-    public const string VerifyFinalResultByBestOfMatch = "96";
+    public const string VerifyFinalResultByBestOfMap = "96";
 
     public const string VerifyFinalResult = "97";
 

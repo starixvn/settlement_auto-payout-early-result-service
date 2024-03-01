@@ -12,7 +12,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
             return;
         }
 
-        var setsResults = await resultDetailService.GetResultsChecking(match);
+        var (setsResults, _) = await resultDetailService.GetResultsChecking(match);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
