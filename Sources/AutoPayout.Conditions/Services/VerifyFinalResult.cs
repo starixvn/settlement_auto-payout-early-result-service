@@ -12,7 +12,8 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
             return;
         }
 
-        var (setsResults, _) = await resultDetailService.GetResultsChecking(match);
+        var maxSetPlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
+        var (setsResults, _) = await resultDetailService.GetResultsChecking(match, maxSetPlayed);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 

@@ -39,7 +39,7 @@ public class VerifyFinalByBestOfMatchTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>());
+        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>());
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class VerifyFinalByBestOfMatchTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>());
+        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>());
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
@@ -142,7 +142,7 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
@@ -184,7 +184,7 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);

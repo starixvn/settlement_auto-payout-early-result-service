@@ -25,7 +25,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
     {
         try
         {
-            Thread.Sleep(60000);
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
             await PushAndWriteLog(match, conditions);
         }

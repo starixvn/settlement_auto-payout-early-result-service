@@ -17,7 +17,8 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
             return;
         }
 
-        var (results, resultIndexes) = await resultDetailService.GetResultsChecking(match);
+        var maxGamePlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
+        var (results, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxGamePlayed);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 

@@ -136,7 +136,7 @@ public static class SportType
 
     public const int Happy5 = 164;
 
-    public static readonly List<int> SportMayNotHaveAwayValue = new() { Cricket };
+    public static readonly List<int> SportMayNotHaveAwayValue = new() { Cricket, ESports };
 }
 
 

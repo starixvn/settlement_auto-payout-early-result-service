@@ -13,7 +13,7 @@ public interface ResultDetailService
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 
-    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -93,7 +93,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
     }
 
-    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match)
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex)
     {
         var resultSettled = await GetResultSettled(match);
 
@@ -105,7 +105,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
 
-        var resultOrdered = results.OrderBy(s => s.IntervalNo).ToList();
+        var resultOrdered = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
         return (resultOrdered, indexes);
     }
