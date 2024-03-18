@@ -8,11 +8,12 @@ public static class VerifyFinalResultHelper
 
     public static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
     {
-        var sumHomeScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) > Convert.ToInt32(set.AwayValue)).ToString();
-        var sumAwayScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) < Convert.ToInt32(set.AwayValue)).ToString();
+        var sumHomeScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) > Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
+        var sumAwayScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) < Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
 
         return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
     }
+
 
     public static bool IsMatchResultsConsecutive(IEnumerable<ResultDetail> setsResults)
     {

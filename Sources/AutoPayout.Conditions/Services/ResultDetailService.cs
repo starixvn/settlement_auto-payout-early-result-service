@@ -31,7 +31,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         };
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
-        scores.ForEach(s => s.HasAwayValue = !SportType.SportMayNotHaveAwayValue.Contains(match.SportType) || s.HasAwayValue);
 
         return scores;
     }
