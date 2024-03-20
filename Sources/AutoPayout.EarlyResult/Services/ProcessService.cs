@@ -33,7 +33,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
             if (exception.MarkFail)
             {
                 await writeLogService.WriteLog(match, exception);
-                await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed);
+                await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed, exception.Description);
             }
         }
         catch (Exception exception)

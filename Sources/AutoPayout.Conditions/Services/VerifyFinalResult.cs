@@ -36,7 +36,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
     private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
     {
         var message = isFinalInconsistentWithGameSession ? ErrorMessage.FinalInconsistentWithGameSession : ErrorMessage.FinalInconsistent;
-        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult });
+        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, message);
         resultDetailService.WriteLogResult(
             match.MatchId,
             finalResult,

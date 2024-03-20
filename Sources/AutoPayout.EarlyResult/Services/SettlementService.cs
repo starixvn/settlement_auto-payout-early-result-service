@@ -54,8 +54,9 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
                 ResultDetails = resultExpired
             };
 
-            await writeLogService.WriteLog(cloneMatch, string.Format(ErrorMessage.ResultExpired, resultExpiredIds));
-            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed);
+            var remark = string.Format(ErrorMessage.ResultExpired, resultExpiredIds);
+            await writeLogService.WriteLog(cloneMatch, remark);
+            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
         }
     }
 
