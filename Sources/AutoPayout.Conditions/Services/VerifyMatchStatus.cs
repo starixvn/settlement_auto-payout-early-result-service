@@ -10,7 +10,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
         var matchRemarks = matchStatus.ToList();
         if (matchRemarks.Any())
         {
-            VerifyMatch(matchRemarks[0]);
+            VerifyMatch(matchRemarks[0], match.ResourceType);
         }
         else
         {
@@ -18,7 +18,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
         }
     }
 
-    private static void VerifyMatch(MatchRemark matchRemark)
+    private static void VerifyMatch(MatchRemark matchRemark, int resourceType)
     {
         var remark = matchRemark.Remark;
         List<bool> conditionsToCheck = new() { remark.IsMtdHold, remark.IsUndecided, remark.IsPending, remark.IsUnderSettle, remark.IsHoldKey };
@@ -27,7 +27,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
             throw new HoldStatusException();
         }
 
-        if (matchRemark.EventStatus.ToLowerInvariant() != EventStatus.Running)
+        if (resourceType == ResourceType.MainResource && matchRemark.EventStatus.ToLowerInvariant() != EventStatus.Running)
         {
             throw new InvalidMatchStatusException();
         }
