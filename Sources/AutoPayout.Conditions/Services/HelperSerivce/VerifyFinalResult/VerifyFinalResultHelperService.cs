@@ -14,9 +14,9 @@ public static class VerifyFinalResultHelper
         return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
     }
 
-
     public static bool IsMatchResultsConsecutive(IEnumerable<ResultDetail> setsResults)
     {
+        var x = setsResults.Select((i, j) => i.IntervalNo - j).Distinct().ToList();
         return !setsResults.Select((i, j) => i.IntervalNo - j).Distinct().Skip(1).Any();
     }
 
@@ -36,6 +36,14 @@ public static class VerifyFinalResultHelper
         var mapOne = results.Find(r => r.ResourceId == ESportsFirstMap);
 
         return finalResult.HomeValue != finalResult.AwayValue && mapOne != null && results.Count == 1;
+    }
+
+    public static bool VerifyResultSettled(List<ResultDetail> runningResults, List<ResultDetail> settledResults, int playedGame)
+    {
+        var fakeCalculatedResults = settledResults.Where(x => x.SettlementStatusId == SettlementStatusId.Calculated
+            && x.IntervalNo > playedGame).ToList();
+
+        return !fakeCalculatedResults.Any();
     }
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)

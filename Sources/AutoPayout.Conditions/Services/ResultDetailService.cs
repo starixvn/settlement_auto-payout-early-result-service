@@ -13,7 +13,9 @@ public interface ResultDetailService
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 
-    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled);
+
+    Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -92,10 +94,8 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
     }
 
-    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex)
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
     {
-        var resultSettled = await GetResultSettled(match);
-
         var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
 
         var results = resultSettled.Concat(resultInBatch).ToList();
@@ -109,9 +109,9 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return (resultOrdered, indexes);
     }
 
-    private async Task<List<ResultDetail>> GetResultSettled(Match match)
+    public async Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType)
     {
-        var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = match.MatchId, SportType = match.SportType })).ToList();
+        var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = matchId, SportType = sportType })).ToList();
 
         return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }

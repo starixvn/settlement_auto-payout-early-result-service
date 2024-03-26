@@ -38,6 +38,9 @@ public class ResultDetail
     public byte ResultStatusId { get; set; }
 
     [XmlIgnore]
+    public short SettlementStatusId { get; set; }
+
+    [XmlIgnore]
     public int GameSession { get; set; }
 
     [XmlIgnore]

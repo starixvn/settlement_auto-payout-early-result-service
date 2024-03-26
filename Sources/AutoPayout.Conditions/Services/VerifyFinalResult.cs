@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services;
+
 public class VerifyFinalResult(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
 {
     public async Task HandleCondition(Match match)
@@ -13,13 +14,16 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         }
 
         var maxSetPlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
-        var (setsResults, _) = await resultDetailService.GetResultsChecking(match, maxSetPlayed);
+        var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
+
+        var (setsResults, _) = await resultDetailService.GetResultsChecking(match, maxSetPlayed, settledResults);
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
         var isFinalConsistentWithGameSession = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult);
         var isValid = !setsResults.IsNullOrEmpty() &&
             isFinalConsistentWithGameSession
+            && VerifyFinalResultHelper.VerifyResultSettled(setsResults, settledResults, maxSetPlayed)
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
 
@@ -28,7 +32,6 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
             await HandleFinalResult(finalResult, match, !isFinalConsistentWithGameSession);
         }
     }
-
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
     {
