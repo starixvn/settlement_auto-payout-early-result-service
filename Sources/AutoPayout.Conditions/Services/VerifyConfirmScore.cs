@@ -12,7 +12,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         CompareScore(match, scores);
 
         await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
 
         if (!match.ResultDetails.Any())
         {
@@ -22,16 +22,15 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 
     private void CompareScore(Match match, IEnumerable<Score> scores)
     {
-        var groupedScores = scores.GroupBy(s => new { s.ResourceId, s.HasAwayValue }).ToList();
+        var groupedScores = scores.GroupBy(s => new { s.ResourceId }).ToList();
 
         groupedScores.ForEach(group =>
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
-            var isAwayValueValid = !group.Key.HasAwayValue || !string.IsNullOrEmpty(group.First().AwayValue);
-            if (group.Distinct(new ScoreComparer()).Count() == 1 && isAwayValueValid)
+            if (group.Distinct(new ScoreComparer()).Count() == 1)
             {
                 resultDetail.HomeValue = group.First().HomeValue;
-                resultDetail.AwayValue = group.Key.HasAwayValue ? group.First().AwayValue : string.Empty;
+                resultDetail.AwayValue = group.First().AwayValue;
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }

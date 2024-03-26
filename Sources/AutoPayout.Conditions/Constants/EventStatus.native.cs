@@ -13,3 +13,8 @@ public static class EventStatus
 {
     public const string Running = "running";
 }
+
+public static class SettlementStatusId
+{
+    public const int Calculated = 4;
+}

@@ -13,7 +13,9 @@ public interface ResultDetailService
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
 
-    Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled);
+
+    Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -31,7 +33,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         };
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
-        scores.ForEach(s => s.HasAwayValue = !SportType.SportMayNotHaveAwayValue.Contains(match.SportType) || s.HasAwayValue);
 
         return scores;
     }
@@ -85,10 +86,33 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, message);
     }
 
-    public Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
+    private async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
     {
         var criteria = new GetResourceIndexCriteria(sportType);
 
-        return repository.FetchAsync<ResourceIndex>(criteria);
+        var indexes = await repository.FetchAsync<ResourceIndex>(criteria);
+        return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
+    }
+
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
+    {
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
+
+        var results = resultSettled.Concat(resultInBatch).ToList();
+
+        var indexes = (await GetResourceIndex(match.SportType)).ToList();
+
+        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
+
+        var resultOrdered = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
+
+        return (resultOrdered, indexes);
+    }
+
+    public async Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType)
+    {
+        var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = matchId, SportType = sportType })).ToList();
+
+        return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
 }

@@ -14,6 +14,8 @@ public class Match
 
     public IEnumerable<ResultDetail> ResultDetails { get; set; }
 
+    public string ResourceRefund { get; set; }
+
     public override bool Equals(object obj)
     {
         return obj is Match match

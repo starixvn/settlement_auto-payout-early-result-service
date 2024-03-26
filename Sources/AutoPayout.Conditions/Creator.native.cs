@@ -12,7 +12,8 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
         VerifyConfirmScore verifyConfirmScore,
         VerifyBeforePushProfile verifyBeforePushProfile,
         VerifyInningStatus verifyInningStatus,
-        VerifyFinalResult verifyFinalResult
+        VerifyFinalResult verifyFinalResult,
+        VerifyFinalByBestOfMap verifyFinalByBestOfMap
        )
     : Creator
 {
@@ -26,6 +27,7 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
             ConditionId.VerifyBeforePush => verifyBeforePushProfile,
             ConditionId.VerifyInningStatus => verifyInningStatus,
             ConditionId.VerifyFinalResult => verifyFinalResult,
+            ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
             _ => throw new NotImplementedException()
         };
     }

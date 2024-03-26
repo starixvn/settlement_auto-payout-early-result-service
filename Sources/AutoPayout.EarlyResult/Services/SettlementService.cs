@@ -37,6 +37,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
             await Execute(settleCriteria, match.SportType, isExistedFinalResource);
             await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+            await AddResourceRefund(match);
         }
     }
 
@@ -83,9 +84,25 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
 
+
         foreach (var server in appSettingsKey.SiteDbServer)
         {
             criteria.DbServer = server;
+            await repository.ExecuteAsync(criteria);
+        }
+
+
+    }
+
+    private async Task AddResourceRefund(Match match)
+    {
+        if (match.SportType == SportType.ESports && !string.IsNullOrEmpty(match.ResourceRefund))
+        {
+            var criteria = new AddResourceRefundCriteria
+            {
+                MatchId = match.MatchId,
+                ResourceIds = match.ResourceRefund
+            };
             await repository.ExecuteAsync(criteria);
         }
     }

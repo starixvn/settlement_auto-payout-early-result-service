@@ -14,14 +14,9 @@ public class ScoreComparer : IEqualityComparer<Score>
             return false;
         }
 
-        if (first.HasAwayValue)
-        {
-            return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0 &&
-                   string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
-        }
 
-        return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0;
-
+        return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0 &&
+               string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
     }
 
     public int GetHashCode(Score score) => score.ResourceId.GetHashCode();

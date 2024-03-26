@@ -52,8 +52,8 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
             ResourceType = g.Key.ResourceType,
             SportType = g.Key.SportType,
             Conditions = results.FirstResultSet.Where(r => r.SportType == g.Key.SportType)
-                .Select(r => g.Key.ResourceType == ResourceType.MainResource ? r.MainCheckList : r.EarlyCheckList)
-                .FirstOrDefault(string.Empty)
+               .Select(r => g.Key.ResourceType == ResourceType.MainResource ? r.MainCheckList : r.EarlyCheckList)
+               .FirstOrDefault(string.Empty)
         }).Where(m => !string.IsNullOrEmpty(m.Conditions)).ToList();
     }
 }

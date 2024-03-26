@@ -38,7 +38,6 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 100,
-                HasAwayValue = true
             },
             new()
             {
@@ -46,7 +45,6 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 200,
-                HasAwayValue = true
             },
             new()
             {
@@ -54,7 +52,6 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "2",
                 SourceId = 200,
-                HasAwayValue = true
             },
         };
 
@@ -73,47 +70,30 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_CheckScoreBasedOnAttributeHasAwayValue_Pass()
+    public async void HandleCondition_AwayNullAndBlank_ComparePassed()
     {
-        var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+            ResultDetails = new List<ResultDetail> { secondResultDetail }
         };
 
         var scores = new List<Score>
         {
             new()
             {
-                ResourceId = "01",
-                HomeValue = "1",
-                AwayValue = "2",
-                SourceId = 100
-            },
-            new()
-            {
-                ResourceId = "01",
-                HomeValue = "1",
-                AwayValue = "3",
-                SourceId = 200
-            },
-            new()
-            {
                 ResourceId = "02",
-                HomeValue = "1",
-                AwayValue = "2",
-                SourceId = 100,
-                HasAwayValue = true
-            },
-            new()
-            {
-                ResourceId = "02",
-                HomeValue = "1",
-                AwayValue = "2",
+                HomeValue = "2",
+                AwayValue = string.Empty,
                 SourceId = 200,
-                HasAwayValue = true
+            },
+            new()
+            {
+                ResourceId = "02",
+                HomeValue = "2",
+                AwayValue = null,
+                SourceId = 200,
             },
         };
 
@@ -122,12 +102,12 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.Null(exception);
-        Assert.Equal("1", firstResultDetail.HomeValue);
-        Assert.Equal(string.Empty, firstResultDetail.AwayValue);
-        Assert.Equal("1", secondResultDetail.HomeValue);
-        Assert.Equal("2", secondResultDetail.AwayValue);
+        Assert.Equal("2", secondResultDetail.HomeValue);
+        Assert.Empty(secondResultDetail.AwayValue);
+        Assert.Equal(2, secondResultDetail.ExternalSourceInfo.Count());
         await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
     }
+
 
     [Fact]
     public async void HandleCondition_ScoreNotEqualAndTimeOverCurrentTime_MarkFail()
@@ -148,8 +128,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-7),
-                HasAwayValue = true
-            },
+                  },
             new()
             {
                 ResourceId = "01",
@@ -157,7 +136,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             },
         };
 
@@ -226,7 +205,6 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 AwayValue = "2",
                 SourceId = 100,
-                HasAwayValue = true
             },
             new()
             {
@@ -235,7 +213,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             },
             new()
             {
@@ -244,7 +222,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             },
         };
 
@@ -283,7 +261,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 100,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
             },
             new()
             {
@@ -292,7 +269,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             },
             new()
             {
@@ -301,7 +278,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             }, new()
             {
                 ResourceId = "02",
@@ -309,7 +286,7 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
+
             },
         };
 
@@ -353,14 +330,12 @@ public class VerifyConfirmScoreTests
                 HomeValue = "2",
                 AwayValue = "3",
                 SourceId = 200,
-                HasAwayValue = true
             }, new()
             {
                 ResourceId = "02",
                 HomeValue = "2",
                 AwayValue = "3",
                 SourceId = 200,
-                HasAwayValue = true
             },
         };
 
@@ -395,7 +370,6 @@ public class VerifyConfirmScoreTests
                 HomeValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-7),
-                HasAwayValue = true
             },
             new()
             {
@@ -404,7 +378,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-                HasAwayValue = true
             },
         };
 
