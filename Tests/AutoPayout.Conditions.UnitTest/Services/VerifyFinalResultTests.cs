@@ -39,7 +39,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>());
+        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>());
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>());
+        await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>());
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -143,7 +143,7 @@ public class VerifyFinalResultTests
             },
         };
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -185,7 +185,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -226,7 +226,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-1) is inconsistent with game session information.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
@@ -257,7 +257,7 @@ public class VerifyFinalResultTests
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
+        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);

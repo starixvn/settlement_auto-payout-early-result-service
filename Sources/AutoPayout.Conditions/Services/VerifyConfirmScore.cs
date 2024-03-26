@@ -12,7 +12,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         CompareScore(match, scores);
 
         await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid);
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
 
         if (!match.ResultDetails.Any())
         {
