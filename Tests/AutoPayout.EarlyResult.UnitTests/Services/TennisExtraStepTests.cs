@@ -1,5 +1,6 @@
-﻿using AutoPayout.Criteria;
+﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
+using AutoPayout.Models;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services;
@@ -19,7 +20,7 @@ public class TennisExtraStepTests
     [Fact]
     public async Task Process_Always_ExecuteRefundIns()
     {
-        await extraStep.Process(new SettleCriteria() { MatchId = 1 });
+        await extraStep.Process(new Match() { MatchId = 1, ResourceType = ResourceType.MainResource });
 
         await repository.Received().ExecuteAsync(Arg.Any<InsRefundResultCriteria>());
     }

@@ -3,13 +3,13 @@
 namespace AutoPayout.EarlyResult.Services.ExtraStepService;
 public interface CreateExtraStepService
 {
-    IExtraStepService Create(int sportType);
+    IExtraStepService Create(Match match);
 }
 
 public class CreateExtraStepServiceImp(TennisExtraStep tennisExtraStep, InitExtraStepService extraStepService) : CreateExtraStepService
 {
-    public IExtraStepService Create(int sportType)
+    public IExtraStepService Create(Match match)
     {
-        return sportType == SportType.Tennis ? tennisExtraStep : extraStepService;
+        return match.SportType == SportType.Tennis ? tennisExtraStep : extraStepService;
     }
 }

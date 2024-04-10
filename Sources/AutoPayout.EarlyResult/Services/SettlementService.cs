@@ -35,8 +35,8 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         {
             var settleCriteria = createQueryService.QuerySettle(match);
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
-            await Execute(settleCriteria, match.SportType, isExistedFinalResource);
-            await SettleHedgeMatch(settleCriteria, match.SportType, isExistedFinalResource);
+            await Execute(settleCriteria, match, isExistedFinalResource);
+            await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
             await AddResourceRefund(match);
         }
     }
@@ -60,17 +60,17 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         }
     }
 
-    private async Task SettleHedgeMatch(SettleCriteria criteria, int sportType, bool isExistedFinalResource)
+    private async Task SettleHedgeMatch(SettleCriteria criteria, Match match, bool isExistedFinalResource)
     {
         var hedgeMatchDetail = await GetHedgeMatch(criteria.MatchId);
         if (hedgeMatchDetail != null)
         {
             criteria.MatchId = hedgeMatchDetail.MatchId;
-            await Execute(criteria, sportType, isExistedFinalResource, false);
+            await Execute(criteria, match, isExistedFinalResource, false);
         }
     }
 
-    private async Task Execute(SettleCriteria criteria, int sportType, bool isExistedFinalResource, bool isMainMatch = true)
+    private async Task Execute(SettleCriteria criteria, Match match, bool isExistedFinalResource, bool isMainMatch = true)
     {
         await SetUnderSettleFlag(criteria, isExistedFinalResource);
 
@@ -78,12 +78,12 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         if (isMainMatch)
         {
-            var extraStep = createExtraStepService.Create(sportType);
-            await extraStep.Process(criteria);
+            var extraStep = createExtraStepService.Create(match);
+            await extraStep.Process(match);
         }
 
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
-        await writeLogService.InsertResettleLog(criteria, sportType, isMainMatch);
+        await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
 
 
         foreach (var server in appSettingsKey.SiteDbServer)
