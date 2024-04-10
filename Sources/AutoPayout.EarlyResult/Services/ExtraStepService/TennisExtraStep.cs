@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Data.Repository;
 
@@ -13,10 +14,12 @@ public class TennisExtraStep(IDynamicRepository repository) : IExtraStepService
             return;
         }
 
+
         var criteria = new InsRefundResultCriteria
         {
             MatchId = match.MatchId,
             ResourceIds = string.Join(',', match.ResultDetails.Select(r => r.ResourceId))
+
         };
 
         await repository.ExecuteAsync(criteria);
