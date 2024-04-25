@@ -2,13 +2,13 @@
 
 public interface UpdateResultStatusService
 {
-    Task UpdateResultStatus(Match match, int status);
+    Task UpdateResultStatus(Match match, int status, string remark = "");
 }
 
 public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConvertService xmlConvertService)
     : UpdateResultStatusService
 {
-    public async Task UpdateResultStatus(Match match, int status)
+    public async Task UpdateResultStatus(Match match, int status, string remark = "")
     {
         var resources = CreateResources(match.ResultDetails);
 
@@ -16,7 +16,8 @@ public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConv
         {
             MatchId = match.MatchId,
             SelectedResources = resources,
-            StatusId = status
+            StatusId = status,
+            Remark = remark
         };
 
         await repository.ExecuteAsync(criteria);

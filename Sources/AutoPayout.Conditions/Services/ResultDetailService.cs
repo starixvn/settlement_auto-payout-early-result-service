@@ -11,7 +11,7 @@ public interface ResultDetailService
 
     void WriteLogResult(int matchId, ResultDetail result, string message);
 
-    Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails);
+    Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
 
     Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled);
 
@@ -52,10 +52,10 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
     }
 
-    public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails)
+    public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails };
-        await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed);
+        await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
     }
 
     private static List<string> ProviderScore(IEnumerable<Score> scores)

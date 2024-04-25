@@ -11,7 +11,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         var scores = await resultDetailService.GetScore(match);
         CompareScore(match, scores);
 
-        await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired));
+        await resultDetailService.UpdateResultStatus(match.MatchId, match.ResultDetails.Where(r => !r.IsValid && r.Expired), ErrorMessage.InconsistentScore);
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
 
         if (!match.ResultDetails.Any())
@@ -39,9 +39,6 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
                 MarkFail(resultDetail, group, match.MatchId);
             }
         });
-
-
-
     }
 
     private void MarkFail(ResultDetail resultDetail, IGrouping<object, Score> groupScore, int matchId)
