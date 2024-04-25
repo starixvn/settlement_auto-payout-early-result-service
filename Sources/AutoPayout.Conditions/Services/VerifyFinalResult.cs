@@ -36,11 +36,13 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
     private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
     {
         var message = isFinalInconsistentWithGameSession ? ErrorMessage.FinalInconsistentWithGameSession : ErrorMessage.FinalInconsistent;
-        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, message);
+        var errorMessage = message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
+
+        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
         resultDetailService.WriteLogResult(
             match.MatchId,
             finalResult,
-            message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}"));
+            errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
     }
 }

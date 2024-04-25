@@ -73,11 +73,12 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
     {
-        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult });
+        var errorMessage = ErrorMessage.FinalESportsInconsistent.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
+        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
         resultDetailService.WriteLogResult(
             match.MatchId,
             finalResult,
-            ErrorMessage.FinalESportsInconsistent.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}"));
+            errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
     }
 }
