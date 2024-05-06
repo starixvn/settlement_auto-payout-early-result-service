@@ -1,9 +1,10 @@
-﻿namespace AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
-public static class VerifyFinalResultHelper
+public static partial class VerifyFinalResultHelper
 {
     private const string ESportsFirstMap = "M1";
     private const string ESportsSecondMap = "M2";
+    private const int Bo1 = 1;
     private const int Bo2 = 2;
 
     public static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
@@ -91,10 +92,10 @@ public static class VerifyFinalResultHelper
 
     public static bool VerifyResultSettled(List<ResultDetail> settledResults, int playedGame)
     {
-        var fakeCalculatedResults = settledResults.Where(x => x.SettlementStatusId == SettlementStatusId.Calculated
-            && x.IntervalNo > playedGame).ToList();
+        var fakeCalculatedResults = settledResults.Any(x => x.SettlementStatusId == SettlementStatusId.Calculated
+            && x.IntervalNo > playedGame);
 
-        return !fakeCalculatedResults.Any();
+        return !fakeCalculatedResults;
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)

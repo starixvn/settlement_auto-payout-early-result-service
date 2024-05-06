@@ -1,4 +1,5 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
