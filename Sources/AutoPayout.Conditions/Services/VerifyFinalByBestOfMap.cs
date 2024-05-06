@@ -38,7 +38,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
     private int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)
     {
-        if (matchDetail.OverTimeSession == 11 && matchDetail.BestOfMap % 2 == 0)
+        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % 2 == 0)
         {
             return matchDetail.BestOfMap;
         }

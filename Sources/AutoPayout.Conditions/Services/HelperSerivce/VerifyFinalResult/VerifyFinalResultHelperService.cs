@@ -62,7 +62,7 @@ public static class VerifyFinalResultHelper
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
-        => resultsChecking.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
+        => !resultsChecking.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)
     {
