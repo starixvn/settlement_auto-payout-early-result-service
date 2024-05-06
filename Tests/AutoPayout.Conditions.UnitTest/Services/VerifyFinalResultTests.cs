@@ -1,10 +1,12 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Constants;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
+
 public class VerifyFinalResultTests
 {
     private readonly IDynamicRepository repository;
@@ -92,7 +94,6 @@ public class VerifyFinalResultTests
                 AwayValue = "2",
                 IntervalNo = 2
             }
-
         };
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
@@ -182,7 +183,6 @@ public class VerifyFinalResultTests
             },
         };
 
-
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
@@ -254,7 +254,6 @@ public class VerifyFinalResultTests
             }
         };
 
-
         var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
 
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
@@ -266,5 +265,4 @@ public class VerifyFinalResultTests
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
     }
-
 }

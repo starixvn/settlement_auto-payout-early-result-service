@@ -14,10 +14,26 @@ public static class VerifyFinalResultHelper
         return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
     }
 
+    public static bool VerifyDrawSetResults(IReadOnlyCollection<ResultDetail> setsResults, int playedGame) // 4
+    {
+        var hasDraw = setsResults.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
+        var newSetResults = setsResults.Where(x => x.IntervalNo < playedGame).ToList();
+        var lastResultNotEqual = setsResults.Any(x => x.IntervalNo == playedGame && !x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
+
+        var sumHomeScore = newSetResults.Count(set => Convert.ToInt32(set.HomeValue) > Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
+        var sumAwayScore = newSetResults.Count(set => Convert.ToInt32(set.HomeValue) < Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
+
+        return hasDraw
+            && sumAwayScore == sumHomeScore
+            && lastResultNotEqual;
+    }
+
     public static bool IsMatchResultsConsecutive(IEnumerable<ResultDetail> setsResults)
     {
         return !setsResults.Select((i, j) => i.IntervalNo - j).Distinct().Skip(1).Any();
     }
+
+    public static bool FinalScoreEqual(ResultDetail final) => final.HomeValue.Equals(final.AwayValue, StringComparison.OrdinalIgnoreCase);
 
     public static bool FinalScoreIsValid(MatchDetail matchDetail, ResultDetail finalResult, bool isGameSession = true)
     {
@@ -44,6 +60,9 @@ public static class VerifyFinalResultHelper
 
         return !fakeCalculatedResults.Any();
     }
+
+    public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
+        => resultsChecking.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)
     {

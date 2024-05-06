@@ -1,6 +1,16 @@
-﻿namespace AutoPayout.Conditions.Models;
+﻿using AutoPayout.Constants;
+
+namespace AutoPayout.Conditions.Models;
+
 public class ScoreComparer : IEqualityComparer<Score>
 {
+    private readonly bool compareOneValue;
+
+    public ScoreComparer(bool compareOneValue = false)
+    {
+        this.compareOneValue = compareOneValue;
+    }
+
     public bool Equals(Score first, Score second)
     {
         if (ReferenceEquals(first, second))
@@ -8,15 +18,14 @@ public class ScoreComparer : IEqualityComparer<Score>
             return true;
         }
 
-
         if (first is null || second is null)
         {
             return false;
         }
 
-
-        return string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0 &&
-               string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
+        return compareOneValue ? string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0
+            : string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0
+                && string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
     }
 
     public int GetHashCode(Score score) => score.ResourceId.GetHashCode();

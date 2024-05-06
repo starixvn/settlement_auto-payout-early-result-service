@@ -2,5 +2,6 @@
 
 public static class SourceId
 {
-    public const int Trader = 100;
+    public const int Screenshot = 100;
+    public const int Trader = 0;
 }

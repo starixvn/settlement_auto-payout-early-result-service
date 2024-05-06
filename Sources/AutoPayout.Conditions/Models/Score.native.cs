@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Models;
+﻿using AutoPayout.Constants;
+
+namespace AutoPayout.Conditions.Models;
 
 public class Score
 {
@@ -23,8 +25,9 @@ public class Score
                 _awayValue = value;
             }
         }
-
     }
 
     public DateTime CreateDate { get; set; }
+
+    public byte ResultType => AutoPayout.Constants.ResourceId.TimePattern.Any(x => ResourceId.StartsWith(x)) ? ResultTypes.Time : default;
 }

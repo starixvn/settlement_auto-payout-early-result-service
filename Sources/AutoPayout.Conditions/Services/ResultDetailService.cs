@@ -9,6 +9,8 @@ public interface ResultDetailService
 
     void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
+    void WriteLogResultNotTrader(int matchId, ResultDetail result, List<Score> scores);
+
     void WriteLogResult(int matchId, ResultDetail result, string message);
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
@@ -52,6 +54,15 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
     }
 
+    public void WriteLogResultNotTrader(int matchId, ResultDetail result, List<Score> scores)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var traderScore = TraderScore(scores);
+        var errorMessage = $"Failed Auto Payout: Result({result.ResourceId}) " + (string.IsNullOrEmpty(traderScore) ? "no trader" : $" {traderScore} second value is invalid");
+
+        writeLogService.WriteLog(cloneMatch, errorMessage);
+    }
+
     public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails };
@@ -60,7 +71,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     private static List<string> ProviderScore(IEnumerable<Score> scores)
     {
-        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Trader).ToList();
+        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Screenshot).ToList();
         return provider.Any() ?
             provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
             : new List<string>();
@@ -68,7 +79,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     private static string TraderScore(IEnumerable<Score> scores)
     {
-        var trader = scores.FirstOrDefault(r => r.SourceId == 0);
+        var trader = scores.FirstOrDefault(r => r.SourceId == SourceId.Trader);
 
         return trader is not null ? ScoreMessage(trader, "Trader") : string.Empty;
     }
@@ -104,9 +115,9 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
 
-        var resultOrdered = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
+        var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
-        return (resultOrdered, indexes);
+        return (resultsChecking, indexes);
     }
 
     public async Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType)

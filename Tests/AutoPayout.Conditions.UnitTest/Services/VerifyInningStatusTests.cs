@@ -2,11 +2,13 @@
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Exceptions;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
+
 public class VerifyInningStatusTests
 {
     private readonly IDynamicRepository repository;
@@ -37,8 +39,6 @@ public class VerifyInningStatusTests
 
         await repository.DidNotReceive().GetAsync<MatchDetail>(Arg.Any<CriteriaBase>());
     }
-
-
 
     [Fact]
     public async Task HandleCondition_MainResourceButNotExistFinal_NotDoAnything()
@@ -80,7 +80,6 @@ public class VerifyInningStatusTests
             ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceId.Final }, new() { ResourceId = "H1" } }
         };
 
-
         var resultDetails = new List<ResultDetail>
         {
             new()
@@ -92,7 +91,6 @@ public class VerifyInningStatusTests
 
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
             .Returns(new MatchDetail() { GameSession = 0 });
-
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
@@ -127,7 +125,6 @@ public class VerifyInningStatusTests
 
         await condition.HandleCondition(match);
 
-
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
         await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
             Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceId.Final)));
@@ -159,7 +156,6 @@ public class VerifyInningStatusTests
             .Returns(resultDetails);
 
         await condition.HandleCondition(match);
-
 
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
         await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
