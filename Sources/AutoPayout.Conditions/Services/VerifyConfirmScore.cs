@@ -44,13 +44,13 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
             if (!IsTimeResult(group) && group.Distinct(new ScoreComparer()).Count() == 1)
             {
                 SetResultDetail(resultDetail, group);
-                break;
+                continue;
             }
 
             if (IsTimeResult(group) && HasTraderScore(group) && group.Distinct(new ScoreComparer(true)).Count() == 1)
             {
                 SetTraderForResultDetail(resultDetail, group);
-                break;
+                continue;
             }
 
             MarkFail(resultDetail, group, match.MatchId);
