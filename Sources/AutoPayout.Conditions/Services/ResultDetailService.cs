@@ -58,7 +58,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
     {
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
         var traderScore = TraderScore(scores);
-        var errorMessage = $"Failed Auto Payout: Result({result.ResourceId}) " + (string.IsNullOrEmpty(traderScore) ? "no trader" : $" {traderScore} second value is invalid");
+        var errorMessage = $"Failed Auto Payout: Result({result.ResourceId}) " + (string.IsNullOrEmpty(traderScore) ? "no trader" : $"{traderScore} second value is invalid");
 
         writeLogService.WriteLog(cloneMatch, errorMessage);
     }
