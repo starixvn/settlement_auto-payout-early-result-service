@@ -6,9 +6,6 @@ namespace AutoPayout.Conditions.Services;
 
 public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
 {
-    private const int Bo1 = 1;
-    private const int Bo2 = 2;
-
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceId.Final);
@@ -48,7 +45,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
     private string GetResourceToRefund(IReadOnlyList<ResultDetail> resultSettled, IReadOnlyList<ResourceIndex> resourceIndexes, MatchDetail matchDetail, int maxGamePlayed)
     {
-        if (matchDetail.BestOfMap is Bo1 or Bo2)
+        if (matchDetail.BestOfMap is GameType.Bo1 or GameType.Bo2)
 
         {
             return string.Empty;

@@ -1,11 +1,9 @@
 ﻿namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
-public static partial class VerifyFinalResultHelper
+public static class VerifyFinalResultHelper
 {
     private const string ESportsFirstMap = "M1";
     private const string ESportsSecondMap = "M2";
-    private const int Bo1 = 1;
-    private const int Bo2 = 2;
 
     public static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
     {
@@ -108,6 +106,6 @@ public static partial class VerifyFinalResultHelper
         var mapTwo = results.Find(r => r.ResourceId == ESportsSecondMap);
         var totalScore = Convert.ToInt32(finalResult.HomeValue) + Convert.ToInt32(finalResult.AwayValue);
 
-        return mapOne != null && mapTwo != null && totalScore == Bo2;
+        return mapOne != null && mapTwo != null && totalScore == GameType.Bo2;
     }
 }

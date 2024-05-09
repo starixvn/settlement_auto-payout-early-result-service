@@ -15,12 +15,15 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
 
         await HandleHalfTime(match, matchDetail, results);
 
+        await HandleFullTime(match, matchDetail, results);
+
     }
 
     private async Task HandleHalfTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
         var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Halftime);
-        if (halfTime is not null && VerifyFinalResultHelper.IsHalfTimeInValidForBasketball(halfTime, results, matchDetail.GameSession, out var message))
+        var resultWithoutHt = results.Where(r => r.ResourceId != ResourceId.Halftime).ToList();
+        if (halfTime is not null && VerifyFinalResultForBasketballHelper.IsHalfTimeInValid(halfTime, resultWithoutHt, matchDetail.GameSession, out var message))
         {
             await HandleInvalidResult(halfTime, match, message);
         }
@@ -28,10 +31,25 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
 
     private async Task HandleFullTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
-        var final = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final);
-        if (final is not null && VerifyFinalResultHelper.IsHalfTimeInValidForBasketball(final, results, matchDetail.GameSession, out var message))
+        var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final);
+        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Halftime);
+        var errorMessage = string.Empty;
+        if (fullTimeResult is null)
         {
-            await HandleInvalidResult(final, match, message);
+            return;
+        }
+
+        var isFinalInValid = matchDetail.GameSession switch
+        {
+            GameType.Bo1 => VerifyFinalResultForBasketballHelper.IsFullTimeDraw(fullTimeResult, out errorMessage),
+            GameType.Bo2 => VerifyFinalResultForBasketballHelper.IsFinalOfBo2InValid(fullTimeResult, halfTime, results, out errorMessage),
+            GameType.Bo4 => VerifyFinalResultForBasketballHelper.IsFinalOfBo4InValid(fullTimeResult, results, out errorMessage),
+            _ => true
+        };
+
+        if (isFinalInValid)
+        {
+            await HandleInvalidResult(fullTimeResult, match, errorMessage);
         }
     }
 

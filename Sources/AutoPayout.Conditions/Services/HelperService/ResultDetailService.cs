@@ -117,12 +117,12 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var criteria = new GetResourceIndexCriteria(sportType);
 
         var indexes = await repository.FetchAsync<ResourceIndex>(criteria);
-        return indexes.Where(r => r.ResourceId != ResourceId.Final && r.ResourceId != ResourceId.Halftime).ToList();
+        return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
     }
 
     public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
     {
-        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final && r.ResourceId != ResourceId.Halftime).ToList();
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
