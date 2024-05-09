@@ -46,6 +46,37 @@ public static class VerifyFinalResultHelper
               && (homeValue + awayValue) <= maxSet;
     }
 
+    public static (int, int) GetMinMaxSetPlay(MatchDetail matchDetail, bool isGameSession = true)
+    {
+        var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;
+        var minSet = (maxSet + 1) / 2;
+
+        return (minSet, maxSet);
+    }
+
+    public static bool IsValidFinalResult(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin)
+    {
+        var homeWinCount = 0;
+        var awayWinCount = 0;
+
+        foreach (var result in results)
+        {
+            var homeWin = Convert.ToInt32(result.HomeValue) > Convert.ToInt32(result.AwayValue) ? 1 : 0;
+            var awayWin = Convert.ToInt32(result.HomeValue) < Convert.ToInt32(result.AwayValue) ? 1 : 0;
+
+            homeWinCount += homeWin;
+            awayWinCount += awayWin;
+
+            if (homeWinCount == numberOfSetWin || awayWinCount == numberOfSetWin)
+            {
+                break;
+            }
+        }
+
+        return Convert.ToInt32(finalResult.HomeValue) == homeWinCount
+            && Convert.ToInt32(finalResult.AwayValue) == awayWinCount;
+    }
+
     public static bool VerifyFinalBO1(ResultDetail finalResult, List<ResultDetail> results)
     {
         var mapOne = results.Find(r => r.ResourceId == ESportsFirstMap);

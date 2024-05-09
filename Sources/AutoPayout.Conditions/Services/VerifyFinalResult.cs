@@ -21,9 +21,12 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
-        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult);
-        var isValid = !setsResults.IsNullOrEmpty() &&
-            isFinalConsistentWithGameSession
+        var (minSet, _) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, true);
+
+        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResult(setsResults, finalResult, minSet);
+
+        var isValid = !setsResults.IsNullOrEmpty()
+            && isFinalConsistentWithGameSession
             && VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxSetPlayed)
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
