@@ -93,10 +93,10 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
             return temp && temp1 && temp2;
         }
 
-        var (minSet, _) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
+        var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
 
         return VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed)
-                    && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet)
+                    && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet)
                     && VerifyFinalResultHelper.IsMatchResultsConsecutive(results)
                     && VerifyFinalResultHelper.VerifyResult(results, finalResult)
                     && VerifyFinalResultHelper.VerifyAnyDrawResults(results);

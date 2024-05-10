@@ -54,7 +54,7 @@ public static class VerifyFinalResultHelper
         return (minSet, maxSet);
     }
 
-    public static bool IsValidFinalResult(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin)
+    public static bool IsValidFinalResult(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
     {
         var homeWinCount = 0;
         var awayWinCount = 0;
@@ -73,8 +73,13 @@ public static class VerifyFinalResultHelper
             }
         }
 
-        return Convert.ToInt32(finalResult.HomeValue) == homeWinCount
-            && Convert.ToInt32(finalResult.AwayValue) == awayWinCount;
+        var finalHomeScore = Convert.ToInt32(finalResult.HomeValue);
+        var finalAwayScore = Convert.ToInt32(finalResult.AwayValue);
+
+        return finalHomeScore == homeWinCount
+            && finalAwayScore == awayWinCount
+            && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
+            && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
 
     public static bool VerifyFinalBO1(ResultDetail finalResult, List<ResultDetail> results)
