@@ -24,7 +24,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
         var (resultsChecking, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxGamePlayed, settledResults);
 
-        var isValid = ValidateResult(resultsChecking, matchDetail, finalResult, settledResults, maxGamePlayed);
+        var isValid = ValidateResult(resultsChecking, matchDetail, match, settledResults, maxGamePlayed);
 
         if (isValid)
         {
@@ -69,10 +69,11 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         return string.Join(",", resourceToRefund);
     }
 
-    private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, ResultDetail finalResult, List<ResultDetail> settledResults, int maxGamePlayed)
+    private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, Match match, List<ResultDetail> settledResults, int maxGamePlayed)
     {
         if (results.IsNullOrEmpty()) return false;
 
+        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceId.Final);
         if (matchDetail.BestOfMap == Bo1)
         {
             return VerifyFinalResultHelper.VerifyFinalBO1(finalResult, results);
@@ -99,7 +100,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
                     && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet)
                     && VerifyFinalResultHelper.IsMatchResultsConsecutive(results)
                     && VerifyFinalResultHelper.VerifyResult(results, finalResult)
-                    && VerifyFinalResultHelper.VerifyAnyDrawResults(results);
+                    && VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.ToList());
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
