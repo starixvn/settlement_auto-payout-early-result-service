@@ -78,7 +78,7 @@ public class SettlementServiceTests
         await service.Push(match);
 
         await scaleOutSettleService.Received().UpdateMatchInfo(Arg.Any<UpdateMatchInfoRequest>());
-        createExtraStepService.Received().Create(5);
+        createExtraStepService.Received().Create(match);
         await writeLogService.Received().WriteLogDirectly(1, Arg.Any<string>());
         await writeLogService.Received().InsertResettleLog(Arg.Any<SettleCriteria>(), 5, Arg.Any<bool>());
         await scaleOutSettleService.DidNotReceive().UpdateUnderSettlementFlag(1, Arg.Any<int>(), Arg.Any<string>());
@@ -110,7 +110,7 @@ public class SettlementServiceTests
         await service.Push(match);
 
         await scaleOutSettleService.Received(2).UpdateMatchInfo(Arg.Any<UpdateMatchInfoRequest>());
-        createExtraStepService.Received(1).Create(5);
+        createExtraStepService.Received(1).Create(match);
         await writeLogService.Received(1).WriteLogDirectly(1, Arg.Any<string>());
         await writeLogService.Received(1).WriteLogDirectly(2, Arg.Any<string>());
         await writeLogService.Received(2).InsertResettleLog(Arg.Any<SettleCriteria>(), 5, Arg.Any<bool>());
