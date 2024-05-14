@@ -7,7 +7,7 @@ namespace AutoPayout.EarlyResult.Services.ExtraStepService;
 
 public class TennisExtraStep(IDynamicRepository repository) : IExtraStepService
 {
-    public async Task Process(Match match)
+    public async Task Process(Match match, SettleCriteria criteria)
     {
         if (match.ResourceType != ResourceType.MainResource)
         {

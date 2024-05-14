@@ -7,4 +7,6 @@ public class MatchDetail
     public int BestOfMap { get; set; }
 
     public int OverTimeSession { get; set; }
+    
+    public byte AutoSetting { get; set; }
 }

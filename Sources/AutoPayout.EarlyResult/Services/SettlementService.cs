@@ -113,7 +113,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
     private static bool IsExistedFinalResource(IEnumerable<ResultDetail> resultDetails)
     {
-        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceId.Final));
+        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceIds.FullTime));
     }
 
     private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource) //NOSONAR

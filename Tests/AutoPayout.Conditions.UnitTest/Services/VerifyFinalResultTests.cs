@@ -34,7 +34,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final
+                    ResourceId = ResourceIds.FullTime
                 }
             }
         };
@@ -71,7 +71,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -105,8 +105,8 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -151,8 +151,8 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.DidNotReceive().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), Arg.Any<string>());
-        Assert.NotNull(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.DidNotReceive().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
+        Assert.NotNull(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -192,8 +192,8 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "1"
                 }
@@ -233,8 +233,8 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -263,7 +263,7 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 }

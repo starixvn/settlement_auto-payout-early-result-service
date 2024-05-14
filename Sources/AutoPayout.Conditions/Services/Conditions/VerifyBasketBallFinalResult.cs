@@ -17,12 +17,14 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
 
         await HandleFullTime(match, matchDetail, results);
 
+        match.AutoSetting = matchDetail.AutoSetting;
+
     }
 
     private async Task HandleHalfTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
-        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Halftime);
-        var resultWithoutHt = results.Where(r => r.ResourceId != ResourceId.Halftime).ToList();
+        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
+        var resultWithoutHt = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
         if (halfTime is not null && VerifyFinalResultForBasketballHelper.IsHalfTimeInValid(halfTime, resultWithoutHt, matchDetail.GameSession, out var message))
         {
             await HandleInvalidResult(halfTime, match, message);
@@ -31,8 +33,8 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
 
     private async Task HandleFullTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
-        var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final);
-        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Halftime);
+        var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
+        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
         var errorMessage = string.Empty;
         if (fullTimeResult is null)
         {
