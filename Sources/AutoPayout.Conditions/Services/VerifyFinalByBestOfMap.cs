@@ -100,7 +100,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
                     && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet)
                     && VerifyFinalResultHelper.IsMatchResultsConsecutive(results)
                     && VerifyFinalResultHelper.VerifyResult(results, finalResult)
-                    && VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.ToList());
+                    && VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.Concat(settledResults).ToList());
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
