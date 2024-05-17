@@ -17,7 +17,7 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
 
         await HandleFullTime(match, matchDetail, results);
 
-        match.AutoSetting = matchDetail.AutoSetting;
+        match.MatchDetail = matchDetail;
 
     }
 

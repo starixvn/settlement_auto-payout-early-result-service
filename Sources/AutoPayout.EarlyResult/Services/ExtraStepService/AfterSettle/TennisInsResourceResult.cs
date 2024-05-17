@@ -3,11 +3,11 @@ using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.EarlyResult.Services.ExtraStepService;
+namespace AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
 
-public class TennisExtraStep(IDynamicRepository repository) : IExtraStepService
+public class TennisInsResourceResult(IDynamicRepository repository) : IExtraStepService
 {
-    public async Task Process(Match match, SettleCriteria criteria)
+    public async Task Process(Match match, SettleCriteria settleCriteria)
     {
         if (match.ResourceType != ResourceType.MainResource)
         {

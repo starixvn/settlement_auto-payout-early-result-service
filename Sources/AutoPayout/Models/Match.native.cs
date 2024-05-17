@@ -20,7 +20,7 @@ public class Match
 
     public string ResourceRefund { get; set; }
 
-    public byte AutoSetting { get; set; }
+    public MatchDetail MatchDetail { get; set; }
 
     public override bool Equals(object obj)
     {

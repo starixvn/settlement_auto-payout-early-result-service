@@ -8,6 +8,8 @@ public static class ConditionId
 
     public const string VerifyConfirmScore = "3";
 
+    public const string VerifyBasketBallFinalResult = "95";
+
     public const string VerifyFinalResultByBestOfMap = "96";
 
     public const string VerifyFinalResult = "97";

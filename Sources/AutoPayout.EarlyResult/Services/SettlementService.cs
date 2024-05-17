@@ -35,9 +35,10 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         {
             var settleCriteria = createQueryService.QuerySettle(match);
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
+            await ProcessBeforeSettle(match, settleCriteria);
             await Execute(settleCriteria, match, isExistedFinalResource);
             await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
-            await AddResourceRefund(match);
+            await ProcessAfterSettle(match, settleCriteria);
         }
     }
 
@@ -76,12 +77,6 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         await UpdateMatchInfo(criteria);
 
-        if (isMainMatch)
-        {
-            var extraStep = createExtraStepService.Create(match);
-            await extraStep.Process(match);
-        }
-
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
 
@@ -92,17 +87,16 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         }
     }
 
-    private async Task AddResourceRefund(Match match)
+    private async Task ProcessBeforeSettle(Match match, SettleCriteria settleCriteria)
     {
-        if (match.SportType == SportType.ESports && !string.IsNullOrEmpty(match.ResourceRefund))
-        {
-            var criteria = new AddResourceRefundCriteria
-            {
-                MatchId = match.MatchId,
-                ResourceIds = match.ResourceRefund
-            };
-            await repository.ExecuteAsync(criteria);
-        }
+        var extraStepBeforeSettle = createExtraStepService.Create(match);
+        await extraStepBeforeSettle.Process(match, settleCriteria);
+    }
+
+    private async Task ProcessAfterSettle(Match match, SettleCriteria settleCriteria)
+    {
+        var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
+        await extraStepBeforeSettle.Process(match, settleCriteria);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)

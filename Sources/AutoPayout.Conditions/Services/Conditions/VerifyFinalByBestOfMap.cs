@@ -8,7 +8,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 {
     public async Task HandleCondition(Match match)
     {
-        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceId.Final);
+        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceIds.FullTime);
         if (match.ResourceType != ResourceType.MainResource || finalResult is null)
         {
             return;
@@ -108,6 +108,6 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime);
     }
 }

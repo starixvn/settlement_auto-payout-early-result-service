@@ -4,6 +4,7 @@ using AutoPayout.Conditions.Services;
 using AutoPayout.Conditions.Services.HelperSerivce;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.EarlyResult.Services.ExtraStepService;
+using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
 using AutoPayout.Services;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
@@ -58,7 +59,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<IgnoreVerify>();
 
-        service.AddSingleton<TennisExtraStep>();
+        service.AddSingleton<TennisInsResourceResult>();
         service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
 

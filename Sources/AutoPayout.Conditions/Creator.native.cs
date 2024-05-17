@@ -15,6 +15,7 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
         VerifyFinalResult verifyFinalResult,
         VerifyFinalByBestOfMap verifyFinalByBestOfMap,
         VerifyTimeResult verifyTimeResult,
+        VerifyBasketBallFinalResult verifyBasketBallFinalResult
         IgnoreVerify ignoreVerify
        )
     : Creator
@@ -31,6 +32,7 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
             ConditionId.VerifyInningStatus => verifyInningStatus,
             ConditionId.VerifyFinalResult => verifyFinalResult,
             ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
+            ConditionId.VerifyBasketBallFinalResult => verifyBasketBallFinalResult,
             _ => ignoreVerify,
         };
     }
