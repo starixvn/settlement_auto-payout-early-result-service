@@ -9,7 +9,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 {
     public async Task HandleCondition(Match match)
     {
-        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceId.Final);
+        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceIds.FullTime);
         if (match.ResourceType != ResourceType.MainResource || finalResult is null)
         {
             return;
@@ -45,6 +45,6 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime);
     }
 }

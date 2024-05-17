@@ -128,6 +128,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
             Action = criteria.Action,
             AdminId = criteria.AdminId,
             MatchId = criteria.MatchId,
+            BetStatus = criteria.BetStatus,
             SelectedResources = criteria.SelectedResources,
             IsAuto = true
         };

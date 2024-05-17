@@ -34,7 +34,7 @@ public static class ErrorMessage
     public const string NotTrader = "Failed: Result({0}) insufficient Trader source for second values.";
     public const string HalfTimeInconsistentWithGameSession = "Failed Auto Payout: HT({0}) due to invalid match type: GameSession({1}).";
 
-    public const string RelatedResultInconsistent = "Failed Auto Payout: {0} due to inconsistent result value(s): {1}";
+    public const string RelatedResultInconsistent = "Failed Auto Payout: {0} due to values inconsistency: {1}";
 
     public const string RelatedResultNotCalculated = "Failed Auto Payout: {0} due to related result(s) not calculated: {1}";
 

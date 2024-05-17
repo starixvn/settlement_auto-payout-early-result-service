@@ -5,6 +5,7 @@ using AutoPayout.Conditions.Services.HelperSerivce;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
+using AutoPayout.EarlyResult.Services.ExtraStepService.BeforeSettle;
 using AutoPayout.Services;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
@@ -58,7 +59,11 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<IgnoreVerify>();
+        service.AddSingleton<VerifyBasketBallFinalResult>();
 
+        service.AddSingleton<BasketBallCashOut>();
+        service.AddSingleton<BasketballExtraStep>();
+        service.AddSingleton<ESportsAddResourceRefund>();
         service.AddSingleton<TennisInsResourceResult>();
         service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();

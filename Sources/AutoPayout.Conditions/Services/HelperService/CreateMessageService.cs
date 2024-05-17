@@ -11,7 +11,7 @@ public static class CreateMessageService
 
     public static string HalfTimeResultRelatedNotValid(ResultDetail halfTimeResult, string[] resultRelatedValid)
     {
-        var resultNotValid = ResourceId.ResultHtBasketBall.Except(resultRelatedValid);
+        var resultNotValid = ResourceIds.ResultHtBasketBall.Except(resultRelatedValid);
         return ErrorMessage.RelatedResultNotCalculated
             .Replace("{0}", $"HT({halfTimeResult.HomeValue}-{halfTimeResult.AwayValue})")
             .Replace("{1}", string.Join(",", resultNotValid));
@@ -41,7 +41,7 @@ public static class CreateMessageService
 
     public static string RelatedResultInvalidForFT(ResultDetail fullTimeResult, string[] resultRelatedValid)
     {
-        var resultNotValid = ResourceId.ResultHtBasketBall.Except(resultRelatedValid);
+        var resultNotValid = ResourceIds.ResultHtBasketBall.Except(resultRelatedValid);
         return ErrorMessage.RelatedResultNotCalculated
             .Replace("{0}", $"FT({fullTimeResult.HomeValue}-{fullTimeResult.AwayValue})")
             .Replace("{1}", string.Join(",", resultNotValid).Replace("01", "HT"));

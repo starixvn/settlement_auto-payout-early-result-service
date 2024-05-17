@@ -19,6 +19,8 @@ public class AppSettingsKey
 
     public string CacheKey { get; set; }
 
+    public int GroupTest { get; set; }
+
     public List<string> SiteDbServer { get; set; }
 
     public ThirdPartySettingKeys ThirdPartyUri { get; set; }

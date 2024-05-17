@@ -38,7 +38,7 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
     {
         var criteria = new GetResultCriteria
         {
-            AutoPayoutGroup = appSettingsKey.AutoPayoutGroup,
+            AutoPayoutGroup = appSettingsKey.GroupTest > 0 ? appSettingsKey.GroupTest : appSettingsKey.AutoPayoutGroup,
             ResourceType = appSettingsKey.ResourceType
         };
 

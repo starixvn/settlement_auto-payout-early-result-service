@@ -38,26 +38,27 @@ public static class VerifyFinalResultForBasketballHelper
     }
 
 
-    public static bool IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult, IEnumerable<ResultDetail> results, out string message)
+    public static bool IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult, out string message)
     {
-        var isHtSettled = results.Any(r => r.ResourceId == ResourceId.Halftime);
         if (IsFullTimeDraw(finalResult, out message))
         {
             return true;
         }
 
-        if (halfTimeResult is null && !isHtSettled)
+        if (halfTimeResult is null)
         {
             message = CreateMessageService.HalfTimeNotCalculated(finalResult);
             return true;
         }
 
-        if (int.Parse(halfTimeResult!.HomeValue) > int.Parse(finalResult.HomeValue) ||
-            int.Parse(halfTimeResult!.AwayValue) > int.Parse(finalResult.AwayValue))
+        if (int.Parse(halfTimeResult.HomeValue) > int.Parse(finalResult.HomeValue) ||
+            int.Parse(halfTimeResult.AwayValue) > int.Parse(finalResult.AwayValue))
         {
             message = CreateMessageService.HalfTimeInconsistentWithFT(finalResult, halfTimeResult);
             return true;
         }
+
+        finalResult.RelatedInfo = $"{halfTimeResult.HomeValue}-{halfTimeResult.AwayValue}";
 
         message = string.Empty;
         return false;
@@ -65,14 +66,18 @@ public static class VerifyFinalResultForBasketballHelper
 
     public static bool IsFinalOfBo4InValid(ResultDetail finalResult, List<ResultDetail> results, out string message)
     {
-        var resultsValid = ResourceId.ResultFtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
+        var resultsValid = ResourceIds.ResultFtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
 
         if (IsFullTimeDraw(finalResult, out message))
         {
             return true;
         }
 
-        if (resultsValid.Length != ResourceId.ResultFtBasketBall.Length)
+        var isOtExist = resultsValid.Any(r => r == ResourceIds.OverTime);
+        var relatedResultNeeded =
+            isOtExist ? ResourceIds.ResultFtBasketBall.Length : ResourceIds.ResultFtWithoutOTBasketBall.Length;
+
+        if (resultsValid.Length != relatedResultNeeded)
         {
             message = CreateMessageService.RelatedResultInvalidForFT(finalResult, resultsValid);
             return true;
@@ -106,7 +111,7 @@ public static class VerifyFinalResultForBasketballHelper
 
     private static bool IsOtInValid(IEnumerable<ResultDetail> results, int totalHomeValue, int totalAwayValue)
     {
-        var otResult = results.FirstOrDefault(r => r.ResourceId == ResourceId.OverTime);
+        var otResult = results.FirstOrDefault(r => r.ResourceId == ResourceIds.OverTime);
         var isOtExist = otResult != null && string.CompareOrdinal($"{otResult.HomeValue}:{otResult.AwayValue}", "0:0") != 0;
 
         if (isOtExist && (totalHomeValue != totalAwayValue || int.Parse(otResult.HomeValue) == int.Parse(otResult.AwayValue)))
@@ -125,22 +130,22 @@ public static class VerifyFinalResultForBasketballHelper
     private static int SumHomeValueFullTime(List<ResultDetail> results)
     {
         return results
-            .Where(r => r.ResourceId != ResourceId.OverTime && r.ResourceId != ResourceId.Halftime)
+            .Where(r => r.ResourceId != ResourceIds.OverTime && r.ResourceId != ResourceIds.Halftime)
             .Select(r => int.Parse(r.HomeValue)).Sum();
     }
 
     private static int SumAwayValueFullTime(List<ResultDetail> results)
     {
         return results
-            .Where(r => r.ResourceId != ResourceId.OverTime && r.ResourceId != ResourceId.Halftime)
+            .Where(r => r.ResourceId != ResourceIds.OverTime && r.ResourceId != ResourceIds.Halftime)
             .Select(r => int.Parse(r.AwayValue)).Sum();
     }
 
     private static bool HalfTimeRelatedResultInValid(ResultDetail halfTimeResult, IEnumerable<ResultDetail> results, out string message)
     {
-        var resultsValid = ResourceId.ResultHtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
+        var resultsValid = ResourceIds.ResultHtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
 
-        if (resultsValid.Length != ResourceId.ResultHtBasketBall.Length)
+        if (resultsValid.Length != ResourceIds.ResultHtBasketBall.Length)
         {
             message = CreateMessageService.HalfTimeResultRelatedNotValid(halfTimeResult, resultsValid);
             return true;
@@ -152,7 +157,7 @@ public static class VerifyFinalResultForBasketballHelper
 
     private static bool IsHalfTimeScoreInValid(ResultDetail halfTimeResult, IEnumerable<ResultDetail> results, out string message)
     {
-        var resultRelated = results.Where(r => ResourceId.ResultHtBasketBall.Contains(r.ResourceId)).ToList();
+        var resultRelated = results.Where(r => ResourceIds.ResultHtBasketBall.Contains(r.ResourceId)).ToList();
 
         var home = resultRelated.Select(r => int.Parse(r.HomeValue)).Sum();
         var away = resultRelated.Select(r => int.Parse(r.AwayValue)).Sum();

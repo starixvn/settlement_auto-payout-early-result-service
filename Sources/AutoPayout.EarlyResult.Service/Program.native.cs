@@ -17,6 +17,8 @@ builder.Services.StartUmSetting(builder.Configuration);
 
 builder.Services.AddHostedService<Worker>();
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 app.Run(async context =>

@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.EarlyResult.Services.ExtraStepService.HelperServices;
 
 namespace AutoPayout.EarlyResult.Services.ExtraStepService.BeforeSettle;
 public class BasketballExtraStep : IExtraStepService
@@ -14,13 +15,16 @@ public class BasketballExtraStep : IExtraStepService
 
         if ((match.MatchDetail.AutoSetting & instantBit) != 0)
         {
-            settleCriteria.determinedType = GenerateDeterminedType(match);
+            settleCriteria.DeterminedType = GenerateDeterminedType(match);
         }
+
+        settleCriteria.BetStatus = match.MatchDetail.GameSession == GameType.Bo4 ?
+            BasketBallBetStatusService.GetBetStatusBoFour(match) : BasketBallBetStatusService.DefaultBetStatus;
 
         return Task.CompletedTask;
     }
 
-    private byte GenerateDeterminedType(Match match)
+    private static byte GenerateDeterminedType(Match match)
     {
         const int roundBitStartAt = 3;
 

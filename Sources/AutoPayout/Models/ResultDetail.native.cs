@@ -48,6 +48,9 @@ public class ResultDetail
     public int IntervalNo { get; set; }
 
     [XmlIgnore]
+    public string RelatedInfo { get; set; }
+
+    [XmlIgnore]
     public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = new List<ExternalSourceInfo>();
 
     [XmlIgnore]

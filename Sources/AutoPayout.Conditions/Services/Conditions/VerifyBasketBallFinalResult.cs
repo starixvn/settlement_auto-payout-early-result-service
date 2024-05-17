@@ -34,7 +34,7 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
     private async Task HandleFullTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
         var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
-        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
+        var halfTime = results.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
         var errorMessage = string.Empty;
         if (fullTimeResult is null)
         {
@@ -44,7 +44,7 @@ public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService
         var isFinalInValid = matchDetail.GameSession switch
         {
             GameType.Bo1 => VerifyFinalResultForBasketballHelper.IsFullTimeDraw(fullTimeResult, out errorMessage),
-            GameType.Bo2 => VerifyFinalResultForBasketballHelper.IsFinalOfBo2InValid(fullTimeResult, halfTime, results, out errorMessage),
+            GameType.Bo2 => VerifyFinalResultForBasketballHelper.IsFinalOfBo2InValid(fullTimeResult, halfTime, out errorMessage),
             GameType.Bo4 => VerifyFinalResultForBasketballHelper.IsFinalOfBo4InValid(fullTimeResult, results, out errorMessage),
             _ => true
         };

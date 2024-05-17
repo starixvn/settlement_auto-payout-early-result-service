@@ -18,6 +18,9 @@
     <Setting Key="NAP_Set_AutoRefundResultOS_Ins" SpName="NAP_Set_AutoRefundResultOS_Ins" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Admin_MajorRound_Sel" SpName="NAP_Admin_MajorRound_Sel" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoRefundOS_ResultIns" SpName="NAP_Set_AutoRefundOS_ResultIns" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="WriteLog_UserLog_Settle" SpName="WriteLog_UserLog_Settle" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="NAP_Set_AutoPayoutPrepareOS_Insert" SpName="NAP_Set_AutoPayoutPrepareOS_Insert" DbName="DBPRO.bodb02.wsv_nap" />
+    
   </Function>
 	<Function Name="Scale Out TransDb">
 		<Function Name="NAP_Admin_Settlement_Validation_Ticket">

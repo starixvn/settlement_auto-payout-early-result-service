@@ -22,6 +22,8 @@ public class Match
 
     public MatchDetail MatchDetail { get; set; }
 
+    public string UId = Guid.NewGuid().ToString();
+
     public override bool Equals(object obj)
     {
         return obj is Match match

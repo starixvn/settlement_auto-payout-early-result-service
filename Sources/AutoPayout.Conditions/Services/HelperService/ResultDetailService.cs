@@ -117,12 +117,12 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var criteria = new GetResourceIndexCriteria(sportType);
 
         var indexes = await repository.FetchAsync<ResourceIndex>(criteria);
-        return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
+        return indexes.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 
     public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
     {
-        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
@@ -139,6 +139,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
     {
         var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = matchId, SportType = sportType })).ToList();
 
-        return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
+        return intervalDetails.Where(r => r.ResourceId != ResourceIds.FullTime).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
 }
