@@ -8,6 +8,8 @@ public class MatchDetail
 
     public byte AutoSetting { get; set; }
 
+    public int OverTimeSession { get; set; }
+
     public IEnumerable<VoidBetInfo> VoidBetInfos { get; set; }
 
     public string BetStatus { get; set; }

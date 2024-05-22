@@ -1,5 +1,5 @@
-﻿using System.Xml.Serialization;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
+using System.Xml.Serialization;
 
 namespace AutoPayout.Models;
 

@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services.HelperSerivce;
+﻿using AutoPayout.Constants;
+
+namespace AutoPayout.Conditions.Services.HelperSerivce;
 public static class CreateMessageService
 {
 

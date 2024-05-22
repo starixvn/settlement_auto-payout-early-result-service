@@ -6,7 +6,9 @@ public class MatchDetail
 
     public int BestOfMap { get; set; }
 
+<<<<<<< HEAD
     public int OverTimeSession { get; set; }
-    
+=======
     public byte AutoSetting { get; set; }
+>>>>>>> d5b9621 (feat: GenerateDeterminedType)
 }

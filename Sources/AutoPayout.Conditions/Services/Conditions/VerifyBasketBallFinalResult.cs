@@ -1,5 +1,6 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
+using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services;
 public class VerifyBasketBallFinalResult(ResultDetailService resultDetailService, IDynamicRepository repository) : ICondition

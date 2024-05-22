@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.EarlyResult.Constants;
+﻿using AutoPayout.EarlyResult.Constants;
 using System.Text.RegularExpressions;
 using Match = AutoPayout.Models.Match;
 
