@@ -14,7 +14,7 @@ public static class VerifyFinalResultHelper
         return final.HomeValue == sumHomeScore && final.AwayValue == sumAwayScore;
     }
 
-    public static bool VerifyDrawSetResults(IReadOnlyCollection<ResultDetail> setsResults, int playedGame) // 4
+    public static bool VerifyDrawSetResults(IReadOnlyCollection<ResultDetail> setsResults, int playedGame)
     {
         var hasDraw = setsResults.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
         var newSetResults = setsResults.Where(x => x.IntervalNo < playedGame).ToList();
@@ -98,7 +98,8 @@ public static class VerifyFinalResultHelper
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
-        => !resultsChecking.Any(x => x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
+        => !resultsChecking.Any(x => (new int[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
+                && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)
     {
