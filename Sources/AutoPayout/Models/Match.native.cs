@@ -12,6 +12,10 @@ public class Match
 
     public int SportType { get; set; }
 
+    public int EarlyRetryTime { get; set; }
+
+    public int MainRetryTime { get; set; }
+
     public IEnumerable<ResultDetail> ResultDetails { get; set; }
 
     public string ResourceRefund { get; set; }

@@ -50,5 +50,12 @@ public class ResultDetail
     [XmlIgnore]
     public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = new List<ExternalSourceInfo>();
 
+    [XmlIgnore]
     public byte ResultType => Constants.ResourceId.TimePattern.Any(ResourceId.StartsWith) ? ResultTypes.Time : default;
+
+    [XmlIgnore]
+    public int EarlyRetryTime { get; set; }
+
+    [XmlIgnore]
+    public int MainRetryTime { get; set; }
 }

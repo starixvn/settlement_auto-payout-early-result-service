@@ -23,7 +23,8 @@ public class ScoreComparer : IEqualityComparer<Score>
             return false;
         }
 
-        return compareOneValue ? string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0
+        return compareOneValue
+            ? string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0
             : string.Compare(first.HomeValue, second.HomeValue, StringComparison.InvariantCultureIgnoreCase) == 0
                 && string.Compare(first.AwayValue, second.AwayValue, StringComparison.InvariantCultureIgnoreCase) == 0;
     }
