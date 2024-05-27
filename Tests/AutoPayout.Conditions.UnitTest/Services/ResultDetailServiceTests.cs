@@ -28,7 +28,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_Always_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
 
         var scores = new List<Score>()
         {
@@ -65,7 +65,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_ProviderOnly_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
 
         var scores = new List<Score>()
         {
@@ -94,7 +94,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_TraderOnly_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2)";
 
         var scores = new List<Score>()
         {

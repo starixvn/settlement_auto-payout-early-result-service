@@ -146,7 +146,7 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
@@ -187,7 +187,7 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
@@ -217,7 +217,7 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
-        var errorMessage = "Failed: FT(0-1) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(0-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
@@ -258,7 +258,7 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        var errorMessage = "Failed: FT(1-1) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(1-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 1 });
@@ -306,7 +306,7 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });
@@ -336,7 +336,7 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });

@@ -14,10 +14,11 @@ public interface ResultDetailService
     void WriteLogResultNotTrader(int matchId, ResultDetail result, List<Score> scores);
 
     void WriteLogResult(int matchId, ResultDetail result, string message);
+    void WriteLogResults(int matchId, List<ResultDetail> result, string message);
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
 
-    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled);
 
     Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
 }
@@ -112,6 +113,13 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, message);
     }
 
+    public void WriteLogResults(int matchId, List<ResultDetail> result, string message)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = result };
+
+        writeLogService.WriteLog(cloneMatch, message);
+    }
+
     private async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
     {
         var criteria = new GetResourceIndexCriteria(sportType);
@@ -120,7 +128,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return indexes.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 
-    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled)
     {
         var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
 

@@ -90,7 +90,7 @@ public class ProcessServiceTests
         createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
         await settlementService.Received().UpdateResultExpired(match);
         await writeLogService.Received().WriteLog(match, Arg.Is<ServiceException>(e => e.Description == "Message"));
-        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed);
+        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed, "Message");
         await condition.Received(1).HandleCondition(Arg.Any<Match>());
         matchPoolService.Received().RemoveMatch(match);
     }
@@ -119,7 +119,7 @@ public class ProcessServiceTests
         createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
         await settlementService.Received().UpdateResultExpired(match);
         await writeLogService.Received().WriteLog(match, Arg.Is<ServiceException>(e => e.Description == "Message"));
-        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed);
+        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed, "Message");
         await condition.Received(3).HandleCondition(Arg.Any<Match>());
     }
 

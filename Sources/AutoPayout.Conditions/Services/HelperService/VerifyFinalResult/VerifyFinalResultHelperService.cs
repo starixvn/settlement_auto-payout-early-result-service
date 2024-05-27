@@ -96,7 +96,7 @@ public static class VerifyFinalResultHelper
         return !fakeCalculatedResults;
     }
 
-    public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
+    public static bool VerifyAnyDrawResults(IEnumerable<ResultDetail> resultsChecking)
         => !resultsChecking.Any(x => (new int[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 

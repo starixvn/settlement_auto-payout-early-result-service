@@ -4,7 +4,7 @@ using Match = AutoPayout.Models.Match;
 
 
 namespace AutoPayout.EarlyResult.Services.ExtraStepService.HelperServices;
-public static class BasketBallBetStatusService
+public static class BasketBallHelperService
 {
     public const string DefaultBetStatus = "0-0,0-0,0-0,0-0,0-0";
 
@@ -12,6 +12,21 @@ public static class BasketBallBetStatusService
 
     private const byte FtPosition = 2;
 
+    public static byte GenerateDeterminedType(Match match)
+    {
+        const int roundBitStartAt = 3;
+
+        var determinedType = match.ResultDetails.Select(resultDetail => resultDetail.ResourceId switch
+            {
+                ResourceIds.FullTime => 0,
+                ResourceIds.Halftime => 2,
+                _ => Array.FindIndex(ResourceIds.ResultBasketBall, r => r == resultDetail.ResourceId) + roundBitStartAt
+            })
+            .Select(bitPosition => Math.Pow(2, bitPosition))
+            .Sum();
+
+        return (byte)determinedType;
+    }
 
     public static string GetBetStatusBoFour(Match match)
     {
@@ -28,7 +43,7 @@ public static class BasketBallBetStatusService
 
     public static string GetBetStatusBoTwo(Match match)
     {
-        var elements = InitializeElements(AnalyzeBetStatus(match));
+        var elements = DefaultBetStatus.Split(',');
 
         foreach (var resultDetail in match.ResultDetails)
         {
@@ -57,21 +72,6 @@ public static class BasketBallBetStatusService
         var final = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
         elements[FtPosition] = final == null ? "0-0" : $"{final.HomeValue}-{final.AwayValue}";
         return string.Join(",", elements);
-    }
-
-    private static List<string> InitializeElements(List<string> elements)
-    {
-        for (var i = 0; i < elements.Count; i++)
-        {
-            if (i is HtPosition or FtPosition)
-            {
-                continue;
-            }
-
-            elements[i] = "0-0";
-        }
-
-        return elements;
     }
 
     private static List<string> AnalyzeBetStatus(Match match)

@@ -1,9 +1,8 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Exceptions;
-using AutoPayout.Conditions.Models;
-using AutoPayout.Constants;
 using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
@@ -47,7 +46,7 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceId.Halftime } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.Halftime } }
         };
 
         await condition.HandleCondition(match);
@@ -61,7 +60,7 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceId.Final }, new() { ResourceId = "H1" }, new() { ResourceId = "A1" } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" }, new() { ResourceId = "A1" } }
         };
 
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
@@ -78,7 +77,7 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceId.Final }, new() { ResourceId = "H1" } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" } }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -107,7 +106,7 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceId.Final } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -126,9 +125,9 @@ public class VerifyInningStatusTests
 
         await condition.HandleCondition(match);
 
-        Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
+        Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceIds.FullTime);
         await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
-            Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceId.Final)));
+            Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceIds.FullTime)), ErrorMessage.IntervalNotSettled);
         await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 
@@ -138,7 +137,7 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceId.Final } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -158,9 +157,9 @@ public class VerifyInningStatusTests
 
         await condition.HandleCondition(match);
 
-        Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceId.Final);
+        Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceIds.FullTime);
         await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
-            Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceId.Final)));
+            Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceIds.FullTime)), ErrorMessage.IntervalNotSettled);
         await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
 }

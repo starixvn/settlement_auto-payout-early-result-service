@@ -15,8 +15,8 @@ public class BasketBallCashOut(IOptions<AppSettingsKey> options, IHttpClientFact
         var listHalf = GetListHalf(match.ResultDetails.Select(r => r.ResourceId));
         var betStatus = match.MatchDetail.GameSession switch
         {
-            GameType.Bo2 => BasketBallBetStatusService.GetBetStatusBoTwo(match),
-            GameType.Bo1 => BasketBallBetStatusService.GetBetStatusBoOne(match),
+            GameType.Bo2 => BasketBallHelperService.GetBetStatusBoTwo(match),
+            GameType.Bo1 => BasketBallHelperService.GetBetStatusBoOne(match),
             _ => settleCriteria.BetStatus
         };
         var criteria = new CashOutCriteria(match.MatchId, betStatus, listHalf.ToArray());
@@ -28,6 +28,7 @@ public class BasketBallCashOut(IOptions<AppSettingsKey> options, IHttpClientFact
         try
         {
             var requestContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+            var json = JsonConvert.SerializeObject(request);
             var httpClient = httpClientFactory.CreateClient();
             await httpClient.PostAsync(new Uri(options.Value.ThirdPartyUri.JackTimeResult), requestContent);
         }

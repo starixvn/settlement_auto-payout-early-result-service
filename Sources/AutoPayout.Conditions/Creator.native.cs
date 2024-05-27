@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Services;
+using AutoPayout.Conditions.Services.Conditions;
 
 namespace AutoPayout.Conditions;
 
@@ -15,7 +16,7 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
         VerifyFinalResult verifyFinalResult,
         VerifyFinalByBestOfMap verifyFinalByBestOfMap,
         VerifyTimeResult verifyTimeResult,
-        VerifyBasketBallFinalResult verifyBasketBallFinalResult
+        VerifyBasketBallResult verifyBasketBallFinalResult,
         IgnoreVerify ignoreVerify
        )
     : Creator

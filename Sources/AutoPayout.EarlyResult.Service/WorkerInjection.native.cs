@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using AutoPayout.Conditions;
 using AutoPayout.Conditions.Services;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
@@ -59,7 +61,8 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<IgnoreVerify>();
-        service.AddSingleton<VerifyBasketBallFinalResult>();
+        service.AddSingleton<VerifyBasketBallResult>();
+        service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
 
         service.AddSingleton<BasketBallCashOut>();
         service.AddSingleton<BasketballExtraStep>();

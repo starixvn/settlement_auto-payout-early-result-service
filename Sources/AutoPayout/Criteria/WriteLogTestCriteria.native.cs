@@ -11,11 +11,8 @@ public class WriteLogTestCriteria : NonQueryCommand
 }
 
 
-public class ResourcesLogTest(Match match, string resourceId, RemarkLog remark)
+public class ResourcesLogTest(Match match, string resourceId, string remark)
 {
-    [JsonPropertyName("u")]
-    public string UId { get; set; } = match.UId;
-
     [JsonPropertyName("m")]
     public int MatchId { get; set; } = match.MatchId;
 
@@ -23,15 +20,11 @@ public class ResourcesLogTest(Match match, string resourceId, RemarkLog remark)
     public string ResourceId { get; set; } = resourceId;
 
     [JsonPropertyName("s")]
-    public int StatusId => string.IsNullOrEmpty(remark.Remark) ? 2 : 3;
+    public int StatusId => string.IsNullOrEmpty(remark) ? 2 : 3;
 
     [JsonPropertyName("rm")]
-    public RemarkLog Remark { get; set; } = remark;
-}
+    public string Remark { get; set; } = remark;
 
-public class RemarkLog(string uId, string remark)
-{
-    public string UId { get; set; }
-
-    public string Remark { get; set; }
+    [JsonPropertyName("u")]
+    public string UId { get; set; } = match.UId;
 }

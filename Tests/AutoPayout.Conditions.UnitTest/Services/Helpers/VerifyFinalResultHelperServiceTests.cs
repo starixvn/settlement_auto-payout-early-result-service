@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers;
@@ -246,7 +245,7 @@ public class VerifyFinalResultHelperServiceTests
     }
 
     [Fact]
-    public void VerifyAnyDrawResults_AllConditionPassed_ReturnTrue()
+    public void VerifyAnyDrawResults_ExistResultDraw_ReturnFalse()
     {
         var results = new List<ResultDetail>()
         {
@@ -266,6 +265,6 @@ public class VerifyFinalResultHelperServiceTests
 
         var actual = VerifyFinalResultHelper.VerifyAnyDrawResults(results);
 
-        Assert.True(actual);
+        Assert.False(actual);
     }
 }

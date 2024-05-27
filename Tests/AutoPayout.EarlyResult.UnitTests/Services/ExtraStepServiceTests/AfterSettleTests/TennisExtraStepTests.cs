@@ -5,7 +5,7 @@ using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
 using AutoPayout.Models;
 using Xunit;
 
-namespace AutoPayout.EarlyResult.UnitTests.Services;
+namespace AutoPayout.EarlyResult.UnitTests.Services.ExtraStepServiceTests.AfterSettleTests;
 
 public class TennisExtraStepTests
 {
@@ -22,8 +22,8 @@ public class TennisExtraStepTests
     [Fact]
     public async Task Process_Always_ExecuteRefundIns()
     {
-        await extraStep.Process(new Match() { MatchId = 1, ResourceType = ResourceType.MainResource }, new SettleCriteria());
+        await extraStep.Process(new Match() { MatchId = 1, ResourceType = ResourceType.MainResource, ResultDetails = new List<ResultDetail>() { new() { ResourceId = "0101" } } }, new SettleCriteria());
 
-        await repository.Received().ExecuteAsync(Arg.Any<InsRefundResultCriteria>());
+        await repository.Received().ExecuteAsync(Arg.Is<InsRefundResultCriteria>(c => c.ResourceIds == "0101"));
     }
 }

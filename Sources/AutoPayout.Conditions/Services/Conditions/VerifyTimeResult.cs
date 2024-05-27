@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoPayout.Conditions.Services.HelperSerivce;
 using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyTimeResult : ICondition
 {
@@ -17,7 +13,7 @@ public class VerifyTimeResult : ICondition
     public VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
     {
         this.resultDetailService = resultDetailService;
-        this.appSettingsKey = options.Value;
+        appSettingsKey = options.Value;
     }
 
     public async Task HandleCondition(Match match)
