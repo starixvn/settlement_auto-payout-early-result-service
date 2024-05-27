@@ -20,8 +20,8 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
 
         await resultDetailService.UpdateResultStatus(match.MatchId, failureResults, errorMessage);
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
 
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
         match.ResultDetails = match.ResultDetails.Concat(timeResult);
 
         if (!match.ResultDetails.Any())

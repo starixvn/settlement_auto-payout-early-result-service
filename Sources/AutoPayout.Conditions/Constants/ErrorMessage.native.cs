@@ -32,5 +32,5 @@ public static class ErrorMessage
 
     public const string FinalESportsInconsistent = "Failed: FT(@score) is inconsistent with Map information.";
 
-    public const string NotTrader = "Failed: Result({0}) Trader source second values.";
+    public const string NotTrader = "Failed: Result({0}) insufficient Trader source for second values.";
 }

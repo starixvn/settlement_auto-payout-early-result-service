@@ -14,6 +14,7 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
         VerifyInningStatus verifyInningStatus,
         VerifyFinalResult verifyFinalResult,
         VerifyFinalByBestOfMap verifyFinalByBestOfMap,
+        VerifyTimeResult verifyTimeResult,
         IgnoreVerify ignoreVerify
        )
     : Creator

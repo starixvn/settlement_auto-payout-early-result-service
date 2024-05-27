@@ -22,12 +22,22 @@ public class VerifyTimeResult : ICondition
 
     public async Task HandleCondition(Match match)
     {
+        var timeResults = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
+
+        if (!timeResults.Any())
+        {
+            return;
+        }
+
+        var normalResults = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time);
         match.ResultDetails = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
+
         var scores = await resultDetailService.GetScore(match);
 
         CompareScore(match, scores);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
+        match.ResultDetails = match.ResultDetails.Concat(normalResults);
 
         if (!match.ResultDetails.Any())
         {
@@ -83,13 +93,18 @@ public class VerifyTimeResult : ICondition
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
 
-        if (!TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalMilliseconds > match.EarlyRetryTime)
+        Console.WriteLine(maxDate);
+        Console.WriteLine(DateTimeOffset.Now);
+        Console.WriteLine(processTime);
+        Console.WriteLine(processTime.TotalSeconds);
+        Console.WriteLine(match.EarlyRetryTime);
+        if (!TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
             resultDetail.Expired = true;
         }
-        else if (processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        else if (TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
