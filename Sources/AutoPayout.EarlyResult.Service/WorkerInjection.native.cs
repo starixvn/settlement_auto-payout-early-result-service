@@ -54,6 +54,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
+        service.AddSingleton<IgnoreVerify>();
 
         service.AddSingleton<TennisExtraStep>();
         service.AddSingleton<InitExtraStepService>();
