@@ -55,7 +55,7 @@ public class VerifyTimeResult : ICondition
 
             if (TryGetTraderScore(group, out int minute, out int second)
                 && group.Distinct(new ScoreComparer(true)).Count() == 1
-                && second > 0 && second < 60)
+                && second >= 0 && second < 60)
             {
                 resultDetail.HomeValue = $"{minute}";
                 resultDetail.AwayValue = $"{second}";
@@ -93,11 +93,6 @@ public class VerifyTimeResult : ICondition
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
 
-        Console.WriteLine(maxDate);
-        Console.WriteLine(DateTimeOffset.Now);
-        Console.WriteLine(processTime);
-        Console.WriteLine(processTime.TotalSeconds);
-        Console.WriteLine(match.EarlyRetryTime);
         if (!TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
