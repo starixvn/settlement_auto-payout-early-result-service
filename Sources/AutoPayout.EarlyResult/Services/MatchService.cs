@@ -53,7 +53,9 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
             SportType = g.Key.SportType,
             Conditions = results.FirstResultSet.Where(r => r.SportType == g.Key.SportType)
                .Select(r => g.Key.ResourceType == ResourceType.MainResource ? r.MainCheckList : r.EarlyCheckList)
-               .FirstOrDefault(string.Empty)
+               .FirstOrDefault(string.Empty),
+            EarlyRetryTime = g.First().EarlyRetryTime,
+            MainRetryTime = g.First().MainRetryTime,
         }).Where(m => !string.IsNullOrEmpty(m.Conditions)).ToList();
     }
 }

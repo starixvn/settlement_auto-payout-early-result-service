@@ -5,4 +5,6 @@ public class MatchDetail
     public int GameSession { get; set; }
 
     public int BestOfMap { get; set; }
+
+    public int OverTimeSession { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services;
@@ -20,9 +21,12 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
-        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult);
-        var isValid = !setsResults.IsNullOrEmpty() &&
-            isFinalConsistentWithGameSession
+        var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, true);
+
+        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResult(setsResults, finalResult, minSet, maxSet);
+
+        var isValid = !setsResults.IsNullOrEmpty()
+            && isFinalConsistentWithGameSession
             && VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxSetPlayed)
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
@@ -39,10 +43,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         var errorMessage = message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
 
         await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
-        resultDetailService.WriteLogResult(
-            match.MatchId,
-            finalResult,
-            errorMessage);
+        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
     }
 }

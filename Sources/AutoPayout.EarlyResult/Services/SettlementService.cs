@@ -85,14 +85,11 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
 
-
         foreach (var server in appSettingsKey.SiteDbServer)
         {
             criteria.DbServer = server;
             await repository.ExecuteAsync(criteria);
         }
-
-
     }
 
     private async Task AddResourceRefund(Match match)

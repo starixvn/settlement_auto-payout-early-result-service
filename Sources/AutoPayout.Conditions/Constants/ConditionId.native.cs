@@ -15,4 +15,6 @@ public static class ConditionId
     public const string VerifyInningStatus = "98";
 
     public const string VerifyBeforePush = "99";
+
+    public const string VerifyEsTimeResult = "94";
 }

@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services;
@@ -19,10 +20,11 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 
-        var maxGamePlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
-        var (results, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxGamePlayed, settledResults);
+        var maxGamePlayed = GetMaxGamePlayed(matchDetail, finalResult);
 
-        var isValid = ValidateResult(results, matchDetail, finalResult, settledResults, maxGamePlayed);
+        var (resultsChecking, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxGamePlayed, settledResults);
+
+        var isValid = ValidateResult(resultsChecking, matchDetail, match, settledResults, maxGamePlayed);
 
         if (isValid)
         {
@@ -32,6 +34,16 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         {
             await HandleFinalResult(finalResult, match);
         }
+    }
+
+    private int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)
+    {
+        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % 2 == 0)
+        {
+            return matchDetail.BestOfMap;
+        }
+
+        return int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
     }
 
     private string GetResourceToRefund(IReadOnlyList<ResultDetail> resultSettled, IReadOnlyList<ResourceIndex> resourceIndexes, MatchDetail matchDetail, int maxGamePlayed)
@@ -57,28 +69,48 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         return string.Join(",", resourceToRefund);
     }
 
-    private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, ResultDetail finalResult, List<ResultDetail> settledResults, int maxGamePlayed)
+    private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, Match match, List<ResultDetail> settledResults, int maxGamePlayed)
     {
-        return !results.IsNullOrEmpty() && matchDetail.BestOfMap switch
+        if (results.IsNullOrEmpty()) return false;
+
+        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceId.Final);
+        if (matchDetail.BestOfMap == Bo1)
         {
-            Bo1 => VerifyFinalResultHelper.VerifyFinalBO1(finalResult, results),
-            Bo2 => VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results) &&
-                   VerifyFinalResultHelper.VerifyResult(results, finalResult),
-            _ => VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed)
-                    && VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, finalResult, false)
+            return VerifyFinalResultHelper.VerifyFinalBO1(finalResult, results);
+        }
+
+        if (matchDetail.BestOfMap == Bo2)
+        {
+            return VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results) &&
+                     VerifyFinalResultHelper.VerifyResult(results, finalResult);
+        }
+
+        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % 2 == 0)
+        {
+            var temp = VerifyFinalResultHelper.VerifyDrawSetResults(results, maxGamePlayed);
+            var temp1 = VerifyFinalResultHelper.IsMatchResultsConsecutive(results);
+            var temp2 = VerifyFinalResultHelper.VerifyResult(results, finalResult);
+
+            return temp && temp1 && temp2;
+        }
+
+        var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
+
+        return VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed)
+                    && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet)
                     && VerifyFinalResultHelper.IsMatchResultsConsecutive(results)
-                    && VerifyFinalResultHelper.VerifyResult(results, finalResult),
-        };
+                    && VerifyFinalResultHelper.VerifyResult(results, finalResult)
+                    && VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.Concat(settledResults).ToList());
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
     {
         var errorMessage = ErrorMessage.FinalESportsInconsistent.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
+
         await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
-        resultDetailService.WriteLogResult(
-            match.MatchId,
-            finalResult,
-            errorMessage);
+
+        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
+
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final);
     }
 }

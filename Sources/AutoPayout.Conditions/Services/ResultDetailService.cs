@@ -7,7 +7,9 @@ public interface ResultDetailService
 {
     Task<IEnumerable<Score>> GetScore(Match match);
 
-    void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
+    string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
+
+    string WriteLogResultNotTrader(int matchId, ResultDetail result);
 
     void WriteLogResult(int matchId, ResultDetail result, string message);
 
@@ -37,7 +39,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return scores;
     }
 
-    public void WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
+    public string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
     {
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
@@ -49,7 +51,20 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             sourceScore.Insert(0, traderScore);
         }
 
+        var message = errorMessage + string.Join(", ", sourceScore);
         writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
+
+        return message;
+    }
+
+    public string WriteLogResultNotTrader(int matchId, ResultDetail result)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var message = string.Format(ErrorMessage.NotTrader, result.ResourceId);
+
+        writeLogService.WriteLog(cloneMatch, message);
+
+        return message;
     }
 
     public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
@@ -60,7 +75,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     private static List<string> ProviderScore(IEnumerable<Score> scores)
     {
-        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Trader).ToList();
+        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Screenshot).ToList();
         return provider.Any() ?
             provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
             : new List<string>();
@@ -68,7 +83,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     private static string TraderScore(IEnumerable<Score> scores)
     {
-        var trader = scores.FirstOrDefault(r => r.SourceId == 0);
+        var trader = scores.FirstOrDefault(r => r.SourceId == SourceId.Trader);
 
         return trader is not null ? ScoreMessage(trader, "Trader") : string.Empty;
     }
@@ -104,9 +119,9 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
 
-        var resultOrdered = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
+        var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
-        return (resultOrdered, indexes);
+        return (resultsChecking, indexes);
     }
 
     public async Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType)

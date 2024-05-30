@@ -244,4 +244,28 @@ public class VerifyFinalResultHelperServiceTests
 
         Assert.True(actual);
     }
+
+    [Fact]
+    public void VerifyAnyDrawResults_AllConditionPassed_ReturnTrue()
+    {
+        var results = new List<ResultDetail>()
+        {
+            new()
+            {
+                ResourceId = "M1",
+                HomeValue = "0",
+                AwayValue= "0"
+            },
+            new()
+            {
+                ResourceId = "M2",
+                HomeValue= "1",
+                AwayValue= "0"
+            }
+        };
+
+        var actual = VerifyFinalResultHelper.VerifyAnyDrawResults(results);
+
+        Assert.True(actual);
+    }
 }

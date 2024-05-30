@@ -1,10 +1,12 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Constants;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
+
 public class VerifyFinalByBestOfMatchTests
 {
     private readonly IDynamicRepository repository;
@@ -181,7 +183,6 @@ public class VerifyFinalByBestOfMatchTests
             },
         };
 
-
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
@@ -211,7 +212,6 @@ public class VerifyFinalByBestOfMatchTests
                 }
             }
         };
-
 
         var errorMessage = "Failed: FT(0-1) is inconsistent with Map information.";
 
@@ -284,7 +284,6 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
-
         var results = new List<ResultDetail>()
         {
             new()
@@ -302,8 +301,6 @@ public class VerifyFinalByBestOfMatchTests
                 IntervalNo = 2
             },
         };
-
-
 
         var errorMessage = "Failed: FT(0-2) is inconsistent with Map information.";
 
@@ -346,5 +343,4 @@ public class VerifyFinalByBestOfMatchTests
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
     }
-
 }

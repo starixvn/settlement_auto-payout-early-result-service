@@ -49,6 +49,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyMatchStatus>();
         service.AddSingleton<VerifyRunningOdds>();
         service.AddSingleton<VerifyConfirmScore>();
+        service.AddSingleton<VerifyTimeResult>();
         service.AddSingleton<VerifyBeforePushProfile>();
         service.AddSingleton<VerifyInningStatus>();
         service.AddSingleton<VerifyFinalResult>();

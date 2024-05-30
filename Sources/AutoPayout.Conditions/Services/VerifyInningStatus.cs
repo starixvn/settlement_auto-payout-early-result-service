@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿using AutoPayout.Constants;
+
+namespace AutoPayout.Conditions.Services;
 
 public class VerifyInningStatus(IDynamicRepository repository, ResultDetailService resultDetailService,
         WriteLogService writeLogService)
