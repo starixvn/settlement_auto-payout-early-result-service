@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
+﻿namespace AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 
 public static class VerifyFinalResultHelper
 {
@@ -90,13 +90,13 @@ public static class VerifyFinalResultHelper
 
     public static bool VerifyResultSettled(List<ResultDetail> settledResults, int playedGame)
     {
-        var fakeCalculatedResults = settledResults.Any(x => x.SettlementStatusId == SettlementStatusId.Calculated
-            && x.IntervalNo > playedGame);
+        var fakeCalculatedResults = settledResults.Where(x => x.SettlementStatusId == SettlementStatusId.Calculated
+            && x.IntervalNo > playedGame).ToList();
 
-        return !fakeCalculatedResults;
+        return !fakeCalculatedResults.Any();
     }
 
-    public static bool VerifyAnyDrawResults(IEnumerable<ResultDetail> resultsChecking)
+    public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
         => !resultsChecking.Any(x => (new int[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 

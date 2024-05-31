@@ -1,5 +1,5 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce;
-using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
+using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
@@ -77,7 +77,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
             return VerifyFinalResultHelper.VerifyFinalBO1(finalResult, results);
         }
 
-        if (matchDetail.BestOfMap == GameType.Bo1)
+        if (matchDetail.BestOfMap == GameType.Bo2)
         {
             return VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results) &&
                      VerifyFinalResultHelper.VerifyResult(results, finalResult);

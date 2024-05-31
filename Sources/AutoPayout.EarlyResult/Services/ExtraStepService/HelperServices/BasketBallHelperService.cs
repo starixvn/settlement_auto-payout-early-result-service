@@ -35,7 +35,10 @@ public static class BasketBallHelperService
         foreach (var resultDetail in match.ResultDetails)
         {
             var position = Array.IndexOf(CashOutConstants.ResourceWithOutFinalOrder, resultDetail.ResourceId);
-            elements[position] = $"{resultDetail.HomeValue}-{resultDetail.AwayValue}";
+            if (position >= 0)
+            {
+                elements[position] = $"{resultDetail.HomeValue}-{resultDetail.AwayValue}";
+            }
         }
 
         return string.Join(",", elements);
