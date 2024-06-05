@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Conditions.Services.HelperService;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 
@@ -25,9 +26,12 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
 
         var (results, _) = await resultDetailService.GetResultsChecking(match, MaxQuarter, resultCalculated);
 
-        var isHalfTimeValid = await HandleHalfTime(match, matchDetail, results);
+        if (await HandleHalfTime(match, matchDetail, results))
+        {
+            results = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
+        };
 
-        await HandleFullTime(match, matchDetail, results, isHalfTimeValid);
+        await HandleFullTime(match, matchDetail, results);
     }
 
     private async Task<bool> HandleHalfTime(Match match, MatchDetail matchDetail, IReadOnlyCollection<ResultDetail> results)
@@ -37,16 +41,16 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
         if (halfTime is not null && basketballHelper.IsHalfTimeInValid(halfTime, resultWithoutHt, matchDetail.GameSession, out var message))
         {
             await HandleInvalidResult(halfTime, match, message);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
-    private async Task HandleFullTime(Match match, MatchDetail matchDetail, List<ResultDetail> results, bool isHalfTimeValid)
+    private async Task HandleFullTime(Match match, MatchDetail matchDetail, List<ResultDetail> results)
     {
         var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
-        var halfTime = results.FirstOrDefault(r => isHalfTimeValid && r.ResourceId == ResourceIds.Halftime);
+        var halfTime = results.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
         var errorMessage = string.Empty;
         if (fullTimeResult is null)
         {

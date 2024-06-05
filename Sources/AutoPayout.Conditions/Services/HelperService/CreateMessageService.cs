@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Services.HelperSerivce;
+namespace AutoPayout.Conditions.Services.HelperService;
 public static class CreateMessageService
 {
 
@@ -11,27 +11,21 @@ public static class CreateMessageService
             .Replace("{1}", gameSession.ToString());
     }
 
-    public static string InconsistentWithGameSession(IEnumerable<ResultDetail> ResultDetails, int gameSession)
+    public static string InconsistentWithGameSession(IEnumerable<ResultDetail> resultDetails, int gameSession)
     {
-        var results = ResultDetails.Select(r => $"{r.ResourceId}({r.HomeValue}-{r.AwayValue})");
+        var results = resultDetails.Select(r => $"{r.ResourceId}({r.HomeValue}-{r.AwayValue})");
         return ErrorMessage.InvalidMatchType
             .Replace("{0}", string.Join(", ", results))
             .Replace("{1}", gameSession.ToString());
     }
 
-    public static string HalfTimeResultRelatedNotValid(ResultDetail halfTimeResult, string[] resultRelatedValid)
+    public static string ResultRelatedInconsistent(ResultDetail resultDetail, IEnumerable<ResultDetail> resultRelatedValid)
     {
-        var resultNotValid = ResourceIds.ResultHtBasketBall.Except(resultRelatedValid);
-        return ErrorMessage.RelatedResultNotCalculated
-            .Replace("{0}", $"HT({halfTimeResult.HomeValue}-{halfTimeResult.AwayValue})")
-            .Replace("{1}", string.Join(", ", resultNotValid));
-    }
-
-    public static string ResultRelatedInconsistentWithHT(ResultDetail halfTimeResult, List<ResultDetail> resultRelatedValid)
-    {
-        var results = resultRelatedValid.Select(r => $"{r.ResourceId}({r.HomeValue}-{r.AwayValue})");
+        var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT")
+            .Replace(ResourceIds.Halftime, "HT");
+        var results = resultRelatedValid.Select(r => $"{r.ResourceId.Replace(ResourceIds.Halftime, "HT")}({r.HomeValue}-{r.AwayValue})");
         return ErrorMessage.RelatedResultInconsistent
-            .Replace("{0}", $"HT({halfTimeResult.HomeValue}-{halfTimeResult.AwayValue})")
+            .Replace("{0}", $"{resourceId}({resultDetail.HomeValue}-{resultDetail.AwayValue})")
             .Replace("{1}", string.Join(", ", results));
     }
 
@@ -49,20 +43,14 @@ public static class CreateMessageService
             .Replace("{1}", $"HT({halfTime.HomeValue}-{halfTime.AwayValue})");
     }
 
-    public static string RelatedResultInvalidForFT(ResultDetail fullTimeResult, string[] resultRelatedValid)
+    public static string RelatedResultInvalid(ResultDetail resultDetail, IEnumerable<string> resultRelatedValid, IEnumerable<string> listResourceNeeded)
     {
-        var resultNotValid = ResourceIds.ResultFtWithoutOTBasketBall.Except(resultRelatedValid);
+        var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT")
+            .Replace(ResourceIds.Halftime, "HT");
+        var resultNotValid = listResourceNeeded.Except(resultRelatedValid);
         return ErrorMessage.RelatedResultNotCalculated
-            .Replace("{0}", $"FT({fullTimeResult.HomeValue}-{fullTimeResult.AwayValue})")
+            .Replace("{0}", $"{resourceId}({resultDetail.HomeValue}-{resultDetail.AwayValue})")
             .Replace("{1}", string.Join(", ", resultNotValid).Replace("01", "HT"));
-    }
-
-    public static string RelatedResultScoreInconsistentWithFT(ResultDetail fullTimeResult, List<ResultDetail> resultRelatedValid)
-    {
-        var results = resultRelatedValid.Select(r => $"{r.ResourceId.Replace("01", "HT")}({r.HomeValue}-{r.AwayValue})");
-        return ErrorMessage.RelatedResultInconsistent
-            .Replace("{0}", $"FT({fullTimeResult.HomeValue}-{fullTimeResult.AwayValue})")
-            .Replace("{1}", string.Join(", ", results));
     }
 
     public static string FullTimeDrawMessage(ResultDetail fullTimeResult)

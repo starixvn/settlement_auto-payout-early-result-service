@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
@@ -95,11 +94,13 @@ public class BasketballHelperServiceImp : BasketballHelperService
 
     private static bool FullTimeRelatedResultInValid(ResultDetail finalResult, IReadOnlyCollection<ResultDetail> results, out string message)
     {
-        var resultsValid = ResourceIds.ResultFtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
+        var resultsValid = ResourceIds.ResultFtBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
         var isOtExist = resultsValid.Any(r => r == ResourceIds.OverTime);
         var relatedResultNeeded = isOtExist ? ResourceIds.ResultFtBasketBall.Length : ResourceIds.ResultFtWithoutOTBasketBall.Length;
 
-        message = resultsValid.Length != relatedResultNeeded ? CreateMessageService.RelatedResultInvalidForFT(finalResult, resultsValid) : string.Empty;
+        message = resultsValid.Length != relatedResultNeeded ?
+            CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, isOtExist ? ResourceIds.ResultFtBasketBall : ResourceIds.ResultFtWithoutOTBasketBall)
+            : string.Empty;
         return resultsValid.Length != relatedResultNeeded;
     }
 
@@ -112,7 +113,7 @@ public class BasketballHelperServiceImp : BasketballHelperService
         var isOTInvalid = IsOtInValid(otResult, totalHomeValue, totalAwayValue);
         if (isOTInvalid || IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, otResult))
         {
-            message = CreateMessageService.RelatedResultScoreInconsistentWithFT(finalResult, results);
+            message = CreateMessageService.ResultRelatedInconsistent(finalResult, results);
             return true;
         }
 
@@ -159,7 +160,7 @@ public class BasketballHelperServiceImp : BasketballHelperService
 
         if (resultsValid.Length != ResourceIds.ResultHtBasketBall.Length)
         {
-            message = CreateMessageService.HalfTimeResultRelatedNotValid(halfTimeResult, resultsValid);
+            message = CreateMessageService.RelatedResultInvalid(halfTimeResult, resultsValid, ResourceIds.ResultHtBasketBall);
             return true;
         }
 
@@ -176,7 +177,7 @@ public class BasketballHelperServiceImp : BasketballHelperService
 
         if (home != int.Parse(halfTimeResult.HomeValue) || away != int.Parse(halfTimeResult.AwayValue))
         {
-            message = CreateMessageService.ResultRelatedInconsistentWithHT(halfTimeResult, resultRelated);
+            message = CreateMessageService.ResultRelatedInconsistent(halfTimeResult, resultRelated);
             return true;
         }
 

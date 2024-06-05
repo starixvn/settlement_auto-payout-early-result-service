@@ -18,8 +18,8 @@ public static class BasketBallHelperService
 
         var determinedType = match.ResultDetails.Select(resultDetail => resultDetail.ResourceId switch
             {
-                ResourceIds.FullTime => 0,
-                ResourceIds.Halftime => 2,
+                ResourceIds.Halftime => 0,
+                ResourceIds.FullTime => 2,
                 _ => Array.FindIndex(ResourceIds.ResultBasketBall, r => r == resultDetail.ResourceId) + roundBitStartAt
             })
             .Select(bitPosition => Math.Pow(2, bitPosition))
