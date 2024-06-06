@@ -1,5 +1,5 @@
 ﻿using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Microsoft.Extensions.Options;
@@ -56,7 +56,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -98,7 +98,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -141,7 +141,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -179,7 +179,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -227,7 +227,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -291,7 +291,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -340,7 +340,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
@@ -382,7 +382,7 @@ public class VerifyConfirmScoreTests
             },
         };
 
-        resultDetailService.GetScore(match).Returns(scores);
+        resultDetailService.GetScores(match).Returns(scores);
 
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 

@@ -1,5 +1,5 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce;
-using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
@@ -109,6 +109,6 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime);
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 }

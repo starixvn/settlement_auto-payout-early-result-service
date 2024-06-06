@@ -1,4 +1,6 @@
-﻿using AutoPayout.Constants;
+﻿using AutoPayout.Conditions.Helpers;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
@@ -7,20 +9,20 @@ public interface BasketballHelperService
     public bool IsHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession,
         out string message);
 
-    public bool IsFullTimeDraw(ResultDetail finalResult, out string message);
+    public string IsFullTimeDraw(ResultDetail finalResult);
 
-    public bool IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult, out string message);
+    public string IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult);
 
-    public bool IsFinalOfBo4InValid(ResultDetail finalResult, List<ResultDetail> results, out string message);
+    public Task<string> IsFinalOfBo4InValid(Match match, ResultDetail finalResult, List<ResultDetail> results);
 }
-public class BasketballHelperServiceImp : BasketballHelperService
+public class BasketballHelperServiceImp(OverTimeService overTimeService) : BasketballHelperService
 {
     public bool IsHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession, out string message)
     {
         switch (gameSession)
         {
             case GameType.Bo1:
-                message = CreateMessageService.HalfTimeInconsistentWithGameSession(halfTimeResult, gameSession);
+                message = CreateMessageService.InconsistentWithGameSession(halfTimeResult, gameSession);
                 return true;
             case GameType.Bo4 when HalfTimeRelatedResultInValid(halfTimeResult, results, out message):
             case GameType.Bo4 when IsHalfTimeScoreInValid(halfTimeResult, results, out message):
@@ -31,94 +33,76 @@ public class BasketballHelperServiceImp : BasketballHelperService
         }
     }
 
-    public bool IsFullTimeDraw(ResultDetail finalResult, out string message)
+    public string IsFullTimeDraw(ResultDetail finalResult)
     {
-        if (int.Parse(finalResult.HomeValue) == int.Parse(finalResult.AwayValue))
-        {
-            message = CreateMessageService.FullTimeDrawMessage(finalResult);
-            return true;
-        }
-
-        message = string.Empty;
-        return false;
+        return int.Parse(finalResult.HomeValue) == int.Parse(finalResult.AwayValue) ? CreateMessageService.FullTimeDrawMessage(finalResult) : string.Empty;
     }
 
 
-    public bool IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult, out string message)
+    public string IsFinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult)
     {
-        if (IsFullTimeDraw(finalResult, out message))
+        var isDraw = IsFullTimeDraw(finalResult);
+        if (isDraw != string.Empty)
         {
-            return true;
+            return isDraw;
         }
 
         if (halfTimeResult is null)
         {
-            message = CreateMessageService.HalfTimeNotCalculated(finalResult);
-            return true;
+            return CreateMessageService.HalfTimeNotCalculated(finalResult);
         }
 
         if (int.Parse(halfTimeResult.HomeValue) > int.Parse(finalResult.HomeValue) ||
             int.Parse(halfTimeResult.AwayValue) > int.Parse(finalResult.AwayValue))
         {
-            message = CreateMessageService.HalfTimeInconsistentWithFT(finalResult, halfTimeResult);
-            return true;
+            return CreateMessageService.HalfTimeInconsistentWithFT(finalResult, halfTimeResult);
+
         }
 
         finalResult.RelatedInfo = $"{halfTimeResult.HomeValue}-{halfTimeResult.AwayValue}";
 
-        message = string.Empty;
-        return false;
+        return string.Empty;
     }
 
-    public bool IsFinalOfBo4InValid(ResultDetail finalResult, List<ResultDetail> results, out string message)
+    public async Task<string> IsFinalOfBo4InValid(Match match, ResultDetail finalResult, List<ResultDetail> results)
     {
-        if (IsFullTimeDraw(finalResult, out message))
+        var isDraw = IsFullTimeDraw(finalResult);
+        if (isDraw != string.Empty)
         {
-            return true;
+            return isDraw;
         }
 
-        if (FullTimeRelatedResultInValid(finalResult, results, out message))
+        if (FullTimeRelatedResultInValid(finalResult, results, out var message))
         {
-            return true;
+            return message;
         }
 
-        if (FullTimeRelatedResultScoreInvalid(finalResult, results, out message))
+        if (await FullTimeRelatedResultScoreInvalid(finalResult, results))
         {
-            return true;
+            return CreateMessageService.ResultRelatedInconsistent(finalResult, results);
         }
 
-        message = string.Empty;
-        return false;
+        match.ResultDetails.AddIf(results.TryGetValue(r => r.ResourceId == ResourceIds.OverTime, out var overTime), overTime);
+        return string.Empty;
     }
-
 
     private static bool FullTimeRelatedResultInValid(ResultDetail finalResult, IReadOnlyCollection<ResultDetail> results, out string message)
     {
         var resultsValid = ResourceIds.ResultFtBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
-        var isOtExist = resultsValid.Any(r => r == ResourceIds.OverTime);
-        var relatedResultNeeded = isOtExist ? ResourceIds.ResultFtBasketBall.Length : ResourceIds.ResultFtWithoutOTBasketBall.Length;
 
-        message = resultsValid.Length != relatedResultNeeded ?
-            CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, isOtExist ? ResourceIds.ResultFtBasketBall : ResourceIds.ResultFtWithoutOTBasketBall)
-            : string.Empty;
-        return resultsValid.Length != relatedResultNeeded;
+        message = resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length ? CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, ResourceIds.ResultFtWithoutOTBasketBall) : string.Empty;
+        return resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length;
     }
 
-    private static bool FullTimeRelatedResultScoreInvalid(ResultDetail finalResult, List<ResultDetail> results, out string message)
+    private async Task<bool> FullTimeRelatedResultScoreInvalid(ResultDetail finalResult, List<ResultDetail> results)
     {
         var quarterResult = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
         var totalHomeValue = SumHomeValueFullTime(quarterResult);
         var totalAwayValue = SumAwayValueFullTime(quarterResult);
-        var otResult = results.FirstOrDefault(r => r.ResourceId == ResourceIds.OverTime);
+        var otResult = await overTimeService.GetOtBasketBall(finalResult, totalHomeValue, totalAwayValue);
         var isOTInvalid = IsOtInValid(otResult, totalHomeValue, totalAwayValue);
-        if (isOTInvalid || IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, otResult))
-        {
-            message = CreateMessageService.ResultRelatedInconsistent(finalResult, results);
-            return true;
-        }
-
-        message = string.Empty;
-        return false;
+        results.AddIf(otResult != null, otResult);
+        return isOTInvalid || IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, otResult);
     }
 
     private static bool IsOtInValid(ResultDetail otResult, int totalHomeValue, int totalAwayValue)

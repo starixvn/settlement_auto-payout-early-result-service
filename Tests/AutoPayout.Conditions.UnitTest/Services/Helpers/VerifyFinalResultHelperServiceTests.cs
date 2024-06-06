@@ -1,4 +1,4 @@
-﻿using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
+﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers;

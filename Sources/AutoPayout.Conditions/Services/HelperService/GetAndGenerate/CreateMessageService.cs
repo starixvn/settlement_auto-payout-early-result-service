@@ -1,13 +1,14 @@
 ﻿using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Services.HelperService;
+namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 public static class CreateMessageService
 {
-
-    public static string HalfTimeInconsistentWithGameSession(ResultDetail halfTimeResult, int gameSession)
+    public static string InconsistentWithGameSession(ResultDetail resultDetail, int gameSession)
     {
+        var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT")
+            .Replace(ResourceIds.Halftime, "HT");
         return ErrorMessage.InvalidMatchType
-            .Replace("{0}", $"HT({halfTimeResult.HomeValue}-{halfTimeResult.AwayValue})")
+            .Replace("{0}", $"{resourceId}({resultDetail.HomeValue}-{resultDetail.AwayValue})")
             .Replace("{1}", gameSession.ToString());
     }
 

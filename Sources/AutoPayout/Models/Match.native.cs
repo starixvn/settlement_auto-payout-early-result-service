@@ -16,7 +16,7 @@ public class Match
 
     public int MainRetryTime { get; set; }
 
-    public IEnumerable<ResultDetail> ResultDetails { get; set; }
+    public List<ResultDetail> ResultDetails { get; set; }
 
     public string ResourceRefund { get; set; }
 

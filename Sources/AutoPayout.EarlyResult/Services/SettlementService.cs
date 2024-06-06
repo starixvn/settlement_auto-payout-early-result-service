@@ -47,7 +47,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         var resultExpired = match.ResultDetails.Where(r => r.ResourceStatus == ResourceStatus.Expired).ToList();
         if (resultExpired.Any())
         {
-            match.ResultDetails = match.ResultDetails.Except(resultExpired);
+            match.ResultDetails = match.ResultDetails.Except(resultExpired).ToList();
             var resultExpiredIds = string.Join(',', resultExpired.Select(r => r.ResourceId));
             var cloneMatch = new Match
             {

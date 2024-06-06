@@ -2,11 +2,11 @@
 public static class CashOutConstants
 {
 
-    public static string[] ResourceOrder = ["00", "Q1", "Q2", "Q3", "Q4", "01"];
+    public static readonly string[] ResourceOrder = { "00", "Q1", "Q2", "Q3", "Q4", "01" };
 
-    public static string[] ResourceWithOutFinalOrder = ["Q1", "Q2", "Q3", "Q4", "OT"];
+    public static readonly string[] ResourceWithOutFinalOrder = { "Q1", "Q2", "Q3", "Q4", "OT" };
 
-    public static Dictionary<string, int> QuarterListHalf = new()
+    public static readonly Dictionary<string, int> QuarterListHalf = new()
     {
         { "00", 0 },
         { "Q1", 1 },

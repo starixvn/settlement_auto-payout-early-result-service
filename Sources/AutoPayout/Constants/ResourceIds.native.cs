@@ -7,7 +7,7 @@ public class ResourceIds
 
     public const string OverTime = "OT";
 
-    public static readonly string[] TimePattern = ["9090", "9089", "9134", "9136", "9137", "9131", "9127", "9129", "9121", "9123", "9126", "9058"];
+    public static readonly string[] TimePattern = { "9090", "9089", "9134", "9136", "9137", "9131", "9127", "9129", "9121", "9123", "9126", "9058" };
 
     public static readonly string[] ResultHtBasketBall = { "Q1", "Q2" };
 

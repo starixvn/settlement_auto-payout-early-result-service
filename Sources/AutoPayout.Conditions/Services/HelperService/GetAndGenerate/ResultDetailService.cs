@@ -1,11 +1,13 @@
 ﻿using AutoPayout.Constants;
 using Match = AutoPayout.Models.Match;
 
-namespace AutoPayout.Conditions.Services.HelperSerivce;
+namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 
 public interface ResultDetailService
 {
-    Task<IEnumerable<Score>> GetScore(Match match);
+    Task<IEnumerable<Score>> GetScores(Match match);
+
+    Task<IEnumerable<Score>> GetSingleScore(ResultDetail resultDetail);
 
     string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
@@ -27,7 +29,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         UpdateResultStatusService updateResultStatusService)
     : ResultDetailService
 {
-    public async Task<IEnumerable<Score>> GetScore(Match match)
+    public async Task<IEnumerable<Score>> GetScores(Match match)
     {
         var resources = match.ResultDetails.Select(r => r.ResourceId);
         var criteria = new GetConfirmScoreCriteria
@@ -35,6 +37,20 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             MatchId = match.MatchId,
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
+        };
+
+        var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
+
+        return scores;
+    }
+
+    public async Task<IEnumerable<Score>> GetSingleScore(ResultDetail resultDetail)
+    {
+        var criteria = new GetConfirmScoreCriteria
+        {
+            MatchId = resultDetail.MatchId,
+            SportType = resultDetail.SportType,
+            ResourceIds = resultDetail.ResourceId
         };
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
@@ -81,7 +97,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails };
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails.ToList() };
         await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
     }
 

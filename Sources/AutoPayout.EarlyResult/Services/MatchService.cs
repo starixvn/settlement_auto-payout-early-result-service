@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
 using Fanex.Data.Repository;
@@ -44,11 +45,11 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
 
         var results = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
 
-        return results.SecondResultSet.GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
+        return IgnoreResult(results.SecondResultSet).GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
         {
             MatchId = g.Key.MatchId,
             LeagueId = g.Key.LeagueId,
-            ResultDetails = g.ToImmutableList(),
+            ResultDetails = g.ToList(),
             ResourceType = g.Key.ResourceType,
             SportType = g.Key.SportType,
             Conditions = results.FirstResultSet.Where(r => r.SportType == g.Key.SportType)
@@ -57,5 +58,10 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
             EarlyRetryTime = g.First().EarlyRetryTime,
             MainRetryTime = g.First().MainRetryTime,
         }).Where(m => !string.IsNullOrEmpty(m.Conditions)).ToList();
+    }
+
+    private static IEnumerable<ResultDetail> IgnoreResult(IEnumerable<ResultDetail> resultDetails)
+    {
+        return resultDetails.Where(r => !IgnoreResultByCondition.Conditions.TryGetValue(r.SportType, out var condition) || condition(r.ResourceId));
     }
 }

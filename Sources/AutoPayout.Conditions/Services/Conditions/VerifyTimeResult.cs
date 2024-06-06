@@ -1,4 +1,4 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
@@ -26,14 +26,14 @@ public class VerifyTimeResult : ICondition
         }
 
         var normalResults = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time);
-        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
+        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
 
-        var scores = await resultDetailService.GetScore(match);
+        var scores = await resultDetailService.GetScores(match);
 
         CompareScore(match, scores);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
-        match.ResultDetails = match.ResultDetails.Concat(normalResults);
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
+        match.ResultDetails = match.ResultDetails.Concat(normalResults).ToList();
 
         if (!match.ResultDetails.Any())
         {

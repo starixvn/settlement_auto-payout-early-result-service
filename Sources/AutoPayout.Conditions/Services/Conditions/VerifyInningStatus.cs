@@ -1,4 +1,4 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services;
@@ -53,7 +53,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
     private async Task UpdateFinalResourceStatus(Match match)
     {
         var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceIds.FullTime).ToList();
-        match.ResultDetails = match.ResultDetails.Except(finalResource);
+        match.ResultDetails = match.ResultDetails.Except(finalResource).ToList();
         await resultDetailService.UpdateResultStatus(match.MatchId, finalResource, ErrorMessage.IntervalNotSettled);
         await writeLogService.WriteLog(new Match { MatchId = match.MatchId, ResultDetails = finalResource },
             new IntervalNotSettledException());

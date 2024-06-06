@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.HelperSerivce;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 using AutoPayout.Models;
@@ -51,7 +51,7 @@ public class VerifyBasketBallFinalResultTests
             Arg.Any<int>(), out Arg.Any<string>());
 
         basketballHelper.DidNotReceive()
-            .IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>(), out Arg.Any<string>());
+            .IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class VerifyBasketBallFinalResultTests
         await resultDetailService.Received(1).UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received(1).WriteLogResult(1, Arg.Any<ResultDetail>(), Arg.Any<string>());
         basketballHelper.DidNotReceive()
-            .IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>(), out Arg.Any<string>());
+            .IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
         Assert.Empty(match.ResultDetails);
     }
 
@@ -98,7 +98,7 @@ public class VerifyBasketBallFinalResultTests
             .Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
         basketballHelper.IsHalfTimeInValid(Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
             Arg.Any<int>(), out Arg.Any<string>()).Returns(true);
-        basketballHelper.IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>(), out Arg.Any<string>()).Returns(true); ;
+        basketballHelper.IsFinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>()).Returns("true"); ;
 
 
         await service.HandleCondition(match);
