@@ -3,8 +3,8 @@
 namespace AutoPayout.EarlyResult.Constants;
 public class IgnoreResultByCondition
 {
-    public static readonly Dictionary<int, Func<string, bool>> Conditions = new()
+    public static readonly Dictionary<int, Func<ResultDetail, bool>> Conditions = new()
     {
-        { SportType.BasketBall, input => input != ResourceIds.OverTime }
+        { SportType.BasketBall, input => input.ResourceId != ResourceIds.OverTime || input.ResourceStatus == ResourceStatus.Expired }
     };
 }

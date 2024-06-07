@@ -1,4 +1,5 @@
-﻿using AutoPayout.Constants;
+﻿using AutoPayout.Conditions.Helpers;
+using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 public static class CreateMessageService
@@ -12,7 +13,7 @@ public static class CreateMessageService
             .Replace("{1}", gameSession.ToString());
     }
 
-    public static string InconsistentWithGameSession(IEnumerable<ResultDetail> resultDetails, int gameSession)
+    public static string ResultsInconsistentWithGameSession(IEnumerable<ResultDetail> resultDetails, int gameSession)
     {
         var results = resultDetails.Select(r => $"{r.ResourceId}({r.HomeValue}-{r.AwayValue})");
         return ErrorMessage.InvalidMatchType
@@ -20,11 +21,12 @@ public static class CreateMessageService
             .Replace("{1}", gameSession.ToString());
     }
 
-    public static string ResultRelatedInconsistent(ResultDetail resultDetail, IEnumerable<ResultDetail> resultRelatedValid)
+    public static string ResultRelatedInconsistent(ResultDetail resultDetail, IReadOnlyCollection<ResultDetail> resultRelatedValid)
     {
-        var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT")
-            .Replace(ResourceIds.Halftime, "HT");
-        var results = resultRelatedValid.Select(r => $"{r.ResourceId.Replace(ResourceIds.Halftime, "HT")}({r.HomeValue}-{r.AwayValue})");
+        var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT").Replace(ResourceIds.Halftime, "HT");
+        var overTime = resultRelatedValid.FirstOrDefault(r => r.ResourceId == ResourceIds.OverTime);
+        var results = resultRelatedValid.Where(r => r.ResourceId != ResourceIds.OverTime).Select(r => $"{r.ResourceId.Replace(ResourceIds.Halftime, "HT")}({r.HomeValue}-{r.AwayValue})").ToList();
+        results.AddIf(overTime != null, $"OT({overTime.RelatedInfo})");
         return ErrorMessage.RelatedResultInconsistent
             .Replace("{0}", $"{resourceId}({resultDetail.HomeValue}-{resultDetail.AwayValue})")
             .Replace("{1}", string.Join(", ", results));

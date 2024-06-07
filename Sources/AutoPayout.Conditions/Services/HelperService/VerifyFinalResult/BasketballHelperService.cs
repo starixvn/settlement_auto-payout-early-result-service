@@ -77,44 +77,38 @@ public class BasketballHelperServiceImp(OverTimeService overTimeService) : Baske
             return message;
         }
 
-        if (await FullTimeRelatedResultScoreInvalid(finalResult, results))
+        if (await FullTimeRelatedResultScoreInvalid(match, finalResult, results))
         {
             return CreateMessageService.ResultRelatedInconsistent(finalResult, results);
         }
 
-        match.ResultDetails.AddIf(results.TryGetValue(r => r.ResourceId == ResourceIds.OverTime, out var overTime), overTime);
+        match.ResultDetails.AddIf(results.TryGetValue(r => r.ResourceId == ResourceIds.OverTime && r.IsValid, out var overTime), overTime);
         return string.Empty;
     }
 
     private static bool FullTimeRelatedResultInValid(ResultDetail finalResult, IReadOnlyCollection<ResultDetail> results, out string message)
     {
-        var resultsValid = ResourceIds.ResultFtBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
+        var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
 
         message = resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length ? CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, ResourceIds.ResultFtWithoutOTBasketBall) : string.Empty;
         return resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length;
     }
 
-    private async Task<bool> FullTimeRelatedResultScoreInvalid(ResultDetail finalResult, List<ResultDetail> results)
+    private async Task<bool> FullTimeRelatedResultScoreInvalid(Match match, ResultDetail finalResult, List<ResultDetail> results)
     {
         var quarterResult = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
         var totalHomeValue = SumHomeValueFullTime(quarterResult);
         var totalAwayValue = SumAwayValueFullTime(quarterResult);
         var otResult = await overTimeService.GetOtBasketBall(finalResult, totalHomeValue, totalAwayValue);
-        var isOTInvalid = IsOtInValid(otResult, totalHomeValue, totalAwayValue);
-        results.AddIf(otResult != null, otResult);
-        return isOTInvalid || IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, otResult);
-    }
+        results.Add(otResult);
 
-    private static bool IsOtInValid(ResultDetail otResult, int totalHomeValue, int totalAwayValue)
-    {
-        var isOtExist = otResult != null && string.CompareOrdinal($"{otResult.HomeValue}:{otResult.AwayValue}", "0:0") != 0;
-
-        if (isOtExist && (totalHomeValue != totalAwayValue || int.Parse(otResult.HomeValue) == int.Parse(otResult.AwayValue)))
+        if (otResult.NeedRetry)
         {
-            return true;
+            match.ResultDetails.Remove(finalResult);
+            return false;
         }
 
-        return !isOtExist && totalHomeValue == totalAwayValue;
+        return !otResult.IsValid || IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, otResult);
     }
 
     private static bool IsTotalScoreInValid(ResultDetail finalResult, int totalHomeValue, int totalAwayValue, ResultDetail otResult)

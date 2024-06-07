@@ -10,7 +10,6 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
     {
         match.MatchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
 
-
         await HandleQuarter(match);
 
         await HandleFinal(match);
@@ -25,25 +24,21 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
 
         var (results, _) = await resultDetailService.GetResultsChecking(match, MaxQuarter, resultCalculated);
 
-        if (await HandleHalfTime(match, match.MatchDetail.GameSession, results))
-        {
-            results = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
-        };
+        await HandleHalfTime(match, match.MatchDetail.GameSession, results);
 
         await HandleFullTime(match, match.MatchDetail.GameSession, results);
     }
 
-    private async Task<bool> HandleHalfTime(Match match, int gameSession, IReadOnlyCollection<ResultDetail> results)
+    private async Task HandleHalfTime(Match match, int gameSession, ICollection<ResultDetail> results)
     {
         var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
         var resultWithoutHt = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
         if (halfTime is not null && basketballHelper.IsHalfTimeInValid(halfTime, resultWithoutHt, gameSession, out var message))
         {
             await HandleInvalidResult(halfTime, match, message);
-            return true;
+            results.Remove(halfTime);
         }
 
-        return false;
     }
 
     private async Task HandleFullTime(Match match, int gameSession, List<ResultDetail> results)
@@ -75,7 +70,7 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
             r.ResourceId != ResourceIds.FullTime && r.ResourceId != ResourceIds.Halftime).ToList();
         if (match.MatchDetail.GameSession is GameType.Bo1 or GameType.Bo2 && quarter.Any())
         {
-            var message = CreateMessageService.InconsistentWithGameSession(quarter, match.MatchDetail.GameSession);
+            var message = CreateMessageService.ResultsInconsistentWithGameSession(quarter, match.MatchDetail.GameSession);
             await resultDetailService.UpdateResultStatus(match.MatchId, quarter, message);
             resultDetailService.WriteLogResults(
                 match.MatchId,
@@ -99,6 +94,6 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
             match.MatchId,
             result,
             message);
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != result.ResourceId).ToList();
+        match.ResultDetails.Remove(result);
     }
 }

@@ -62,6 +62,6 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
 
     private static IEnumerable<ResultDetail> IgnoreResult(IEnumerable<ResultDetail> resultDetails)
     {
-        return resultDetails.Where(r => !IgnoreResultByCondition.Conditions.TryGetValue(r.SportType, out var condition) || condition(r.ResourceId));
+        return resultDetails.Where(r => !IgnoreResultByCondition.Conditions.TryGetValue(r.SportType, out var condition) || condition(r));
     }
 }

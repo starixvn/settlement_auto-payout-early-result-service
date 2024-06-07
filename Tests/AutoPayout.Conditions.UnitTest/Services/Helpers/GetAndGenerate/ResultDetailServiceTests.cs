@@ -5,7 +5,7 @@ using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTests.Services;
+namespace AutoPayout.Conditions.UnitTests.Services.Helpers.GetAndGenerate;
 public class ResultDetailServiceTests
 {
     private readonly IDynamicRepository repository;

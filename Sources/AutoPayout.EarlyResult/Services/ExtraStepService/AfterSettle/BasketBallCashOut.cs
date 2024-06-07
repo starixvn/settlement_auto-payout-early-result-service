@@ -32,7 +32,7 @@ public class BasketBallCashOut(IOptions<AppSettingsKey> options, IHttpClientFact
             var httpClient = httpClientFactory.CreateClient();
 
             await httpClient.PostAsync(new Uri(options.Value.ThirdPartyUri.JackTimeResult), requestContent);
-            await Fanex.Logging.LogService.ErrorAsync($"Auto Payout (Call JackTime API): {options.Value.ThirdPartyUri.JackTimeResult} : {json}");
+            await Fanex.Logging.LogService.InfoAsync($"Auto Payout (Call JackTime API): {options.Value.ThirdPartyUri.JackTimeResult} : {json}");
         }
         catch (Exception exception)
         {

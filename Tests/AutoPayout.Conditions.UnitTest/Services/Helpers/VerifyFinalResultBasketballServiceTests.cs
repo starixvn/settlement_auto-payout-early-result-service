@@ -38,7 +38,6 @@ public class VerifyFinalResultBasketballServiceTests
         var actual = service.IsHalfTimeInValid(halfTime, new List<ResultDetail>(),
             GameType.Bo1, out var message);
 
-
         Assert.Equal("Failed Auto Payout: HT(1-2) due to invalid match type: GameSession(1)", message);
     }
 
@@ -160,8 +159,7 @@ public class VerifyFinalResultBasketballServiceTests
     public async Task IsFinalOfBo4InValid_FinalDraw_ReturnTrueAndCorrectMessage()
     {
         fullTime.HomeValue = fullTime.AwayValue = "1";
-        var actual = await service.IsFinalOfBo4InValid(fullTime, new List<ResultDetail>());
-
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, new List<ResultDetail>());
 
         Assert.Equal("Failed Auto Payout: FT(1-1) due to FT should not be tie.", actual);
     }
@@ -177,7 +175,7 @@ public class VerifyFinalResultBasketballServiceTests
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
         var results = GetQuarter((from, to));
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, results);
 
 
         Assert.Equal(errorMessage, actual);
@@ -188,14 +186,17 @@ public class VerifyFinalResultBasketballServiceTests
     {
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
-        var results = GetQuarter((0, ResourceIds.ResultFtBasketBall.Length));
+        var results = GetQuarter((0, ResourceIds.ResultFtWithoutOTBasketBall.Length));
         results.ForEach(r => r.HomeValue = r.AwayValue = "1");
         results[0].HomeValue = "2";
+        var otResult = new ResultDetail { ResourceId = ResourceIds.OverTime, HomeValue = "1", AwayValue = "2" };
 
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        overTimeService.GetOtBasketBall(fullTime, Arg.Any<int>(), Arg.Any<int>()).Returns(otResult);
+
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, results);
 
 
-        Assert.Equal("Failed Auto Payout: FT(3-4) due to values inconsistency: Q1(2-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1), OT(1-1)", actual);
+        Assert.Equal("Failed Auto Payout: FT(3-4) due to values inconsistency: Q1(2-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1), OT(1-2)", actual);
     }
     [Fact]
     public async Task IsFinalOfBo4InValid_NotExistOTAndSumScoreIsDraw_ReturnTrueAndCorrectMessage()
@@ -204,11 +205,13 @@ public class VerifyFinalResultBasketballServiceTests
         fullTime.AwayValue = "4";
         var results = GetQuarter((0, ResourceIds.ResultFtWithoutOTBasketBall.Length));
         results.ForEach(r => r.HomeValue = r.AwayValue = "1");
+        var otResult = new ResultDetail { ResourceId = ResourceIds.OverTime, HomeValue = "0", AwayValue = "0" };
+        overTimeService.GetOtBasketBall(fullTime, Arg.Any<int>(), Arg.Any<int>()).Returns(otResult);
 
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, results);
 
 
-        Assert.Equal("Failed Auto Payout: FT(3-4) due to values inconsistency: Q1(1-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1)", actual);
+        Assert.Equal("Failed Auto Payout: FT(3-4) due to values inconsistency: Q1(1-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1), OT(0-0)", actual);
     }
 
     [Fact]
@@ -216,10 +219,13 @@ public class VerifyFinalResultBasketballServiceTests
     {
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
-        var results = GetQuarter((0, ResourceIds.ResultFtBasketBall.Length));
+        var results = GetQuarter((0, ResourceIds.ResultFtWithoutOTBasketBall.Length));
         results.ForEach(r => r.HomeValue = r.AwayValue = "1");
+        var otResult = new ResultDetail { ResourceId = ResourceIds.OverTime, HomeValue = "1", AwayValue = "1" };
 
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        overTimeService.GetOtBasketBall(fullTime, Arg.Any<int>(), Arg.Any<int>()).Returns(otResult);
+
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, results);
 
 
         Assert.Equal("Failed Auto Payout: FT(3-4) due to values inconsistency: Q1(1-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1), OT(1-1)", actual);
@@ -235,7 +241,7 @@ public class VerifyFinalResultBasketballServiceTests
         results.ForEach(r => r.HomeValue = r.AwayValue = "1");
         results[0].HomeValue = "0";
 
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        var actual = await service.IsFinalOfBo4InValid(new Match(), fullTime, results);
 
 
         Assert.Equal("Failed Auto Payout: FT(2-4) due to values inconsistency: Q1(0-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1)", actual);
@@ -245,15 +251,24 @@ public class VerifyFinalResultBasketballServiceTests
     [Fact]
     public async Task IsFinalOfBo4InValid_TotalScoreScoreEqualFullTimeScoreAndOtValid_ReturnFalseAndEmptyMessage()
     {
-        fullTime.HomeValue = "4";
-        fullTime.AwayValue = "5";
-        var results = GetQuarter((0, ResourceIds.ResultFtBasketBall.Length));
+        fullTime.HomeValue = "5";
+        fullTime.AwayValue = "6";
+        var results = GetQuarter((0, ResourceIds.ResultFtWithoutOTBasketBall.Length));
         results.ForEach(r => r.HomeValue = r.AwayValue = "1");
-        results.Last().HomeValue = "0";
+        var otResult = new ResultDetail { ResourceId = ResourceIds.OverTime, HomeValue = "1", AwayValue = "2" };
+        var match = new Match
+        {
+            ResultDetails = new List<ResultDetail>()
+            {
+                fullTime
+            }
+        };
 
-        var actual = await service.IsFinalOfBo4InValid(fullTime, results);
+        overTimeService.GetOtBasketBall(fullTime, Arg.Any<int>(), Arg.Any<int>()).Returns(otResult);
+        var actual = await service.IsFinalOfBo4InValid(match, fullTime, results);
 
         Assert.Empty(actual);
+        Assert.Equal(2, match.ResultDetails.Count);
     }
 }
 
