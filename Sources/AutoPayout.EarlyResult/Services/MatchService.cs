@@ -4,7 +4,6 @@ using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
-using System.Collections.Immutable;
 
 namespace AutoPayout.EarlyResult.Services;
 

@@ -26,7 +26,7 @@ public static class CreateMessageService
         var resourceId = resultDetail.ResourceId.Replace(ResourceIds.FullTime, "FT").Replace(ResourceIds.Halftime, "HT");
         var overTime = resultRelatedValid.FirstOrDefault(r => r.ResourceId == ResourceIds.OverTime);
         var results = resultRelatedValid.Where(r => r.ResourceId != ResourceIds.OverTime).Select(r => $"{r.ResourceId.Replace(ResourceIds.Halftime, "HT")}({r.HomeValue}-{r.AwayValue})").ToList();
-        results.AddIf(overTime != null, $"OT({overTime.RelatedInfo})");
+        results.AddIf(overTime != null && !string.IsNullOrEmpty(overTime.RelatedInfo), $"OT({overTime?.RelatedInfo})");
         return ErrorMessage.RelatedResultInconsistent
             .Replace("{0}", $"{resourceId}({resultDetail.HomeValue}-{resultDetail.AwayValue})")
             .Replace("{1}", string.Join(", ", results));

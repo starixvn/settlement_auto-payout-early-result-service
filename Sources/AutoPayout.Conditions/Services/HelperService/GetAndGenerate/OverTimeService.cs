@@ -9,16 +9,17 @@ public interface OverTimeService
 
 public class OverTimeServiceImp(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options) : OverTimeService
 {
-    private readonly string OverTimeDefaultValue = "0";
+    private const string overTimeDefaultValue = "0";
+
     public async Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue)
     {
-        var resultOt = new ResultDetail()
+        var resultOt = new ResultDetail
         {
             MatchId = finalResult.MatchId,
             SportType = finalResult.SportType,
             ResourceId = ResourceIds.OverTime,
-            HomeValue = OverTimeDefaultValue,
-            AwayValue = OverTimeDefaultValue
+            HomeValue = overTimeDefaultValue,
+            AwayValue = overTimeDefaultValue
         };
 
         var scoresOt = (await resultDetailService.GetSingleScore(resultOt)).ToList();

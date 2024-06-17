@@ -5,16 +5,10 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyTimeResult : ICondition
+public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+    : ICondition
 {
-    private readonly ResultDetailService resultDetailService;
-    private readonly AppSettingsKey appSettingsKey;
-
-    public VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
-    {
-        this.resultDetailService = resultDetailService;
-        appSettingsKey = options.Value;
-    }
+    private const int maxSecond = 60;
 
     public async Task HandleCondition(Match match)
     {
@@ -88,18 +82,25 @@ public class VerifyTimeResult : ICondition
     {
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
+        var traderScore = TryGetTraderScore(groupScore, out _, out _);
 
-        if (!TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalSeconds > match.EarlyRetryTime)
+        if (!traderScore && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail },
+                remark);
             resultDetail.Expired = true;
         }
-        else if (TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        else if (traderScore && processTime.TotalMilliseconds > options.Value.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail },
+                remark);
             resultDetail.Expired = true;
+        }
+        else
+        {
+            //Do nothing
         }
 
         resultDetail.IsValid = false;

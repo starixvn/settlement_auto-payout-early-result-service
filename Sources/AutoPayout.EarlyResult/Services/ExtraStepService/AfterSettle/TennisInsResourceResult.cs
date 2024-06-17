@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Conditions.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Data.Repository;
 

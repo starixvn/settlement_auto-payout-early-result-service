@@ -68,17 +68,18 @@ public static class VerifyFinalResultHelper
 
             if (homeWinCount == numberOfSetWin || awayWinCount == numberOfSetWin)
             {
-                break;
+                break; // NOSONAR
             }
         }
 
         var finalHomeScore = Convert.ToInt32(finalResult.HomeValue);
         var finalAwayScore = Convert.ToInt32(finalResult.AwayValue);
+        var isFinalScoreMatched = finalHomeScore == homeWinCount
+                                  && finalAwayScore == awayWinCount;
 
-        return finalHomeScore == homeWinCount
-            && finalAwayScore == awayWinCount
-            && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
-            && (finalHomeScore + finalAwayScore) <= maxSetPlay;
+        return isFinalScoreMatched
+               && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
+               && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
 
     public static bool VerifyFinalBO1(ResultDetail finalResult, List<ResultDetail> results)
@@ -97,7 +98,7 @@ public static class VerifyFinalResultHelper
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
-        => !resultsChecking.Any(x => (new int[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
+        => !resultsChecking.Exists(x => (new[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)

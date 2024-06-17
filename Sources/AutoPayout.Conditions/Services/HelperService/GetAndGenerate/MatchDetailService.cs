@@ -10,7 +10,7 @@ public class MatchDetailServiceImp(IDynamicRepository repository) : MatchDetailS
 {
     public async Task<Settings> GetAutoSettings(int leagueId, int sportType)
     {
-        var criteria = new GetSettingsCriteria()
+        var criteria = new GetSettingsCriteria
         {
             LeagueId = leagueId,
             SportType = sportType

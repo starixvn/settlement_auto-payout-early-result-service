@@ -101,7 +101,7 @@ public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSetti
     {
         var listResourceLog = match.ResultDetails.Select(resultDetail => new ResourcesLogTest(match, resultDetail.ResourceId, message)).ToList();
 
-        return new WriteLogTestCriteria()
+        return new WriteLogTestCriteria
         {
             Resources = JsonConvert.SerializeObject(listResourceLog)
         };

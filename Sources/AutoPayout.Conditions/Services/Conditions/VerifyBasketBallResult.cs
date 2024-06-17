@@ -31,11 +31,18 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
 
     private async Task HandleHalfTime(Match match, int gameSession, ICollection<ResultDetail> results)
     {
-        var halfTime = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
+        var halfTime = match.ResultDetails.Find(r => r.ResourceId == ResourceIds.Halftime);
         var resultWithoutHt = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
-        if (halfTime is not null && basketballHelper.IsHalfTimeInValid(halfTime, resultWithoutHt, gameSession, out var message))
+        if (halfTime is null)
         {
-            await HandleInvalidResult(halfTime, match, message);
+            return;
+        }
+
+        var halfTimeMessage = basketballHelper.VerifyHalfTimeInValid(halfTime, resultWithoutHt, gameSession);
+
+        if (!string.IsNullOrEmpty(halfTimeMessage))
+        {
+            await HandleInvalidResult(halfTime, match, halfTimeMessage);
             results.Remove(halfTime);
         }
 
@@ -43,8 +50,8 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
 
     private async Task HandleFullTime(Match match, int gameSession, List<ResultDetail> results)
     {
-        var fullTimeResult = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
-        var halfTime = results.FirstOrDefault(r => r.ResourceId == ResourceIds.Halftime);
+        var fullTimeResult = match.ResultDetails.Find(r => r.ResourceId == ResourceIds.FullTime);
+        var halfTime = results.Find(r => r.ResourceId == ResourceIds.Halftime);
         if (fullTimeResult is null)
         {
             return;

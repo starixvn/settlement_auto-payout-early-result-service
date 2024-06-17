@@ -45,8 +45,8 @@ public class OverTimeServiceTests
         var overTime = await service.GetOtBasketBall(final, 5, 6);
 
         Assert.False(overTime.IsValid);
-        Assert.Null(overTime.HomeValue);
-        Assert.Null(overTime.AwayValue);
+        Assert.Equal("0", overTime.HomeValue);
+        Assert.Equal("0", overTime.AwayValue);
     }
     [Fact]
     public async Task GetOtBasketBall_QuartersNotDrawAndNotExistOT_ReturnOtValid()
@@ -56,8 +56,8 @@ public class OverTimeServiceTests
         var overTime = await service.GetOtBasketBall(final, 5, 6);
 
         Assert.True(overTime.IsValid);
-        Assert.Null(overTime.HomeValue);
-        Assert.Null(overTime.AwayValue);
+        Assert.Equal("0", overTime.HomeValue);
+        Assert.Equal("0", overTime.AwayValue);
     }
 
     [Fact]
@@ -68,8 +68,8 @@ public class OverTimeServiceTests
         var overTime = await service.GetOtBasketBall(final, 5, 5);
 
         Assert.False(overTime.IsValid);
-        Assert.Null(overTime.HomeValue);
-        Assert.Null(overTime.AwayValue);
+        Assert.Equal("0", overTime.HomeValue);
+        Assert.Equal("0", overTime.AwayValue);
     }
 
     [Fact]
@@ -113,7 +113,8 @@ public class OverTimeServiceTests
                 HomeValue = "1",
                 AwayValue = "2",
                 ResourceId = ResourceIds.OverTime,
-                SourceId = 1
+                SourceId = 1,
+                CreateDate = DateTime.Now
             },
             new()
             {
@@ -128,7 +129,7 @@ public class OverTimeServiceTests
         var overTime = await service.GetOtBasketBall(final, 5, 5);
 
         Assert.False(overTime.IsValid);
-        Assert.Null(overTime.HomeValue);
-        Assert.Null(overTime.AwayValue);
+        Assert.Equal("0", overTime.HomeValue);
+        Assert.Equal("0", overTime.AwayValue);
     }
 }

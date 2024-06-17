@@ -9,7 +9,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 {
     public async Task HandleCondition(Match match)
     {
-        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceIds.FullTime);
+        var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
         if (match.ResourceType != ResourceType.MainResource || finalResult is null)
         {
             return;
@@ -36,7 +36,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
     private int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)
     {
-        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % 2 == 0)
+        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % GameType.Bo2 == 0)
         {
             return matchDetail.BestOfMap;
         }
@@ -69,9 +69,12 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
     private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, Match match, List<ResultDetail> settledResults, int maxGamePlayed)
     {
-        if (results.IsNullOrEmpty()) return false;
+        if (results.IsNullOrEmpty())
+        {
+            return false;
+        }
 
-        var finalResult = match.ResultDetails.FirstOrDefault(i => i.ResourceId == ResourceIds.FullTime);
+        var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
         if (matchDetail.BestOfMap == GameType.Bo1)
         {
             return VerifyFinalResultHelper.VerifyFinalBO1(finalResult, results);
@@ -79,26 +82,46 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
         if (matchDetail.BestOfMap == GameType.Bo2)
         {
-            return VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results) &&
-                     VerifyFinalResultHelper.VerifyResult(results, finalResult);
+            return ValidateBestOfTwo(finalResult, results);
         }
 
-        if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % 2 == 0)
+        if (IsOverTimeSession(matchDetail))
         {
-            var temp = VerifyFinalResultHelper.VerifyDrawSetResults(results, maxGamePlayed);
-            var temp1 = VerifyFinalResultHelper.IsMatchResultsConsecutive(results);
-            var temp2 = VerifyFinalResultHelper.VerifyResult(results, finalResult);
-
-            return temp && temp1 && temp2;
+            return ValidateOverTimeSession(results, finalResult, maxGamePlayed);
         }
 
+        return ValidateGeneralCase(match, results, matchDetail, settledResults, finalResult, maxGamePlayed);
+    }
+
+    private static bool ValidateBestOfTwo(ResultDetail finalResult, List<ResultDetail> results)
+    {
+        return VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results) &&
+               VerifyFinalResultHelper.VerifyResult(results, finalResult);
+    }
+
+    private static bool IsOverTimeSession(MatchDetail matchDetail)
+    {
+        return matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % GameType.Bo2 == 0;
+    }
+
+    private static bool ValidateOverTimeSession(List<ResultDetail> results, ResultDetail finalResult, int maxGamePlayed)
+    {
+        return VerifyFinalResultHelper.VerifyDrawSetResults(results, maxGamePlayed) &&
+               VerifyFinalResultHelper.IsMatchResultsConsecutive(results) &&
+               VerifyFinalResultHelper.VerifyResult(results, finalResult);
+    }
+
+    private static bool ValidateGeneralCase(Match match, List<ResultDetail> results, MatchDetail matchDetail, List<ResultDetail> settledResults, ResultDetail finalResult, int maxGamePlayed)
+    {
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
 
-        return VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed)
-                    && VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet)
-                    && VerifyFinalResultHelper.IsMatchResultsConsecutive(results)
-                    && VerifyFinalResultHelper.VerifyResult(results, finalResult)
-                    && VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.Concat(settledResults).ToList());
+        var verifyRelatedResult = VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed) &&
+                                  VerifyFinalResultHelper.IsMatchResultsConsecutive(results) &&
+                                  VerifyFinalResultHelper.VerifyResult(results, finalResult);
+
+        return verifyRelatedResult &&
+               VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet) &&
+               VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.Concat(settledResults).ToList());
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)

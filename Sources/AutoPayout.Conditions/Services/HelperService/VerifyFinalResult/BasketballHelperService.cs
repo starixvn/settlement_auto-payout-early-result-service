@@ -6,8 +6,7 @@ namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
 public interface BasketballHelperService
 {
-    public bool IsHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession,
-        out string message);
+    public string VerifyHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession);
 
     public string IsFullTimeDraw(ResultDetail finalResult);
 
@@ -17,19 +16,17 @@ public interface BasketballHelperService
 }
 public class BasketballHelperServiceImp(OverTimeService overTimeService) : BasketballHelperService
 {
-    public bool IsHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession, out string message)
+    public string VerifyHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> results, int gameSession)
     {
         switch (gameSession)
         {
             case GameType.Bo1:
-                message = CreateMessageService.InconsistentWithGameSession(halfTimeResult, gameSession);
-                return true;
-            case GameType.Bo4 when HalfTimeRelatedResultInValid(halfTimeResult, results, out message):
+                return CreateMessageService.InconsistentWithGameSession(halfTimeResult, gameSession);
+            case GameType.Bo4 when HalfTimeRelatedResultInValid(halfTimeResult, results, out var message):
             case GameType.Bo4 when IsHalfTimeScoreInValid(halfTimeResult, results, out message):
-                return true;
+                return message;
             default:
-                message = string.Empty;
-                return false;
+                return string.Empty;
         }
     }
 
@@ -90,7 +87,9 @@ public class BasketballHelperServiceImp(OverTimeService overTimeService) : Baske
     {
         var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
 
-        message = resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length ? CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, ResourceIds.ResultFtWithoutOTBasketBall) : string.Empty;
+        message = resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length
+            ? CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, ResourceIds.ResultFtWithoutOTBasketBall)
+            : string.Empty;
         return resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length;
     }
 

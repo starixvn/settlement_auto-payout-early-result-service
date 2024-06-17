@@ -16,7 +16,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         var scores = await resultDetailService.GetScores(match);
         CompareScore(match, scores);
 
-        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired);
+        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
         var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
 

@@ -65,6 +65,7 @@ public static class WorkerInjection
         service.AddSingleton<IgnoreVerify>();
         service.AddSingleton<VerifyBasketBallResult>();
         service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
+        service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
 
         service.AddSingleton<BasketBallCashOut>();
         service.AddSingleton<BasketballExtraStep>();

@@ -72,7 +72,7 @@ public static class BasketBallHelperService
     public static string GetBetStatusBoOne(Match match)
     {
         var elements = DefaultBetStatus.Split(",");
-        var final = match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime);
+        var final = match.ResultDetails.Find(r => r.ResourceId == ResourceIds.FullTime);
         elements[FtPosition] = final == null ? "0-0" : $"{final.HomeValue}-{final.AwayValue}";
         return string.Join(",", elements);
     }

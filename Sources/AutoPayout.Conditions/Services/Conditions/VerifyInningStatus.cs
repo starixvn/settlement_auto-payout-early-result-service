@@ -15,7 +15,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
 
     public async Task HandleCondition(Match match)
     {
-        if (match.ResourceType == ResourceType.MainResource && match.ResultDetails.Any(r => r.ResourceId == ResourceIds.FullTime))
+        if (match.ResourceType == ResourceType.MainResource && match.ResultDetails.Exists(r => r.ResourceId == ResourceIds.FullTime))
         {
             var getMatchInfoCriteria = new GetMatchDetailCriteria { MatchId = match.MatchId };
             var matchDetail = await repository.GetAsync<MatchDetail>(getMatchInfoCriteria);
