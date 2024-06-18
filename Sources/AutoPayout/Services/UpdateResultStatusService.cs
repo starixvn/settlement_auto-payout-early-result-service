@@ -1,11 +1,13 @@
-﻿namespace AutoPayout.Services;
+﻿using Microsoft.Extensions.Options;
+
+namespace AutoPayout.Services;
 
 public interface UpdateResultStatusService
 {
     Task UpdateResultStatus(Match match, int status, string remark = "");
 }
 
-public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConvertService xmlConvertService)
+public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConvertService xmlConvertService, IOptions<AppSettingsKey> options)
     : UpdateResultStatusService
 {
     public async Task UpdateResultStatus(Match match, int status, string remark = "")
@@ -20,7 +22,11 @@ public class UpdateResultStatusServiceImp(IDynamicRepository repository, XmlConv
             Remark = remark
         };
 
-        await repository.ExecuteAsync(criteria);
+        if (options.Value.GroupTest == 0)
+        {
+            await repository.ExecuteAsync(criteria);
+        }
+
     }
 
     private string CreateResources(IEnumerable<ResultDetail> selectedResources)

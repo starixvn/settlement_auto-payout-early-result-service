@@ -99,7 +99,7 @@ public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSetti
 
     private static WriteLogTestCriteria CreateLogTest(Match match, string message)
     {
-        var listResourceLog = match.ResultDetails.Select(resultDetail => new ResourcesLogTest(match, resultDetail.ResourceId, message)).ToList();
+        var listResourceLog = match.ResultDetails.Select(resultDetail => new ResourcesLogTest(match, resultDetail, message)).ToList();
 
         return new WriteLogTestCriteria
         {

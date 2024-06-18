@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.Conditions.Helpers;
+﻿namespace AutoPayout.Helpers;
 public static class ObjectExtensionMethods
 {
     public static void AddIf<T>(this List<T> self, bool conditionValue, T source)

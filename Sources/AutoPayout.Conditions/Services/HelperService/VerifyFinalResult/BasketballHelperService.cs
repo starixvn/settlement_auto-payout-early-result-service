@@ -1,6 +1,6 @@
-﻿using AutoPayout.Conditions.Helpers;
-using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
+using AutoPayout.Helpers;
 
 namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 

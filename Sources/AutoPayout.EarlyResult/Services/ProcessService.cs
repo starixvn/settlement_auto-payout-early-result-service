@@ -45,16 +45,16 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
 
     private async Task PushAndWriteLog(Match match, List<ICondition> conditions)
     {
+        await settlementService.UpdateResultExpired(match);
+        if (!match.ResultDetails.Any())
+        {
+            return;
+        }
+
         if (appSettingsKey.GroupTest != 0)
         {
             await HandleAndRetryCondition(match, conditions);
             await writeLogService.WriteLog(match, string.Empty);
-            return;
-        }
-
-        await settlementService.UpdateResultExpired(match);
-        if (!match.ResultDetails.Any())
-        {
             return;
         }
 
@@ -67,10 +67,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
         if (exception.MarkFail)
         {
             await writeLogService.WriteLog(match, exception);
-            if (appSettingsKey.GroupTest == 0)
-            {
-                await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed, exception.Description);
-            }
+            await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed, exception.Description);
         }
     }
 

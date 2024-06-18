@@ -1,5 +1,5 @@
-﻿using AutoPayout.Conditions.Helpers;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
+using AutoPayout.Helpers;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 public static class CreateMessageService

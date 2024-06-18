@@ -11,9 +11,9 @@ public class InvokeExternalAPIImp(IHttpClientFactory httpClientFactory) : Invoke
 {
     public async Task PostAsync(object request, string url)
     {
+        var json = JsonConvert.SerializeObject(request);
         try
         {
-            var json = JsonConvert.SerializeObject(request);
             var requestContent = new StringContent(json, Encoding.UTF8, "application/json");
             var httpClient = httpClientFactory.CreateClient();
 
@@ -22,7 +22,7 @@ public class InvokeExternalAPIImp(IHttpClientFactory httpClientFactory) : Invoke
         }
         catch (Exception exception)
         {
-            await Fanex.Logging.LogService.ErrorAsync($"Auto Payout (Call API Failed): {url}", exception);
+            await Fanex.Logging.LogService.ErrorAsync($"Auto Payout (Call API Failed): {url} : {json}", exception);
         }
     }
 }
