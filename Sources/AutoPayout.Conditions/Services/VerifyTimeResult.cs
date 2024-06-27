@@ -53,12 +53,12 @@ public class VerifyTimeResult : ICondition
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
 
-            if (TryGetTraderScore(group, out int minute, out int second)
+            if (TryGetTraderScore(group, out string minute, out string second)
                 && group.Distinct(new ScoreComparer(true)).Count() == 1
-                && second >= 0 && second < 60)
+                && Convert.ToInt32(second) >= 0 && Convert.ToInt32(second) < 60)
             {
-                resultDetail.HomeValue = $"{minute}";
-                resultDetail.AwayValue = $"{second}";
+                resultDetail.HomeValue = minute;
+                resultDetail.AwayValue = second;
 
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 {
@@ -74,7 +74,7 @@ public class VerifyTimeResult : ICondition
         });
     }
 
-    private bool TryGetTraderScore(IGrouping<KeyGroupScore, Score> group, out int homeScore, out int awayScore)
+    private bool TryGetTraderScore(IGrouping<KeyGroupScore, Score> group, out string homeScore, out string awayScore)
     {
         var traderScore = group.FirstOrDefault(x => x.SourceId == SourceId.Trader);
 
@@ -82,8 +82,8 @@ public class VerifyTimeResult : ICondition
             && !string.IsNullOrEmpty(traderScore.AwayValue)
             && !string.IsNullOrEmpty(traderScore.HomeValue);
 
-        awayScore = result ? Convert.ToInt32(traderScore.AwayValue) : -1;
-        homeScore = result ? Convert.ToInt32(traderScore.HomeValue) : -1;
+        homeScore = traderScore?.HomeValue;
+        awayScore = traderScore?.AwayValue;
 
         return result;
     }
@@ -93,13 +93,13 @@ public class VerifyTimeResult : ICondition
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
 
-        if (!TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalSeconds > match.EarlyRetryTime)
+        if (!TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
             resultDetail.Expired = true;
         }
-        else if (TryGetTraderScore(groupScore, out int _, out int _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        else if (TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
