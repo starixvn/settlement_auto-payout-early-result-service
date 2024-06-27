@@ -17,10 +17,5 @@ public class AutoService(ProcessService processService, MatchPoolService matchPo
              Task.Run(() => processService.Process(m))
                  .ConfigureAwait(false);
          });
-
-        //foreach (Match match in matches)
-        //{
-        //    await processService.Process(match);
-        //}
     }
 }
