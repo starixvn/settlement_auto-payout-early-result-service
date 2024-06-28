@@ -21,6 +21,17 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
     {
         var matches = await FetchMatch();
 
+        return await MatchBranching(matches);
+    }
+
+    private async Task<List<Match>> MatchBranching(List<Match> matches)
+    {
+        if (appSettingsKey.GroupTest > 0)
+        {
+            return matches;
+        }
+
+
         var (_, response) = await cache.TryGetAsync<string>(appSettingsKey.CacheKey);
         var leagueIds = (response ?? "").Split(",");
 
