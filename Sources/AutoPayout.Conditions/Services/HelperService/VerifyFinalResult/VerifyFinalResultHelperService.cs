@@ -34,17 +34,6 @@ public static class VerifyFinalResultHelper
 
     public static bool FinalScoreEqual(ResultDetail final) => final.HomeValue.Equals(final.AwayValue, StringComparison.OrdinalIgnoreCase);
 
-    public static bool FinalScoreIsValid(MatchDetail matchDetail, ResultDetail finalResult, bool isGameSession = true)
-    {
-        var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;
-        var minSetToWin = (maxSet + 1) / 2;
-        var homeValue = Convert.ToInt32(finalResult.HomeValue);
-        var awayValue = Convert.ToInt32(finalResult.AwayValue);
-
-        return (homeValue == minSetToWin || awayValue == minSetToWin)
-              && (homeValue + awayValue) <= maxSet;
-    }
-
     public static (int, int) GetMinMaxSetPlay(MatchDetail matchDetail, bool isGameSession = true)
     {
         var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;

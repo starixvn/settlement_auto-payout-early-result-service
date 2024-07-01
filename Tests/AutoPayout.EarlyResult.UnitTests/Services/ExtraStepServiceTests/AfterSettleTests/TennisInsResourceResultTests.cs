@@ -7,13 +7,13 @@ using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services.ExtraStepServiceTests.AfterSettleTests;
 
-public class TennisExtraStepTests
+public class TennisInsResourceResultTests
 {
     private readonly IDynamicRepository repository;
 
     private readonly TennisInsResourceResult extraStep;
 
-    public TennisExtraStepTests()
+    public TennisInsResourceResultTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         extraStep = new TennisInsResourceResult(repository);

@@ -1,7 +1,6 @@
 ﻿namespace AutoPayout.Models;
 
 public class AppSettingsKey
-#pragma warning restore VSSpell001
 {
     public int AutoPayoutGroup { get; set; }
 

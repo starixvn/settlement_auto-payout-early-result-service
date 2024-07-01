@@ -5,7 +5,7 @@ using AutoPayout.Constants;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers;
-public class VerifyFinalResultBasketballServiceTests
+public class BasketballHelperServiceTests
 {
     private readonly ResultDetail halfTime = new() { ResourceId = ResourceIds.Halftime, HomeValue = "1", AwayValue = "2" };
 
@@ -15,7 +15,7 @@ public class VerifyFinalResultBasketballServiceTests
 
     private readonly OverTimeService overTimeService;
 
-    public VerifyFinalResultBasketballServiceTests()
+    public BasketballHelperServiceTests()
     {
         overTimeService = Substitute.For<OverTimeService>();
         service = new BasketballHelperServiceImp(overTimeService);

@@ -39,29 +39,36 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
     {
         var groupedScores = scores.GroupBy(s => new KeyGroupScore(s.ResourceId, s.ResultType)).ToList();
 
-        groupedScores.ForEach(async group =>
+        async void Action(IGrouping<KeyGroupScore, Score> group)
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
 
             if (TryGetTraderScore(group, out string minute, out string second)
-                && group.Distinct(new ScoreComparer(true)).Count() == 1
+        }
+
+        groupedScores.ForEach(Action);
+    }
+
+    private async Task CheckScoreIsUnique(IGrouping<KeyGroupScore, Score> group, ResultDetail resultDetail, Match match)
+    {
+        if (TryGetTraderScore(group, out var minute, out var second)
+            && group.Distinct(new ScoreComparer(true)).Count() == 1
                 && Convert.ToInt32(second) >= 0 && Convert.ToInt32(second) < 60)
-            {
+        {
                 resultDetail.HomeValue = minute;
                 resultDetail.AwayValue = second;
 
-                resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
-                {
-                    SourceName = g.SourceName,
-                    ResourceId = g.ResourceId,
-                    SourceId = g.SourceId
-                });
-            }
-            else
+            resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
             {
-                await MarkFail(resultDetail, group, match);
-            }
-        });
+                SourceName = g.SourceName,
+                ResourceId = g.ResourceId,
+                SourceId = g.SourceId
+            });
+        }
+        else
+        {
+            await MarkFail(resultDetail, group, match);
+        }
     }
 
     private bool TryGetTraderScore(IGrouping<KeyGroupScore, Score> group, out string homeScore, out string awayScore)

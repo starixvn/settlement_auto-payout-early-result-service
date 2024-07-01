@@ -67,7 +67,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Empty(secondResultDetail.AwayValue);
         Assert.Equal(2, secondResultDetail.ExternalSourceInfo.Count());
-        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(), Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
 
@@ -146,7 +146,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -234,12 +234,12 @@ public class VerifyConfirmScoreTests
         Assert.Null(exception);
         Assert.Null(firstResultDetail.HomeValue);
         Assert.Null(firstResultDetail.AwayValue);
-        Assert.Null(firstResultDetail.ExternalSourceInfo);
+        Assert.Empty(firstResultDetail.ExternalSourceInfo);
         Assert.False(firstResultDetail.IsValid);
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -292,12 +292,12 @@ public class VerifyConfirmScoreTests
         };
 
         resultDetailService.GetScores(match).Returns(scores);
-
+        var errorMessage = "Failed Auto Payout: Result(01,02) values inconsistent between ";
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
         Assert.False(((ServiceException)exception).MarkFail);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2), errorMessage);
     }
 
     [Fact]
@@ -387,6 +387,6 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 }

@@ -67,7 +67,7 @@ public class WriteLogServiceTests
         await tempService.WriteLog(match, exception);
 
         await repository.Received()
-            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"MatchId\":1,\"ResourceId\":\"01\",\"StatusId\":3,\"Remark\":\"Message\",\"UId\":\"123\"}]"));
+            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"m\":1,\"r\":\"01\",\"s\":3,\"rm\":\"Message\",\"u\":\"123\"}]"));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class WriteLogServiceTests
         await tempService.WriteLog(match, "Message");
 
         await repository.Received()
-            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"MatchId\":1,\"ResourceId\":\"01\",\"StatusId\":3,\"Remark\":\"Message\",\"UId\":\"123\"}]"));
+            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"m\":1,\"r\":\"01\",\"s\":3,\"rm\":\"Message\",\"u\":\"123\"}]"));
     }
 
     [Fact]

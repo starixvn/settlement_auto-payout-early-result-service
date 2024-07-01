@@ -78,6 +78,18 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
+        var resultsCalculated = new List<ResultDetail>()
+        {
+            new()
+            {
+                ResourceId = "M1",
+                HomeValue = "1",
+                AwayValue = "3",
+                IntervalNo = 1,
+                SettlementStatusId = SettlementStatusId.Calculated
+            },
+        };
+
         var results = new List<ResultDetail>()
         {
             new ()
@@ -85,17 +97,19 @@ public class VerifyFinalByBestOfMatchTests
                 ResourceId = "M1",
                 HomeValue = "1",
                 AwayValue = "3",
-                IntervalNo = 1
+                IntervalNo = 1,
+                SettlementStatusId = SettlementStatusId.Calculated
             },
             new()
             {
                 ResourceId = "M2",
                 HomeValue = "1",
                 AwayValue = "2",
-                IntervalNo = 2
+                IntervalNo = 2,
             },
         };
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
@@ -124,6 +138,18 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
+        var resultsCalculated = new List<ResultDetail>()
+        {
+            new()
+            {
+                ResourceId = "M1",
+                HomeValue = "1",
+                AwayValue = "3",
+                IntervalNo = 1,
+                SettlementStatusId = SettlementStatusId.Calculated
+            },
+        };
+
         var results = new List<ResultDetail>()
         {
             new ()
@@ -145,6 +171,7 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
@@ -173,6 +200,18 @@ public class VerifyFinalByBestOfMatchTests
             }
         };
 
+        var resultsCalculated = new List<ResultDetail>()
+        {
+            new()
+            {
+                ResourceId = "M1",
+                HomeValue = "1",
+                AwayValue = "3",
+                IntervalNo = 1,
+                SettlementStatusId = SettlementStatusId.Calculated
+            },
+        };
+
         var results = new List<ResultDetail>()
         {
             new()
@@ -186,6 +225,7 @@ public class VerifyFinalByBestOfMatchTests
 
         var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
