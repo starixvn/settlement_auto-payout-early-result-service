@@ -18,7 +18,6 @@ public class InvokeExternalAPIImp(IHttpClientFactory httpClientFactory) : Invoke
             var httpClient = httpClientFactory.CreateClient();
 
             await httpClient.PostAsync(new Uri(url), requestContent);
-            await Fanex.Logging.LogService.InfoAsync($"Auto Payout (Call API): {url} : {json}");
         }
         catch (Exception exception)
         {
