@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using AutoPayout.Conditions;
 using AutoPayout.Conditions.Services;
-using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.EarlyResult.Services;

@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Conditions.Services;
-using AutoPayout.Conditions.Services.Conditions;
 
 namespace AutoPayout.Conditions;
 

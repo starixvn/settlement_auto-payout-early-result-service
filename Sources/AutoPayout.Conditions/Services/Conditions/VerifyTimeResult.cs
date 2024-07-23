@@ -3,12 +3,12 @@ using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.Services.Conditions;
+namespace AutoPayout.Conditions.Services;
 
 public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
     : ICondition
 {
-    private const int maxSecond = 60;
+    private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task HandleCondition(Match match)
     {
@@ -39,36 +39,29 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
     {
         var groupedScores = scores.GroupBy(s => new KeyGroupScore(s.ResourceId, s.ResultType)).ToList();
 
-        async void Action(IGrouping<KeyGroupScore, Score> group)
+        groupedScores.ForEach(async group =>
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
 
             if (TryGetTraderScore(group, out string minute, out string second)
-        }
-
-        groupedScores.ForEach(Action);
-    }
-
-    private async Task CheckScoreIsUnique(IGrouping<KeyGroupScore, Score> group, ResultDetail resultDetail, Match match)
-    {
-        if (TryGetTraderScore(group, out var minute, out var second)
-            && group.Distinct(new ScoreComparer(true)).Count() == 1
+                && group.Distinct(new ScoreComparer(true)).Count() == 1
                 && Convert.ToInt32(second) >= 0 && Convert.ToInt32(second) < 60)
-        {
+            {
                 resultDetail.HomeValue = minute;
                 resultDetail.AwayValue = second;
 
-            resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
+                resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
+                {
+                    SourceName = g.SourceName,
+                    ResourceId = g.ResourceId,
+                    SourceId = g.SourceId
+                });
+            }
+            else
             {
-                SourceName = g.SourceName,
-                ResourceId = g.ResourceId,
-                SourceId = g.SourceId
-            });
-        }
-        else
-        {
-            await MarkFail(resultDetail, group, match);
-        }
+                await MarkFail(resultDetail, group, match);
+            }
+        });
     }
 
     private bool TryGetTraderScore(IGrouping<KeyGroupScore, Score> group, out string homeScore, out string awayScore)
@@ -89,25 +82,18 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
     {
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
-        var traderScore = TryGetTraderScore(groupScore, out _, out _);
 
-        if (!traderScore && processTime.TotalSeconds > match.EarlyRetryTime)
+        if (!TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail },
-                remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
             resultDetail.Expired = true;
         }
-        else if (traderScore && processTime.TotalMilliseconds > options.Value.RetryProcessScore)
+        else if (TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail },
-                remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
             resultDetail.Expired = true;
-        }
-        else
-        {
-            //Do nothing
         }
 
         resultDetail.IsValid = false;
