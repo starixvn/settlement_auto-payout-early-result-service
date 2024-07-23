@@ -19,6 +19,10 @@ public class SettleCriteria : NonQueryCommand
 
     public string AutoSourceInfo { get; set; }
 
+    public byte DeterminedType { get; set; }
+
+    public string BetStatus { get; set; }
+
     public int ErrCode { get; set; }
 
     public string ErrMsg { get; set; }

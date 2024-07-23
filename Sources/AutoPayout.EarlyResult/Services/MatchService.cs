@@ -1,9 +1,9 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
-using System.Collections.Immutable;
 
 namespace AutoPayout.EarlyResult.Services;
 
@@ -20,6 +20,17 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
     public async Task<List<Match>> GetMatches()
     {
         var matches = await FetchMatch();
+
+        return await MatchBranching(matches);
+    }
+
+    private async Task<List<Match>> MatchBranching(List<Match> matches)
+    {
+        if (appSettingsKey.GroupTest > 0)
+        {
+            return matches;
+        }
+
 
         var (_, response) = await cache.TryGetAsync<string>(appSettingsKey.CacheKey);
         var leagueIds = (response ?? "").Split(",");
@@ -38,17 +49,17 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
     {
         var criteria = new GetResultCriteria
         {
-            AutoPayoutGroup = appSettingsKey.AutoPayoutGroup,
+            AutoPayoutGroup = appSettingsKey.GroupTest > 0 ? appSettingsKey.GroupTest : appSettingsKey.AutoPayoutGroup,
             ResourceType = appSettingsKey.ResourceType
         };
 
         var results = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
 
-        return results.SecondResultSet.GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
+        return IgnoreResult(results.SecondResultSet).GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
         {
             MatchId = g.Key.MatchId,
             LeagueId = g.Key.LeagueId,
-            ResultDetails = g.ToImmutableList(),
+            ResultDetails = g.ToList(),
             ResourceType = g.Key.ResourceType,
             SportType = g.Key.SportType,
             Conditions = results.FirstResultSet.Where(r => r.SportType == g.Key.SportType)
@@ -57,5 +68,10 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
             EarlyRetryTime = g.First().EarlyRetryTime,
             MainRetryTime = g.First().MainRetryTime,
         }).Where(m => !string.IsNullOrEmpty(m.Conditions)).ToList();
+    }
+
+    private static IEnumerable<ResultDetail> IgnoreResult(IEnumerable<ResultDetail> resultDetails)
+    {
+        return resultDetails.Where(r => !IgnoreResultByCondition.Conditions.TryGetValue(r.SportType, out var condition) || condition(r));
     }
 }

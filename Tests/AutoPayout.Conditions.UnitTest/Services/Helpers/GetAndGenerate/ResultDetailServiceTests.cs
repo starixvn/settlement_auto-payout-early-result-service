@@ -1,14 +1,13 @@
 ﻿using AutoPayout.Conditions.Models;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
 
-namespace AutoPayout.Conditions.UnitTests.Services;
+namespace AutoPayout.Conditions.UnitTests.Services.Helpers.GetAndGenerate;
 public class ResultDetailServiceTests
 {
-    private readonly IDynamicRepository repository;
-
     private readonly WriteLogService writeLogService;
 
     private readonly UpdateResultStatusService updateResultStatusService;
@@ -17,7 +16,7 @@ public class ResultDetailServiceTests
 
     public ResultDetailServiceTests()
     {
-        repository = Substitute.For<IDynamicRepository>();
+        var repository = Substitute.For<IDynamicRepository>();
         writeLogService = Substitute.For<WriteLogService>();
         updateResultStatusService = Substitute.For<UpdateResultStatusService>();
         service = new ResultDetailServiceImp(repository, writeLogService, updateResultStatusService);
@@ -27,7 +26,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_Always_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
 
         var scores = new List<Score>()
         {
@@ -64,7 +63,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_ProviderOnly_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
 
         var scores = new List<Score>()
         {
@@ -93,7 +92,7 @@ public class ResultDetailServiceTests
     [Fact]
     public void WriteLogResultInvalid_TraderOnly_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed: Result(01) values inconsistent between Trader(2-2)";
+        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2)";
 
         var scores = new List<Score>()
         {

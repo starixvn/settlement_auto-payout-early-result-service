@@ -1,5 +1,5 @@
-﻿using System.Xml.Serialization;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
+using System.Xml.Serialization;
 
 namespace AutoPayout.Models;
 
@@ -33,7 +33,10 @@ public class ResultDetail
     public bool IsValid { get; set; } = true;
 
     [XmlIgnore]
-    public bool Expired { get; set; } = false;
+    public bool Expired { get; set; }
+
+    [XmlIgnore]
+    public bool NeedRetry { get; set; }
 
     [XmlIgnore]
     public byte ResultStatusId { get; set; }
@@ -48,10 +51,13 @@ public class ResultDetail
     public int IntervalNo { get; set; }
 
     [XmlIgnore]
+    public string RelatedInfo { get; set; }
+
+    [XmlIgnore]
     public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = new List<ExternalSourceInfo>();
 
     [XmlIgnore]
-    public byte ResultType => Constants.ResourceId.TimePattern.Any(ResourceId.StartsWith) ? ResultTypes.Time : default;
+    public byte ResultType => ResourceIds.TimePattern.Any(ResourceId.StartsWith) ? ResultTypes.Time : default;
 
     [XmlIgnore]
     public int EarlyRetryTime { get; set; }

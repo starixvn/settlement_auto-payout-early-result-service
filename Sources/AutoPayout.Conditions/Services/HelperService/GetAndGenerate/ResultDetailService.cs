@@ -1,21 +1,26 @@
 ﻿using AutoPayout.Constants;
 using Match = AutoPayout.Models.Match;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 
 public interface ResultDetailService
 {
-    Task<IEnumerable<Score>> GetScore(Match match);
+    Task<IEnumerable<Score>> GetScores(Match match);
+
+    Task<IEnumerable<Score>> GetSingleScore(ResultDetail resultDetail);
 
     string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
     string WriteLogResultNotTrader(int matchId, ResultDetail result);
 
+    void WriteLogResultNotTrader(int matchId, ResultDetail result, List<Score> scores);
+
     void WriteLogResult(int matchId, ResultDetail result, string message);
+    void WriteLogResults(int matchId, List<ResultDetail> result, string message);
 
     Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
 
-    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled);
+    Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled);
 
     Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
 }
@@ -24,7 +29,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         UpdateResultStatusService updateResultStatusService)
     : ResultDetailService
 {
-    public async Task<IEnumerable<Score>> GetScore(Match match)
+    public async Task<IEnumerable<Score>> GetScores(Match match)
     {
         var resources = match.ResultDetails.Select(r => r.ResourceId);
         var criteria = new GetConfirmScoreCriteria
@@ -32,6 +37,20 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             MatchId = match.MatchId,
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
+        };
+
+        var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
+
+        return scores;
+    }
+
+    public async Task<IEnumerable<Score>> GetSingleScore(ResultDetail resultDetail)
+    {
+        var criteria = new GetConfirmScoreCriteria
+        {
+            MatchId = resultDetail.MatchId,
+            SportType = resultDetail.SportType,
+            ResourceIds = resultDetail.ResourceId
         };
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
@@ -67,9 +86,18 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return message;
     }
 
+    public void WriteLogResultNotTrader(int matchId, ResultDetail result, List<Score> scores)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var traderScore = TraderScore(scores);
+        var errorMessage = $"Failed Auto Payout: Result({result.ResourceId}) " + (string.IsNullOrEmpty(traderScore) ? "no trader" : $" {traderScore} second value is invalid");
+
+        writeLogService.WriteLog(cloneMatch, errorMessage);
+    }
+
     public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails };
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails.ToList() };
         await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
     }
 
@@ -101,17 +129,24 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, message);
     }
 
+    public void WriteLogResults(int matchId, List<ResultDetail> result, string message)
+    {
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = result };
+
+        writeLogService.WriteLog(cloneMatch, message);
+    }
+
     private async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
     {
         var criteria = new GetResourceIndexCriteria(sportType);
 
         var indexes = await repository.FetchAsync<ResourceIndex>(criteria);
-        return indexes.Where(r => r.ResourceId != ResourceId.Final).ToList();
+        return indexes.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 
-    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, List<ResultDetail> resultSettled)
+    public async Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled)
     {
-        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceId.Final).ToList();
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
@@ -128,6 +163,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
     {
         var intervalDetails = (await repository.FetchAsync<ResultDetail>(new GetResultDetailCriteria { MatchId = matchId, SportType = sportType })).ToList();
 
-        return intervalDetails.Where(r => r.ResourceId != ResourceId.Final).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
+        return intervalDetails.Where(r => r.ResourceId != ResourceIds.FullTime).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
 }

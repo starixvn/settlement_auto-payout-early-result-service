@@ -1,10 +1,9 @@
-﻿using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers;
 
-public class VerifyFinalResultHelperServiceTests
+public class VerifyFinalResultHelperTests
 {
     [Theory]
     [InlineData("1", "2", "1", "3", true)]
@@ -47,31 +46,6 @@ public class VerifyFinalResultHelperServiceTests
         var resultDetails = resourceIds.Split(",").Select(r => new ResultDetail() { IntervalNo = Convert.ToInt32(r) });
 
         var actual = VerifyFinalResultHelper.IsMatchResultsConsecutive(resultDetails);
-
-        Assert.Equal(expected, actual);
-    }
-
-    [Theory]
-    [InlineData("1", "2", 3, true)]
-    [InlineData("1", "4", 3, false)]
-    [InlineData("1", "1", 3, false)]
-    [InlineData("2", "1", 5, false)]
-    [InlineData("2", "3", 5, true)]
-    [InlineData("2", "3", 7, false)]
-    [InlineData("4", "3", 7, true)]
-    public void FinalScoreIsValid_Always_ReturnByGameSession(string home, string away, int gameSession, bool expected)
-    {
-        var final = new ResultDetail()
-        {
-            HomeValue = home,
-            AwayValue = away
-        };
-        var matchDetail = new MatchDetail()
-        {
-            GameSession = gameSession
-        };
-
-        var actual = VerifyFinalResultHelper.FinalScoreIsValid(matchDetail, final);
 
         Assert.Equal(expected, actual);
     }
@@ -246,7 +220,7 @@ public class VerifyFinalResultHelperServiceTests
     }
 
     [Fact]
-    public void VerifyAnyDrawResults_AllConditionPassed_ReturnTrue()
+    public void VerifyAnyDrawResults_ExistResultDraw_ReturnFalse()
     {
         var results = new List<ResultDetail>()
         {
@@ -266,6 +240,6 @@ public class VerifyFinalResultHelperServiceTests
 
         var actual = VerifyFinalResultHelper.VerifyAnyDrawResults(results);
 
-        Assert.True(actual);
+        Assert.False(actual);
     }
 }

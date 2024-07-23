@@ -16,9 +16,13 @@ public class Match
 
     public int MainRetryTime { get; set; }
 
-    public IEnumerable<ResultDetail> ResultDetails { get; set; }
+    public List<ResultDetail> ResultDetails { get; set; }
 
     public string ResourceRefund { get; set; }
+
+    public MatchDetail MatchDetail { get; set; }
+
+    public string UId = Guid.NewGuid().ToString();
 
     public override bool Equals(object obj)
     {

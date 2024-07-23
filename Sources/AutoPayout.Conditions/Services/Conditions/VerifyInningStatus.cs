@@ -1,4 +1,5 @@
-﻿using AutoPayout.Constants;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services;
 
@@ -14,7 +15,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
 
     public async Task HandleCondition(Match match)
     {
-        if (match.ResourceType == ResourceType.MainResource && match.ResultDetails.Any(r => r.ResourceId == ResourceId.Final))
+        if (match.ResourceType == ResourceType.MainResource && match.ResultDetails.Exists(r => r.ResourceId == ResourceIds.FullTime))
         {
             var getMatchInfoCriteria = new GetMatchDetailCriteria { MatchId = match.MatchId };
             var matchDetail = await repository.GetAsync<MatchDetail>(getMatchInfoCriteria);
@@ -51,8 +52,8 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
 
     private async Task UpdateFinalResourceStatus(Match match)
     {
-        var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceId.Final).ToList();
-        match.ResultDetails = match.ResultDetails.Except(finalResource);
+        var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceIds.FullTime).ToList();
+        match.ResultDetails = match.ResultDetails.Except(finalResource).ToList();
         await resultDetailService.UpdateResultStatus(match.MatchId, finalResource, ErrorMessage.IntervalNotSettled);
         await writeLogService.WriteLog(new Match { MatchId = match.MatchId, ResultDetails = finalResource },
             new IntervalNotSettledException());

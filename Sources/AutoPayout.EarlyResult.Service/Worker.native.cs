@@ -7,19 +7,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace AutoPayout.EarlyResult.Service;
 
-public class Worker : BackgroundService
+public class Worker(IAutoService autoService, IConfiguration configuration, IMaintenanceService maintenanceService)
+    : BackgroundService
 {
-    private readonly IAutoService autoService;
-    private readonly IConfiguration configuration;
-    private readonly IMaintenanceService maintenanceService;
     private int counter;
-
-    public Worker(IAutoService autoService, IConfiguration configuration, IMaintenanceService maintenanceService)
-    {
-        this.autoService = autoService;
-        this.configuration = configuration;
-        this.maintenanceService = maintenanceService;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

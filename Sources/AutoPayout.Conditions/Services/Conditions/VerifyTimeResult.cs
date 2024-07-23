@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services;
 
-public class VerifyTimeResult : ICondition
+public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+    : ICondition
 {
-    private readonly ResultDetailService resultDetailService;
-    private readonly AppSettingsKey appSettingsKey;
-
-    public VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
-    {
-        this.resultDetailService = resultDetailService;
-        this.appSettingsKey = options.Value;
-    }
+    private readonly AppSettingsKey appSettingsKey = options.Value;
 
     public async Task HandleCondition(Match match)
     {
@@ -30,14 +20,14 @@ public class VerifyTimeResult : ICondition
         }
 
         var normalResults = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time);
-        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
+        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
 
-        var scores = await resultDetailService.GetScore(match);
+        var scores = await resultDetailService.GetScores(match);
 
         CompareScore(match, scores);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
-        match.ResultDetails = match.ResultDetails.Concat(normalResults);
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
+        match.ResultDetails = match.ResultDetails.Concat(normalResults).ToList();
 
         if (!match.ResultDetails.Any())
         {
@@ -96,14 +86,18 @@ public class VerifyTimeResult : ICondition
         if (!TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
         }
         else if (TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail>() { resultDetail }, remark);
+            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
+        }
+        else
+        {
+            //do not thing
         }
 
         resultDetail.IsValid = false;

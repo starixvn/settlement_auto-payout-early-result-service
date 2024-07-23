@@ -35,9 +35,10 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         {
             var settleCriteria = createQueryService.QuerySettle(match);
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
+            await ProcessBeforeSettle(match, settleCriteria);
             await Execute(settleCriteria, match, isExistedFinalResource);
             await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
-            await AddResourceRefund(match);
+            await ProcessAfterSettle(match, settleCriteria);
         }
     }
 
@@ -46,7 +47,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         var resultExpired = match.ResultDetails.Where(r => r.ResourceStatus == ResourceStatus.Expired).ToList();
         if (resultExpired.Any())
         {
-            match.ResultDetails = match.ResultDetails.Except(resultExpired);
+            match.ResultDetails = match.ResultDetails.Except(resultExpired).ToList();
             var resultExpiredIds = string.Join(',', resultExpired.Select(r => r.ResourceId));
             var cloneMatch = new Match
             {
@@ -76,12 +77,6 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
         await UpdateMatchInfo(criteria);
 
-        if (isMainMatch)
-        {
-            var extraStep = createExtraStepService.Create(match);
-            await extraStep.Process(match);
-        }
-
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
 
@@ -92,17 +87,16 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         }
     }
 
-    private async Task AddResourceRefund(Match match)
+    private async Task ProcessBeforeSettle(Match match, SettleCriteria settleCriteria)
     {
-        if (match.SportType == SportType.ESports && !string.IsNullOrEmpty(match.ResourceRefund))
-        {
-            var criteria = new AddResourceRefundCriteria
-            {
-                MatchId = match.MatchId,
-                ResourceIds = match.ResourceRefund
-            };
-            await repository.ExecuteAsync(criteria);
-        }
+        var extraStepBeforeSettle = createExtraStepService.Create(match);
+        await extraStepBeforeSettle.Process(match, settleCriteria);
+    }
+
+    private async Task ProcessAfterSettle(Match match, SettleCriteria settleCriteria)
+    {
+        var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
+        await extraStepBeforeSettle.Process(match, settleCriteria);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)
@@ -113,7 +107,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
 
     private static bool IsExistedFinalResource(IEnumerable<ResultDetail> resultDetails)
     {
-        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceId.Final));
+        return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceIds.FullTime));
     }
 
     private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource) //NOSONAR
@@ -134,6 +128,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
             Action = criteria.Action,
             AdminId = criteria.AdminId,
             MatchId = criteria.MatchId,
+            BetStatus = criteria.BetStatus,
             SelectedResources = criteria.SelectedResources,
             IsAuto = true
         };

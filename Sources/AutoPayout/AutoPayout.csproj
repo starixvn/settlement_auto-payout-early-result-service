@@ -12,6 +12,9 @@
     <PackageReference Include="Fanex.Logging.Extensions.Database" Version="1.0.8" />
     <PackageReference Include="Fanex.Data.Repository" Version="4.2.5.3" />
     <PackageReference Include="Fanex.Settlement.Converter" Version="1.0.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

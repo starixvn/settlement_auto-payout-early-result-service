@@ -2,6 +2,8 @@
 using Fanex.Logging;
 using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.Database;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Services;
@@ -19,7 +21,7 @@ public interface WriteLogService
     Task InsertResettleLog(SettleCriteria criteria, int sportType, bool isMainMatch);
 }
 
-public class WriteLogServiceImp(IDynamicRepository repository) : WriteLogService
+public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSettingsKey> options) : WriteLogService
 {
     public async Task ExceptionLog(int matchId, Exception exception)
     {
@@ -36,14 +38,14 @@ public class WriteLogServiceImp(IDynamicRepository repository) : WriteLogService
     {
         var message = exception.Description;
         var errorMessage = GenerateErrorLogMessage(match, message);
-        var criteria = new WriteLogCriteria(match.MatchId, errorMessage);
+        INonQueryCommand criteria = options.Value.GroupTest != 0 ? CreateLogTest(match, message) : new WriteLogCriteria(match.MatchId, errorMessage);
         await repository.ExecuteAsync(criteria);
     }
 
     public async Task WriteLog(Match match, string message)
     {
         var errorMessage = GenerateErrorLogMessage(match, message);
-        var criteria = new WriteLogCriteria(match.MatchId, errorMessage);
+        INonQueryCommand criteria = options.Value.GroupTest != 0 ? CreateLogTest(match, message) : new WriteLogCriteria(match.MatchId, errorMessage);
         await repository.ExecuteAsync(criteria);
     }
 
@@ -93,5 +95,15 @@ public class WriteLogServiceImp(IDynamicRepository repository) : WriteLogService
         };
 
         return string.Join("<br/>", remark);
+    }
+
+    private static WriteLogTestCriteria CreateLogTest(Match match, string message)
+    {
+        var listResourceLog = match.ResultDetails.Select(resultDetail => new ResourcesLogTest(match, resultDetail, message)).ToList();
+
+        return new WriteLogTestCriteria
+        {
+            Resources = JsonConvert.SerializeObject(listResourceLog)
+        };
     }
 }

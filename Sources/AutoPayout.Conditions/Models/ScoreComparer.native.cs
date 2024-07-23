@@ -1,6 +1,4 @@
-﻿using AutoPayout.Constants;
-
-namespace AutoPayout.Conditions.Models;
+﻿namespace AutoPayout.Conditions.Models;
 
 public class ScoreComparer : IEqualityComparer<Score>
 {

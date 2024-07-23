@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
 using AutoPayout.Conditions;
 using AutoPayout.Conditions.Services;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.EarlyResult.Services.ExtraStepService;
+using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
+using AutoPayout.EarlyResult.Services.ExtraStepService.BeforeSettle;
 using AutoPayout.Services;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
@@ -46,6 +50,8 @@ public static class WorkerInjection
         service.AddSingleton<MatchService, MatchServiceImp>();
         service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
         service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
+        service.AddTransient<OverTimeService, OverTimeServiceImp>();
+        service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
         service.AddSingleton<VerifyMatchStatus>();
         service.AddSingleton<VerifyRunningOdds>();
         service.AddSingleton<VerifyConfirmScore>();
@@ -56,8 +62,14 @@ public static class WorkerInjection
         service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<IgnoreVerify>();
+        service.AddSingleton<VerifyBasketBallResult>();
+        service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
+        service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
 
-        service.AddSingleton<TennisExtraStep>();
+        service.AddSingleton<BasketBallCashOut>();
+        service.AddSingleton<BasketballExtraStep>();
+        service.AddSingleton<ESportsAddResourceRefund>();
+        service.AddSingleton<TennisInsResourceResult>();
         service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
 

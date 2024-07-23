@@ -29,5 +29,5 @@ public class Score
 
     public DateTime CreateDate { get; set; }
 
-    public byte ResultType => AutoPayout.Constants.ResourceId.TimePattern.Any(x => ResourceId.StartsWith(x)) ? ResultTypes.Time : default;
+    public byte ResultType => ResourceIds.TimePattern.Any(x => ResourceId.StartsWith(x)) ? ResultTypes.Time : default;
 }

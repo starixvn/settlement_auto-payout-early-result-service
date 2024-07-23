@@ -1,6 +1,7 @@
 ﻿using AutoPayout.Conditions.Constants;
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
@@ -33,7 +34,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final
+                    ResourceId = ResourceIds.FullTime
                 }
             }
         };
@@ -70,7 +71,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -96,16 +97,17 @@ public class VerifyFinalResultTests
             }
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -119,7 +121,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -144,14 +146,15 @@ public class VerifyFinalResultTests
             },
         };
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
         await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.DidNotReceive().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), Arg.Any<string>());
-        Assert.NotNull(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        resultDetailService.DidNotReceive().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
+        Assert.NotNull(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -165,7 +168,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
@@ -183,16 +186,17 @@ public class VerifyFinalResultTests
             },
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -206,7 +210,7 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "1"
                 }
@@ -224,16 +228,17 @@ public class VerifyFinalResultTests
             },
         };
 
-        var errorMessage = "Failed: FT(0-1) is inconsistent with game session information.";
+        var errorMessage = "Failed Auto Payout: FT(0-1) is inconsistent with game session information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
     [Fact]
@@ -247,22 +252,23 @@ public class VerifyFinalResultTests
             {
                 new ()
                 {
-                    ResourceId = ResourceId.Final,
+                    ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
             }
         };
 
-        var errorMessage = "Failed: FT(0-2) is inconsistent with interval scores.";
+        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
 
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(new List<ResultDetail>());
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceId.Final), errorMessage);
-        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceId.Final));
+        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 }

@@ -21,6 +21,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
 {
     private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
 
+
     public async Task Process(Match match)
     {
         try
@@ -30,11 +31,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
         }
         catch (ServiceException exception)
         {
-            if (exception.MarkFail)
-            {
-                await writeLogService.WriteLog(match, exception);
-                await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed, exception.Description);
-            }
+            await ProcessError(match, exception);
         }
         catch (Exception exception)
         {
@@ -54,9 +51,24 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
             return;
         }
 
-        await HandleAndRetryCondition(match, conditions);
+        if (appSettingsKey.GroupTest != 0)
+        {
+            await HandleAndRetryCondition(match, conditions);
+            await writeLogService.WriteLog(match, string.Empty);
+            return;
+        }
 
+        await HandleAndRetryCondition(match, conditions);
         await settlementService.Push(match);
+    }
+
+    private async Task ProcessError(Match match, ServiceException exception)
+    {
+        if (exception.MarkFail)
+        {
+            await writeLogService.WriteLog(match, exception);
+            await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Failed, exception.Description);
+        }
     }
 
     private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)

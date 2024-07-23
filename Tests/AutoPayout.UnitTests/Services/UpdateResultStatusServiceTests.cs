@@ -3,6 +3,7 @@ using AutoPayout.Criteria;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 using Fanex.Settlement.Converter.Services;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.UnitTests.Services;
 
@@ -18,7 +19,8 @@ public class UpdateResultStatusServiceTests
     {
         repository = Substitute.For<IDynamicRepository>();
         xmlConvertService = Substitute.For<XmlConvertService>();
-        service = new UpdateResultStatusServiceImp(repository, xmlConvertService);
+        var options = Options.Create(new AppSettingsKey());
+        service = new UpdateResultStatusServiceImp(repository, xmlConvertService, options);
     }
 
     [Fact]

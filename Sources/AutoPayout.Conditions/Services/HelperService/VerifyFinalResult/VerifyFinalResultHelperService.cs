@@ -4,7 +4,6 @@ public static class VerifyFinalResultHelper
 {
     private const string ESportsFirstMap = "M1";
     private const string ESportsSecondMap = "M2";
-    private const int Bo2 = 2;
 
     public static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
     {
@@ -35,17 +34,6 @@ public static class VerifyFinalResultHelper
 
     public static bool FinalScoreEqual(ResultDetail final) => final.HomeValue.Equals(final.AwayValue, StringComparison.OrdinalIgnoreCase);
 
-    public static bool FinalScoreIsValid(MatchDetail matchDetail, ResultDetail finalResult, bool isGameSession = true)
-    {
-        var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;
-        var minSetToWin = (maxSet + 1) / 2;
-        var homeValue = Convert.ToInt32(finalResult.HomeValue);
-        var awayValue = Convert.ToInt32(finalResult.AwayValue);
-
-        return (homeValue == minSetToWin || awayValue == minSetToWin)
-              && (homeValue + awayValue) <= maxSet;
-    }
-
     public static (int, int) GetMinMaxSetPlay(MatchDetail matchDetail, bool isGameSession = true)
     {
         var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;
@@ -69,17 +57,18 @@ public static class VerifyFinalResultHelper
 
             if (homeWinCount == numberOfSetWin || awayWinCount == numberOfSetWin)
             {
-                break;
+                break; // NOSONAR
             }
         }
 
         var finalHomeScore = Convert.ToInt32(finalResult.HomeValue);
         var finalAwayScore = Convert.ToInt32(finalResult.AwayValue);
+        var isFinalScoreMatched = finalHomeScore == homeWinCount
+                                  && finalAwayScore == awayWinCount;
 
-        return finalHomeScore == homeWinCount
-            && finalAwayScore == awayWinCount
-            && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
-            && (finalHomeScore + finalAwayScore) <= maxSetPlay;
+        return isFinalScoreMatched
+               && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
+               && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
 
     public static bool VerifyFinalBO1(ResultDetail finalResult, List<ResultDetail> results)
@@ -98,7 +87,7 @@ public static class VerifyFinalResultHelper
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
-        => !resultsChecking.Any(x => (new int[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
+        => !resultsChecking.Exists(x => (new[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
     public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)
@@ -107,6 +96,6 @@ public static class VerifyFinalResultHelper
         var mapTwo = results.Find(r => r.ResourceId == ESportsSecondMap);
         var totalScore = Convert.ToInt32(finalResult.HomeValue) + Convert.ToInt32(finalResult.AwayValue);
 
-        return mapOne != null && mapTwo != null && totalScore == Bo2;
+        return mapOne != null && mapTwo != null && totalScore == GameType.Bo2;
     }
 }

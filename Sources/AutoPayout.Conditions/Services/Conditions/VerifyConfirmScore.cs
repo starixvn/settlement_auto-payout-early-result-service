@@ -1,4 +1,5 @@
-﻿using AutoPayout.Constants;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
@@ -10,19 +11,19 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
     public async Task HandleCondition(Match match)
     {
         var timeResult = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
-        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time);
+        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
 
-        var scores = await resultDetailService.GetScore(match);
+        var scores = await resultDetailService.GetScores(match);
         CompareScore(match, scores);
 
-        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired);
+        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
         var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
 
         await resultDetailService.UpdateResultStatus(match.MatchId, failureResults, errorMessage);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any());
-        match.ResultDetails = match.ResultDetails.Concat(timeResult);
+        match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
+        match.ResultDetails = match.ResultDetails.Concat(timeResult).ToList();
 
         if (!match.ResultDetails.Any())
         {
