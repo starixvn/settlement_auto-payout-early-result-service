@@ -1,9 +1,9 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
-using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyFinalResult(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
 {
@@ -36,14 +36,14 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         }
     }
 
-    private bool VerifyFinal(List<ResultDetail> settledResults, IReadOnlyCollection<ResultDetail> setsResults, ResultDetail finalResult, int maxSetPlayed)
+    private static bool VerifyFinal(IEnumerable<ResultDetail> settledResults, IReadOnlyCollection<ResultDetail> setsResults, ResultDetail finalResult, int maxSetPlayed)
     {
         return VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxSetPlayed)
             && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
             && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
     }
 
-    private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession) //NOSONAR
+    private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession)
     {
         var message = isFinalInconsistentWithGameSession ? ErrorMessage.FinalInconsistentWithGameSession : ErrorMessage.FinalInconsistent;
         var errorMessage = message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");

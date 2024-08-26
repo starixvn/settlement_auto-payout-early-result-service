@@ -1,10 +1,10 @@
 ﻿namespace AutoPayout.EarlyResult.Constants;
+
 public static class CashOutConstants
 {
+    public static readonly string[] ResourceOrder = ["00", "Q1", "Q2", "Q3", "Q4", "01"];
 
-    public static readonly string[] ResourceOrder = { "00", "Q1", "Q2", "Q3", "Q4", "01" };
-
-    public static readonly string[] ResourceWithOutFinalOrder = { "Q1", "Q2", "Q3", "Q4", "OT" };
+    public static readonly string[] ResourceWithOutFinalOrder = ["Q1", "Q2", "Q3", "Q4", "OT"];
 
     public static readonly Dictionary<string, int> QuarterListHalf = new()
     {
@@ -15,5 +15,4 @@ public static class CashOutConstants
         { "Q4", 4 },
         { "01", 5 },
     };
-
 }

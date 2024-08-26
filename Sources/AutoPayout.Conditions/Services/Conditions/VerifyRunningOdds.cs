@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyRunningOdds(IDynamicRepository repository) : ICondition
 {
@@ -27,7 +27,7 @@ public class VerifyRunningOdds(IDynamicRepository repository) : ICondition
 
         var resources = new Resources<CheckOddsItem>
         {
-            ResourceItems = new List<CheckOddsItem> { checkOddsItem }
+            ResourceItems = [checkOddsItem]
         };
 
         var converter = new XmlConvertServiceImp();

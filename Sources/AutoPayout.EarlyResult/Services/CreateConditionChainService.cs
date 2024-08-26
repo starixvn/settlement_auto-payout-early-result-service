@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Conditions;
 using AutoPayout.Conditions.Constants;
-using AutoPayout.Conditions.Services;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 
 namespace AutoPayout.EarlyResult.Services;

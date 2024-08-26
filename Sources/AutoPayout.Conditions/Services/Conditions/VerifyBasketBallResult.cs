@@ -2,10 +2,15 @@
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Services;
-public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDynamicRepository repository, BasketballHelperService basketballHelper) : ICondition
+namespace AutoPayout.Conditions.Services.Conditions;
+
+public class VerifyBasketBallResult(
+    ResultDetailService resultDetailService,
+    IDynamicRepository repository,
+    BasketballHelperService basketballHelper) : ICondition
 {
     private const int MaxQuarter = 4;
+
     public async Task HandleCondition(Match match)
     {
         match.MatchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
@@ -13,7 +18,6 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
         await HandleQuarter(match);
 
         await HandleFinal(match);
-
     }
 
     private async Task HandleFinal(Match match)
@@ -38,14 +42,13 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
             return;
         }
 
-        var halfTimeMessage = basketballHelper.VerifyHalfTimeInValid(halfTime, resultWithoutHt, gameSession);
+        var halfTimeMessage = await basketballHelper.VerifyHalfTimeInValid(halfTime, resultWithoutHt, gameSession);
 
         if (!string.IsNullOrEmpty(halfTimeMessage))
         {
             await HandleInvalidResult(halfTime, match, halfTimeMessage);
             results.Remove(halfTime);
         }
-
     }
 
     private async Task HandleFullTime(Match match, int gameSession, List<ResultDetail> results)
@@ -57,17 +60,17 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
             return;
         }
 
-        var isFinalInValid = gameSession switch
+        var errorMessage = gameSession switch
         {
-            GameType.Bo1 => basketballHelper.IsFullTimeDraw(fullTimeResult),
-            GameType.Bo2 => basketballHelper.IsFinalOfBo2InValid(fullTimeResult, halfTime),
-            GameType.Bo4 => await basketballHelper.IsFinalOfBo4InValid(match, fullTimeResult, results),
+            GameType.Bo1 => basketballHelper.FullTimeDraw(fullTimeResult),
+            GameType.Bo2 => await basketballHelper.FinalOfBo2InValid(fullTimeResult, halfTime),
+            GameType.Bo4 => await basketballHelper.FinalOfBo4InValid(match, fullTimeResult, results),
             _ => CreateMessageService.InconsistentWithGameSession(fullTimeResult, gameSession)
         };
 
-        if (isFinalInValid != string.Empty)
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await HandleInvalidResult(fullTimeResult, match, isFinalInValid);
+            await HandleInvalidResult(fullTimeResult, match, errorMessage);
         }
     }
 
@@ -101,6 +104,7 @@ public class VerifyBasketBallResult(ResultDetailService resultDetailService, IDy
             match.MatchId,
             result,
             message);
+
         match.ResultDetails.Remove(result);
     }
 }

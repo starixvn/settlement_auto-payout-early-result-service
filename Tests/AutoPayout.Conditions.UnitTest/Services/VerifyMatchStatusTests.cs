@@ -2,6 +2,7 @@
 using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Exceptions;
 using AutoPayout.Conditions.Models;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
@@ -28,7 +29,6 @@ public class VerifyMatchStatusTests
 
         Assert.IsType<HoldStatusException>(exception);
     }
-
 
     [Theory]
     [InlineData(1)]

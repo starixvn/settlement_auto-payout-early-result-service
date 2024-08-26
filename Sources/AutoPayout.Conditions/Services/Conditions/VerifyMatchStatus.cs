@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
 {
@@ -21,7 +21,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
     private static void VerifyMatch(MatchRemark matchRemark, int resourceType)
     {
         var remark = matchRemark.Remark;
-        List<bool> conditionsToCheck = new() { remark.IsMtdHold, remark.IsUndecided, remark.IsPending, remark.IsUnderSettle, remark.IsHoldKey };
+        List<bool> conditionsToCheck = [remark.IsMtdHold, remark.IsUndecided, remark.IsPending, remark.IsUnderSettle, remark.IsHoldKey];
         if (conditionsToCheck.Exists(item => item))
         {
             throw new HoldStatusException();

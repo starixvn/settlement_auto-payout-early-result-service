@@ -1,4 +1,4 @@
-﻿using AutoPayout.Conditions.Services;
+﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Constants;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.Exceptions;
@@ -9,6 +9,7 @@ using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services;
+
 public class ProcessServiceTests
 {
     private readonly WriteLogService writeLogService;

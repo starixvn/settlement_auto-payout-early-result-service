@@ -1,9 +1,11 @@
 ﻿using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Exceptions;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
+
 public class VerifyRunningOddsTests
 {
     private readonly IDynamicRepository repository;
@@ -15,7 +17,6 @@ public class VerifyRunningOddsTests
         repository = Substitute.For<IDynamicRepository>();
         condition = new VerifyRunningOdds(repository);
     }
-
 
     [Fact]
     public async Task HandleCondition_WhenErrCodeGreaterThanZero_ThrowsRunningOddsException()

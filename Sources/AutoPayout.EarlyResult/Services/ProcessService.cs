@@ -1,4 +1,4 @@
-﻿using AutoPayout.Conditions.Services;
+﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
 using Microsoft.Extensions.Options;
@@ -11,7 +11,7 @@ public interface ProcessService
     Task Process(Match match);
 }
 
-public class ProcessServiceImp(IOptions<AppSettingsKey> options,
+public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         WriteLogService writeLogService,
         CreateConditionChainService createConditionChainService,
         SettlementService settlementService,
@@ -19,9 +19,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
         UpdateResultStatusService updateResultStatusService)
     : ProcessService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
-
-
     public async Task Process(Match match)
     {
         try
@@ -46,12 +43,12 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
     private async Task PushAndWriteLog(Match match, List<ICondition> conditions)
     {
         await settlementService.UpdateResultExpired(match);
-        if (!match.ResultDetails.Any())
+        if (match.ResultDetails.Count == 0)
         {
             return;
         }
 
-        if (appSettingsKey.GroupTest != 0)
+        if (appSettingsKey.Value.GroupTest != 0)
         {
             await HandleAndRetryCondition(match, conditions);
             await writeLogService.WriteLog(match, string.Empty);
@@ -74,8 +71,8 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> options,
     private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
     {
         await Policy.Handle<ServiceException>(e => e.NeedRetry)
-            .WaitAndRetryAsync(appSettingsKey.RetryCount,
-                _ => TimeSpan.FromMilliseconds(appSettingsKey.RetryInterval))
+            .WaitAndRetryAsync(appSettingsKey.Value.RetryCount,
+                _ => TimeSpan.FromMilliseconds(appSettingsKey.Value.RetryInterval))
             .ExecuteAsync(async () =>
             {
                 foreach (var condition in conditions)

@@ -8,10 +8,9 @@ using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services.ExtraStepServiceTests.AfterSettleTests;
+
 public class BasketBallCashOutTests
 {
-    private readonly IHttpClientFactory httpClient;
-
     private readonly BasketBallCashOut service;
 
     private readonly InvokeExternalAPI invokeExternalApi;
@@ -20,7 +19,6 @@ public class BasketBallCashOutTests
 
     public BasketBallCashOutTests()
     {
-        httpClient = Substitute.For<IHttpClientFactory>();
         invokeExternalApi = Substitute.For<InvokeExternalAPI>();
         appSettingsKey = new AppSettingsKey()
         {
@@ -39,7 +37,7 @@ public class BasketBallCashOutTests
     {
         var match = new Match()
         {
-            ResultDetails = new List<ResultDetail>() { new() { ResourceId = "Q1" } },
+            ResultDetails = [new() { ResourceId = "Q1" }],
             MatchDetail = new MatchDetail() { GameSession = GameType.Bo4 }
         };
 

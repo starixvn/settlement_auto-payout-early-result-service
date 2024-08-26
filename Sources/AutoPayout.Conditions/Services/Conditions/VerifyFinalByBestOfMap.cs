@@ -1,9 +1,9 @@
-﻿using AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
-using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
 {
@@ -34,7 +34,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         }
     }
 
-    private int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)
+    private static int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)
     {
         if (matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % GameType.Bo2 == 0)
         {
@@ -44,7 +44,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         return int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
     }
 
-    private string GetResourceToRefund(IReadOnlyList<ResultDetail> resultSettled, IReadOnlyList<ResourceIndex> resourceIndexes, MatchDetail matchDetail, int maxGamePlayed)
+    private static string GetResourceToRefund(IEnumerable<ResultDetail> resultSettled, IReadOnlyList<ResourceIndex> resourceIndexes, MatchDetail matchDetail, int maxGamePlayed)
     {
         if (matchDetail.BestOfMap is GameType.Bo1 or GameType.Bo2)
 
@@ -67,7 +67,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         return string.Join(",", resourceToRefund);
     }
 
-    private bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, Match match, List<ResultDetail> settledResults, int maxGamePlayed)
+    private static bool ValidateResult(List<ResultDetail> results, MatchDetail matchDetail, Match match, List<ResultDetail> settledResults, int maxGamePlayed)
     {
         if (results.IsNullOrEmpty())
         {
@@ -104,14 +104,20 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         return matchDetail.OverTimeSession == OverTimeSessions.OverWatch && matchDetail.BestOfMap % GameType.Bo2 == 0;
     }
 
-    private static bool ValidateOverTimeSession(List<ResultDetail> results, ResultDetail finalResult, int maxGamePlayed)
+    private static bool ValidateOverTimeSession(IReadOnlyCollection<ResultDetail> results, ResultDetail finalResult, int maxGamePlayed)
     {
         return VerifyFinalResultHelper.VerifyDrawSetResults(results, maxGamePlayed) &&
                VerifyFinalResultHelper.IsMatchResultsConsecutive(results) &&
                VerifyFinalResultHelper.VerifyResult(results, finalResult);
     }
 
-    private static bool ValidateGeneralCase(Match match, List<ResultDetail> results, MatchDetail matchDetail, List<ResultDetail> settledResults, ResultDetail finalResult, int maxGamePlayed)
+    private static bool ValidateGeneralCase(
+        Match match,
+        List<ResultDetail> results,
+        MatchDetail matchDetail,
+        IReadOnlyCollection<ResultDetail> settledResults,
+        ResultDetail finalResult,
+        int maxGamePlayed)
     {
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
 
@@ -121,7 +127,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
 
         return verifyRelatedResult &&
                VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet) &&
-               VerifyFinalResultHelper.VerifyAnyDrawResults(match.ResultDetails.Concat(settledResults).ToList());
+               VerifyFinalResultHelper.VerifyAnyDrawResults([.. match.ResultDetails, .. settledResults]);
     }
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
