@@ -31,12 +31,12 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         if (match.ResultDetails.Count != 0)
         {
-            var settleCriteria = createQueryService.QuerySettle(match);
-            var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
-            await ProcessBeforeSettle(match, settleCriteria);
-            await Execute(settleCriteria, match, isExistedFinalResource);
-            await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
-            await ProcessAfterSettle(match, settleCriteria);
+            //var settleCriteria = createQueryService.QuerySettle(match);
+            //var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
+            //await ProcessBeforeSettle(match, settleCriteria);
+            //await Execute(settleCriteria, match, isExistedFinalResource);
+            //await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
+            //await ProcessAfterSettle(match, settleCriteria);
         }
     }
 

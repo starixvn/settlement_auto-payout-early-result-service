@@ -139,7 +139,7 @@ public class BasketballHelperServiceTests
     }
 
     [Fact]
-    public async Task FinalOfBo2InValid_HalfTimeIsNull_ReturnTrueAndCorrectMessage()
+    public async Task FinalOfBo2InValid_HalfTimeIsNullAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueAndCorrectMessage()
     {
         fullTime.HomeValue = "2";
         fullTime.AwayValue = "1";
@@ -149,20 +149,9 @@ public class BasketballHelperServiceTests
     }
 
     [Fact]
-    public async Task FinalOfBo2InValid_HalfTimeScoreIsGreaterThanFullTimAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueAndCorrectMessage()
+    public async Task FinalOfBo2InValid_HalfTimeIsNullAndMaxTimeScoreLessThanRetryProcessScore_ReturnEmptyMessage()
     {
-        fullTime.HomeValue = "0";
-        fullTime.AwayValue = "1";
-
-        var actual = await service.FinalOfBo2InValid(fullTime, halfTime);
-
-        Assert.Equal("Failed Auto Payout: FT(0-1) due to values inconsistency: HT(1-2)", actual);
-    }
-
-    [Fact]
-    public async Task FinalOfBo2InValid_HalfTimeScoreIsGreaterThanFullTimAndMaxTimeScoreLessThanRetryProcessScore_ReturnFalseAndEmptyMessage()
-    {
-        fullTime.HomeValue = "0";
+        fullTime.HomeValue = "2";
         fullTime.AwayValue = "1";
         var scores = new List<Score>()
         {
@@ -173,10 +162,20 @@ public class BasketballHelperServiceTests
         };
 
         resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
+        var actual = await service.FinalOfBo2InValid(fullTime, null);
+
+        Assert.Empty(actual);
+    }
+
+    [Fact]
+    public async Task FinalOfBo2InValid_HalfTimeScoreIsGreaterThanFullTim_ReturnMessage()
+    {
+        fullTime.HomeValue = "0";
+        fullTime.AwayValue = "1";
 
         var actual = await service.FinalOfBo2InValid(fullTime, halfTime);
 
-        Assert.Empty(actual);
+        Assert.Equal("Failed Auto Payout: FT(0-1) due to values inconsistency: HT(1-2)", actual);
     }
 
     [Fact]
@@ -215,7 +214,7 @@ public class BasketballHelperServiceTests
     [InlineData(0, 2, "Failed Auto Payout: FT(3-4) due to related result(s) not calculated: HT, Q3, Q4")]
     [InlineData(0, 3, "Failed Auto Payout: FT(3-4) due to related result(s) not calculated: Q3, Q4")]
     [InlineData(0, 4, "Failed Auto Payout: FT(3-4) due to related result(s) not calculated: Q4")]
-    public async Task FinalOfBo4InValid_RelatedResultInvalid_ReturnTrueAndCorrectMessage(int from, int to, string errorMessage)
+    public async Task FinalOfBo4InValid_RelatedResultInvalidAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueAndCorrectMessage(int from, int to, string errorMessage)
     {
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
@@ -226,7 +225,7 @@ public class BasketballHelperServiceTests
     }
 
     [Fact]
-    public async Task FinalOfBo4InValid_ExistOTAndSumScoreNotDrawAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueAndCorrectMessage()
+    public async Task FinalOfBo4InValid_ExistOTAndSumScoreNotDraw_ReturnTrueAndCorrectMessage()
     {
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
@@ -243,7 +242,7 @@ public class BasketballHelperServiceTests
     }
 
     [Fact]
-    public async Task FinalOfBo4InValid_NotExistOTAndSumScoreIsDrawAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueAndCorrectMessage()
+    public async Task FinalOfBo4InValid_NotExistOTAndSumScoreIsDraw_ReturnTrueAndCorrectMessage()
     {
         fullTime.HomeValue = "3";
         fullTime.AwayValue = "4";
@@ -287,37 +286,6 @@ public class BasketballHelperServiceTests
         var actual = await service.FinalOfBo4InValid(new Match(), fullTime, results);
 
         Assert.Equal("Failed Auto Payout: FT(2-4) due to values inconsistency: Q1(0-1), Q2(1-1), HT(1-1), Q3(1-1), Q4(1-1)", actual);
-    }
-
-    [Fact]
-    public async Task FinalOfBo4InValid_TotalScoreNotMatchWithFinalScoreAndMaxTimeScoreLessThanRetryProcessScore_ReturnFalseAndEmptyMessage()
-    {
-        fullTime.HomeValue = "2";
-        fullTime.AwayValue = "4";
-        var results = GetQuarter((0, ResourceIds.ResultFtWithoutOTBasketBall.Length));
-        results.ForEach(r => r.HomeValue = r.AwayValue = "1");
-        results[0].HomeValue = "0";
-        var otResult = new ResultDetail { ResourceId = ResourceIds.OverTime, HomeValue = "1", AwayValue = "1", IsValid = false };
-        overTimeService.GetOtBasketBall(fullTime, Arg.Any<int>(), Arg.Any<int>()).Returns(otResult);
-
-        var match = new Match
-        {
-            ResultDetails = [fullTime]
-        };
-
-        var scores = new List<Score>()
-        {
-            new()
-            {
-                CreateDate = DateTime.Now
-            }
-        };
-
-        resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
-
-        var actual = await service.FinalOfBo4InValid(match, fullTime, results);
-
-        Assert.Empty(actual);
     }
 
     [Fact]
