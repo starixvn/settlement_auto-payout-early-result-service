@@ -33,7 +33,7 @@ public class VerifyBasketBallResult(
         await HandleFullTime(match, match.MatchDetail.GameSession, results);
     }
 
-    private async Task HandleHalfTime(Match match, int gameSession, ICollection<ResultDetail> results)
+    private async Task HandleHalfTime(Match match, int gameSession, List<ResultDetail> results)
     {
         var halfTime = match.ResultDetails.Find(r => r.ResourceId == ResourceIds.Halftime);
         var resultWithoutHt = results.Where(r => r.ResourceId != ResourceIds.Halftime).ToList();
@@ -42,7 +42,7 @@ public class VerifyBasketBallResult(
             return;
         }
 
-        var halfTimeMessage = await basketballHelper.VerifyHalfTimeInValid(halfTime, resultWithoutHt, gameSession);
+        var halfTimeMessage = await basketballHelper.VerifyHalfTimeInValid(match, halfTime, resultWithoutHt, gameSession);
 
         if (!string.IsNullOrEmpty(halfTimeMessage))
         {
@@ -63,7 +63,7 @@ public class VerifyBasketBallResult(
         var errorMessage = gameSession switch
         {
             GameType.Bo1 => basketballHelper.FullTimeDraw(fullTimeResult),
-            GameType.Bo2 => await basketballHelper.FinalOfBo2InValid(fullTimeResult, halfTime),
+            GameType.Bo2 => await basketballHelper.FinalOfBo2InValid(match, fullTimeResult, halfTime),
             GameType.Bo4 => await basketballHelper.FinalOfBo4InValid(match, fullTimeResult, results),
             _ => CreateMessageService.InconsistentWithGameSession(fullTimeResult, gameSession)
         };

@@ -56,7 +56,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
 
         await HandleAndRetryCondition(match, conditions);
-        // await settlementService.Push(match);
+        await settlementService.Push(match);
     }
 
     private async Task ProcessError(Match match, ServiceException exception)

@@ -47,11 +47,11 @@ public class VerifyBasketBallFinalResultTests
         await service.HandleCondition(match);
 
         Assert.Equal(2, match.MatchDetail.GameSession);
-        await basketballHelper.DidNotReceive().VerifyHalfTimeInValid(Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
+        await basketballHelper.DidNotReceive().VerifyHalfTimeInValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
             Arg.Any<int>());
 
         await basketballHelper.DidNotReceive()
-             .FinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
+             .FinalOfBo2InValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
     }
 
     [Fact]
@@ -68,14 +68,14 @@ public class VerifyBasketBallFinalResultTests
         resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>())
             .Returns(([], []));
-        basketballHelper.VerifyHalfTimeInValid(Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
+        basketballHelper.VerifyHalfTimeInValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
             Arg.Any<int>()).Returns("Error");
 
         await service.HandleCondition(match);
         await resultDetailService.Received(1).UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received(1).WriteLogResult(1, Arg.Any<ResultDetail>(), Arg.Any<string>());
         await basketballHelper.DidNotReceive()
-            .FinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
+            .FinalOfBo2InValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
         Assert.Empty(match.ResultDetails);
     }
 
@@ -93,9 +93,9 @@ public class VerifyBasketBallFinalResultTests
         resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>())
             .Returns(([], []));
-        basketballHelper.VerifyHalfTimeInValid(Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
+        basketballHelper.VerifyHalfTimeInValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<List<ResultDetail>>(),
             Arg.Any<int>()).Returns("Error");
-        basketballHelper.FinalOfBo2InValid(Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>()).Returns("true");
+        basketballHelper.FinalOfBo2InValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>()).Returns("true");
 
         await service.HandleCondition(match);
         await resultDetailService.Received(2).UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());

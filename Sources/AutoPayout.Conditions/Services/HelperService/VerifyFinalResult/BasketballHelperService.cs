@@ -7,11 +7,11 @@ namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
 public interface BasketballHelperService
 {
-    Task<string> VerifyHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> resultDetails, int gameSession);
+    Task<string> VerifyHalfTimeInValid(Match match, ResultDetail halfTimeResult, List<ResultDetail> resultDetails, int gameSession);
 
     string FullTimeDraw(ResultDetail finalResult);
 
-    Task<string> FinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult);
+    Task<string> FinalOfBo2InValid(Match match, ResultDetail finalResult, ResultDetail halfTimeResult);
 
     Task<string> FinalOfBo4InValid(Match match, ResultDetail finalResult, List<ResultDetail> results);
 }
@@ -21,7 +21,7 @@ public class BasketballHelperServiceImp(
     OverTimeService overTimeService,
     IOptions<AppSettingsKey> appSettingsKey) : BasketballHelperService
 {
-    public async Task<string> VerifyHalfTimeInValid(ResultDetail halfTimeResult, List<ResultDetail> resultDetails, int gameSession)
+    public async Task<string> VerifyHalfTimeInValid(Match match, ResultDetail halfTimeResult, List<ResultDetail> resultDetails, int gameSession)
     {
         if (gameSession == GameType.Bo1)
         {
@@ -29,20 +29,49 @@ public class BasketballHelperServiceImp(
         }
 
         return gameSession == GameType.Bo4
-            ? await VerifyHalfTimeOfBo4InValid(halfTimeResult, resultDetails)
+            ? await VerifyHalfTimeOfBo4InValid(match, halfTimeResult, resultDetails)
             : string.Empty;
     }
 
-    private async Task<string> VerifyHalfTimeOfBo4InValid(ResultDetail halfTimeResult, IReadOnlyCollection<ResultDetail> resultDetails)
+    private async Task<string> VerifyHalfTimeOfBo4InValid(Match match, ResultDetail halfTimeResult, IReadOnlyCollection<ResultDetail> resultDetails)
     {
-        var (isInValidResult, errorMessageResult) = await HalfTimeRelatedResultInValid(halfTimeResult, resultDetails);
-        if (isInValidResult)
+        var resultsValid = ResourceIds.ResultHtBasketBall.Where(r => resultDetails.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
+
+        if (resultsValid.Length != ResourceIds.ResultHtBasketBall.Length)
         {
-            return errorMessageResult;
+            return await HalfTimeRelatedResultInValidAndMaxTimeScore(match, halfTimeResult, resultsValid);
         }
 
-        var (isInValidScore, errorMessageScore) = HalfTimeScoreInValid(halfTimeResult, resultDetails);
-        return isInValidScore ? errorMessageScore : string.Empty;
+        return HalfTimeScoreInValid(halfTimeResult, resultDetails);
+    }
+
+    private async Task<string> HalfTimeRelatedResultInValidAndMaxTimeScore(Match match, ResultDetail halfTimeResult, IEnumerable<string> resultsValid)
+    {
+        var maxTimeScore = await MaxTimeScore(halfTimeResult);
+        if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
+        {
+            return CreateMessageService.RelatedResultInvalid(halfTimeResult, resultsValid, ResourceIds.ResultHtBasketBall);
+        }
+
+        match.ResultDetails.Remove(halfTimeResult);
+        return string.Empty;
+    }
+
+    private static string HalfTimeScoreInValid(ResultDetail halfTimeResult, IEnumerable<ResultDetail> results)
+    {
+        var resultRelated = results.Where(r => ResourceIds.ResultHtBasketBall.Contains(r.ResourceId)).ToList();
+
+        var isInconsistentScoreHalfTime = IsInconsistentScoreHalfTime(halfTimeResult, resultRelated);
+
+        return isInconsistentScoreHalfTime ? CreateMessageService.ResultRelatedInconsistent(halfTimeResult, resultRelated) : string.Empty;
+    }
+
+    private static bool IsInconsistentScoreHalfTime(ResultDetail halfTimeResult, IEnumerable<ResultDetail> resultRelated)
+    {
+        var home = resultRelated.Select(r => int.Parse(r.HomeValue)).Sum();
+        var away = resultRelated.Select(r => int.Parse(r.AwayValue)).Sum();
+
+        return home != int.Parse(halfTimeResult.HomeValue) || away != int.Parse(halfTimeResult.AwayValue);
     }
 
     public string FullTimeDraw(ResultDetail finalResult)
@@ -50,7 +79,7 @@ public class BasketballHelperServiceImp(
         return int.Parse(finalResult.HomeValue) == int.Parse(finalResult.AwayValue) ? CreateMessageService.FullTimeDrawMessage(finalResult) : string.Empty;
     }
 
-    public async Task<string> FinalOfBo2InValid(ResultDetail finalResult, ResultDetail halfTimeResult)
+    public async Task<string> FinalOfBo2InValid(Match match, ResultDetail finalResult, ResultDetail halfTimeResult)
     {
         var isDraw = FullTimeDraw(finalResult);
         if (isDraw != string.Empty)
@@ -60,8 +89,7 @@ public class BasketballHelperServiceImp(
 
         if (halfTimeResult is null)
         {
-            var maxTimeScore = await MaxTimeScore(finalResult);
-            return maxTimeScore > appSettingsKey.Value.RetryProcessScore ? CreateMessageService.HalfTimeNotCalculated(finalResult) : string.Empty;
+            return await FinalOfBo2RelatedResultInValidAndMaxTimeScore(match, finalResult);
         }
 
         var isInValidScore = int.Parse(halfTimeResult.HomeValue) > int.Parse(finalResult.HomeValue) ||
@@ -77,6 +105,18 @@ public class BasketballHelperServiceImp(
         return string.Empty;
     }
 
+    private async Task<string> FinalOfBo2RelatedResultInValidAndMaxTimeScore(Match match, ResultDetail finalResult)
+    {
+        var maxTimeScore = await MaxTimeScore(finalResult);
+        if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
+        {
+            return CreateMessageService.HalfTimeNotCalculated(finalResult);
+        }
+
+        match.ResultDetails.Remove(finalResult);
+        return string.Empty;
+    }
+
     public async Task<string> FinalOfBo4InValid(Match match, ResultDetail finalResult, List<ResultDetail> results)
     {
         var isDraw = FullTimeDraw(finalResult);
@@ -85,10 +125,11 @@ public class BasketballHelperServiceImp(
             return isDraw;
         }
 
-        var (isInValidResult, errorMessageResult) = await FullTimeRelatedResultInValid(finalResult, results);
-        if (isInValidResult)
+        var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
+
+        if (resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length)
         {
-            return errorMessageResult;
+            return await FullTimeRelatedResultInValidAndMaxTimeScore(match, finalResult, resultsValid);
         }
 
         var isInvalid = await FullTimeRelatedResultScoreInvalid(match, finalResult, results);
@@ -101,20 +142,16 @@ public class BasketballHelperServiceImp(
         return string.Empty;
     }
 
-    private async Task<(bool, string)> FullTimeRelatedResultInValid(ResultDetail finalResult, IReadOnlyCollection<ResultDetail> results)
+    private async Task<string> FullTimeRelatedResultInValidAndMaxTimeScore(Match match, ResultDetail finalResult, IEnumerable<string> resultsValid)
     {
-        var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
         var maxTimeScore = await MaxTimeScore(finalResult);
-
-        if (resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length &&
-            maxTimeScore > appSettingsKey.Value.RetryProcessScore)
+        if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
         {
-            var message = CreateMessageService.RelatedResultInvalid(finalResult, resultsValid,
-                ResourceIds.ResultFtWithoutOTBasketBall);
-            return (true, message);
+            return CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, ResourceIds.ResultFtWithoutOTBasketBall);
         }
 
-        return (false, string.Empty);
+        match.ResultDetails.Remove(finalResult);
+        return string.Empty;
     }
 
     private async Task<bool> FullTimeRelatedResultScoreInvalid(Match match, ResultDetail finalResult, List<ResultDetail> results)
@@ -155,43 +192,6 @@ public class BasketballHelperServiceImp(
         return results
             .Where(r => r.ResourceId != ResourceIds.OverTime && r.ResourceId != ResourceIds.Halftime)
             .Select(r => int.Parse(r.AwayValue)).Sum();
-    }
-
-    private async Task<(bool, string)> HalfTimeRelatedResultInValid(ResultDetail halfTimeResult, IEnumerable<ResultDetail> results)
-    {
-        var resultsValid = ResourceIds.ResultHtBasketBall.Where(r => results.FirstOrDefault(rd => rd.ResourceId == r) != null).ToArray();
-        var maxTimeScore = await MaxTimeScore(halfTimeResult);
-
-        if (resultsValid.Length != ResourceIds.ResultHtBasketBall.Length && maxTimeScore > appSettingsKey.Value.RetryProcessScore)
-        {
-            var message = CreateMessageService.RelatedResultInvalid(halfTimeResult, resultsValid, ResourceIds.ResultHtBasketBall);
-            return (true, message);
-        }
-
-        return (false, string.Empty);
-    }
-
-    private static (bool, string) HalfTimeScoreInValid(ResultDetail halfTimeResult, IEnumerable<ResultDetail> results)
-    {
-        var resultRelated = results.Where(r => ResourceIds.ResultHtBasketBall.Contains(r.ResourceId)).ToList();
-
-        var isInconsistentScoreHalfTime = IsInconsistentScoreHalfTime(halfTimeResult, resultRelated);
-
-        if (isInconsistentScoreHalfTime)
-        {
-            var message = CreateMessageService.ResultRelatedInconsistent(halfTimeResult, resultRelated);
-            return (true, message);
-        }
-
-        return (false, string.Empty);
-    }
-
-    private static bool IsInconsistentScoreHalfTime(ResultDetail halfTimeResult, IEnumerable<ResultDetail> resultRelated)
-    {
-        var home = resultRelated.Select(r => int.Parse(r.HomeValue)).Sum();
-        var away = resultRelated.Select(r => int.Parse(r.AwayValue)).Sum();
-
-        return home != int.Parse(halfTimeResult.HomeValue) || away != int.Parse(halfTimeResult.AwayValue);
     }
 
     private async Task<double> MaxTimeScore(ResultDetail resultDetail)

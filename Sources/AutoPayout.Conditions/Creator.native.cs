@@ -25,14 +25,14 @@ public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
     {
         return id switch
         {
-            //ConditionId.VerifyMatchStatus => verifyMatchStatus,
-            //ConditionId.VerifyRunningOdds => verifyRunningOdds,
-            //ConditionId.VerifyEsTimeResult => verifyTimeResult,
-            //ConditionId.VerifyConfirmScore => verifyConfirmScore,
-            //ConditionId.VerifyBeforePush => verifyBeforePushProfile,
-            //ConditionId.VerifyInningStatus => verifyInningStatus,
-            //ConditionId.VerifyFinalResult => verifyFinalResult,
-            //ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
+            ConditionId.VerifyMatchStatus => verifyMatchStatus,
+            ConditionId.VerifyRunningOdds => verifyRunningOdds,
+            ConditionId.VerifyEsTimeResult => verifyTimeResult,
+            ConditionId.VerifyConfirmScore => verifyConfirmScore,
+            ConditionId.VerifyBeforePush => verifyBeforePushProfile,
+            ConditionId.VerifyInningStatus => verifyInningStatus,
+            ConditionId.VerifyFinalResult => verifyFinalResult,
+            ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
             ConditionId.VerifyBasketBallFinalResult => verifyBasketBallFinalResult,
             _ => ignoreVerify,
         };
