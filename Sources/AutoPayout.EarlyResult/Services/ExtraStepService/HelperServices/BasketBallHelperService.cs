@@ -2,8 +2,8 @@
 using System.Text.RegularExpressions;
 using Match = AutoPayout.Models.Match;
 
-
 namespace AutoPayout.EarlyResult.Services.ExtraStepService.HelperServices;
+
 public static class BasketBallHelperService
 {
     public const string DefaultBetStatus = "0-0,0-0,0-0,0-0,0-0";
@@ -93,11 +93,18 @@ public static class BasketBallHelperService
     private static string GetElements(string betStatus)
     {
         const string pattern = @"\d+-\d+";
+        const int timeoutMilliseconds = 3000;
+        try
+        {
+            var matches = Regex.Matches(betStatus, pattern, RegexOptions.None, TimeSpan.FromMilliseconds(timeoutMilliseconds));
 
-        var matches = Regex.Matches(betStatus, pattern);
+            var result = string.Join(",", matches);
 
-        var result = string.Join(",", matches);
-
-        return result;
+            return result;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return string.Empty;
+        }
     }
 }

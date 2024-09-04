@@ -60,7 +60,7 @@ public class BasketballHelperServiceTests
     }
 
     [Fact]
-    public async Task VerifyHalfTimeInValid_MatchBO4AndRelatedResultNotValidAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnTrueWithCorrectMessage()
+    public async Task VerifyHalfTimeInValid_MatchBO4AndRelatedResultNotValidAndMaxTimeScoreGreaterThanRetryProcessScore_ReturnsErrorMessage()
     {
         var match = new Match
         {
@@ -87,40 +87,43 @@ public class BasketballHelperServiceTests
         Assert.Equal(expected, message);
     }
 
-    //[Fact]
-    //public async Task VerifyHalfTimeInValid_MatchBO4AndRelatedResultNotValidAndMaxTimeScoreLessThanRetryProcessScore_ReturnTrueWithCorrectMessage()
-    //{
-    //    var match = new Match
-    //    {
-    //        MatchId = 1,
-    //        ResultDetails =
-    //        [
-    //            new ResultDetail
-    //            {
-    //                ResourceId = "Q1"
-    //            },
+    [Fact]
+    public async Task VerifyHalfTimeInValid_MatchBO4AndRelatedResultNotValidAndMaxTimeScoreLessThanRetryProcessScore_ReturnEmptyMessage()
+    {
+        var match = new Match
+        {
+            MatchId = 1,
+            ResultDetails =
+            [
+                new ResultDetail
+                {
+                    ResourceId = "Q1"
+                },
 
-    //            new ResultDetail
-    //            {
-    //                ResourceId = "01"
-    //            }
-    //        ]
-    //    };
-    //    var scores = new List<Score>()
-    //    {
-    //        new()
-    //        {
-    //            CreateDate = DateTime.Now
-    //        }
-    //    };
+                new ResultDetail
+                {
+                    ResourceId = "01",
+                    HomeValue = "1",
+                    AwayValue = "2"
+                }
+            ]
+        };
+        var scores = new List<Score>()
+        {
+            new()
+            {
+                CreateDate = DateTime.Now
+            }
+        };
 
-    //    resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
-    //    var results = GetQuarter((0, 1));
-    //    var message = await service.VerifyHalfTimeInValid(match, halfTime, results, GameType.Bo4);
+        var ht = match.ResultDetails.Find(r => r.ResourceId == "01");
+        resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
+        var results = GetQuarter((0, 1));
+        var message = await service.VerifyHalfTimeInValid(match, ht, results, GameType.Bo4);
 
-    //    Assert.Single(match.ResultDetails);
-    //    Assert.Empty(message);
-    //}
+        Assert.Single(match.ResultDetails);
+        Assert.Empty(message);
+    }
 
     [Fact]
     public async Task VerifyHalfTimeInValid_MatchBO4AndHalfTimeScoreInconsistentWithRelatedResult_ReturnTrueWithCorrectMessage()
@@ -133,43 +136,6 @@ public class BasketballHelperServiceTests
 
         Assert.Equal("Failed Auto Payout: HT(1-2) due to values inconsistency: Q1(1-1), Q2(1-1)", message);
     }
-
-    //[Fact]
-    //public async Task VerifyHalfTimeInValid_MatchBO4HalfTimeConsistentWithRelatedResultAndMaxTimeScoreLessThanRetryProcessScore_ReturnFalseAndEmptyMessage()
-    //{
-    //    var results = GetQuarter((0, 2));
-    //    results[0].HomeValue = "0";
-    //    results[1].HomeValue = "1";
-    //    results[0].AwayValue = results[1].AwayValue = "1";
-    //    var scores = new List<Score>()
-    //    {
-    //        new()
-    //        {
-    //            CreateDate = DateTime.Now
-    //        }
-    //    };
-    //    var match = new Match
-    //    {
-    //        MatchId = 1,
-    //        ResultDetails =
-    //        [
-    //            new ResultDetail
-    //            {
-    //                ResourceId = "Q1"
-    //            },
-
-    //            new ResultDetail
-    //            {
-    //                ResourceId = "01"
-    //            }
-    //        ]
-    //    };
-    //    resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
-    //    var message = await service.VerifyHalfTimeInValid(match, halfTime, results, GameType.Bo4);
-
-    //    Assert.Single(match.ResultDetails);
-    //    Assert.Empty(message);
-    //}
 
     [Fact]
     public async Task VerifyHalfTimeInValid_MatchBO2_ReturnFalseAndEmpty()
@@ -237,8 +203,6 @@ public class BasketballHelperServiceTests
     [Fact]
     public async Task FinalOfBo2InValid_HalfTimeIsNullAndMaxTimeScoreLessThanRetryProcessScore_ReturnEmptyMessage()
     {
-        fullTime.HomeValue = "2";
-        fullTime.AwayValue = "1";
         var scores = new List<Score>()
         {
             new()
@@ -253,7 +217,9 @@ public class BasketballHelperServiceTests
             [
                 new ResultDetail
                 {
-                    ResourceId = "00"
+                    ResourceId = "00",
+                    HomeValue = "1",
+                    AwayValue = "2"
                 },
 
                 new ResultDetail
@@ -263,8 +229,10 @@ public class BasketballHelperServiceTests
             ]
         };
 
+        var ft = match.ResultDetails.Find(r => r.ResourceId == "00");
+
         resultDetailService.GetSingleScore(Arg.Any<ResultDetail>()).Returns(scores);
-        var actual = await service.FinalOfBo2InValid(match, fullTime, null);
+        var actual = await service.FinalOfBo2InValid(match, ft, null);
 
         Assert.Single(match.ResultDetails);
         Assert.Empty(actual);

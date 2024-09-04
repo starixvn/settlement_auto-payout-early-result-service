@@ -125,7 +125,7 @@ public class BasketballHelperServiceImp(
             return isDraw;
         }
 
-        var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Any(rd => rd.ResourceId == r)).ToArray();
+        var resultsValid = ResourceIds.ResultFtWithoutOTBasketBall.Where(r => results.Exists(rd => rd.ResourceId == r)).ToArray();
 
         if (resultsValid.Length != ResourceIds.ResultFtWithoutOTBasketBall.Length)
         {
