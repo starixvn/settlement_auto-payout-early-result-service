@@ -2,12 +2,13 @@
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+
 public interface OverTimeService
 {
     Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue);
 }
 
-public class OverTimeServiceImp(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options) : OverTimeService
+public class OverTimeServiceImp(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingsKey) : OverTimeService
 {
     private const string overTimeDefaultValue = "0";
 
@@ -28,7 +29,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
                                                         && (s.HomeValue != "0" || s.AwayValue != "0"))
                                                         .ToList();
 
-        resultOt.IsValid = isOtValid(resultOt, totalHomeValue, totalAwayValue, scoresValid);
+        resultOt.IsValid = IsOtValid(resultOt, totalHomeValue, totalAwayValue, scoresValid);
         resultOt.RelatedInfo = string.Join(',', scoresValid.Select(s => $"{s.SourceName ?? "Trader"}: {s.HomeValue}-{s.AwayValue}"));
         if (resultOt.IsValid && totalAwayValue == totalHomeValue)
         {
@@ -39,9 +40,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         return resultOt;
     }
 
-
-
-    private bool isOtValid(ResultDetail resultOt, int totalHomeValue, int totalAwayValue, List<Score> scores)
+    private bool IsOtValid(ResultDetail resultOt, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
     {
         var variantCount = scores.Distinct(new ScoreComparer()).Count();
         if (totalAwayValue != totalHomeValue)
@@ -55,16 +54,15 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
                 {
                     var maxDate = scores.Max(t => t.CreateDate);
                     var processTime = DateTimeOffset.Now - maxDate;
-                    resultOt.Expired = processTime.TotalMilliseconds > options.Value.RetryProcessScore;
+                    resultOt.Expired = processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore;
                     resultOt.NeedRetry = !resultOt.Expired;
                     return false;
                 }
             case 1:
                 return int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
+
             default:
                 return false;
         }
-
-
     }
 }

@@ -18,7 +18,7 @@ public interface SettlementService
     Task UpdateResultExpired(Match match);
 }
 
-public class SettlementServiceImp(IOptions<AppSettingsKey> options,
+public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         WriteLogService writeLogService,
         IDynamicRepository repository,
         ScaleOutSettleService scaleOutSettleService,
@@ -27,11 +27,9 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         CreateExtraStepService createExtraStepService)
     : SettlementService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
-
     public async Task Push(Match match)
     {
-        if (match.ResultDetails.Any())
+        if (match.ResultDetails.Count != 0)
         {
             var settleCriteria = createQueryService.QuerySettle(match);
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
@@ -45,7 +43,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
     public async Task UpdateResultExpired(Match match)
     {
         var resultExpired = match.ResultDetails.Where(r => r.ResourceStatus == ResourceStatus.Expired).ToList();
-        if (resultExpired.Any())
+        if (resultExpired.Count != 0)
         {
             match.ResultDetails = match.ResultDetails.Except(resultExpired).ToList();
             var resultExpiredIds = string.Join(',', resultExpired.Select(r => r.ResourceId));
@@ -80,7 +78,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
 
-        foreach (var server in appSettingsKey.SiteDbServer)
+        foreach (var server in appSettingsKey.Value.SiteDbServer)
         {
             criteria.DbServer = server;
             await repository.ExecuteAsync(criteria);
@@ -110,7 +108,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> options,
         return resultDetails.Any(resource => !string.IsNullOrEmpty(resource.ResourceId) && resource.ResourceId.Equals(ResourceIds.FullTime));
     }
 
-    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource) //NOSONAR
+    private async Task SetUnderSettleFlag(SettleCriteria criteria, bool isExistedFinalResource)
     {
         if (isExistedFinalResource)
         {

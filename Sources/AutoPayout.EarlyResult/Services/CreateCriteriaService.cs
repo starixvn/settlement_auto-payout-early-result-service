@@ -33,7 +33,7 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
         return provider;
     }
 
-    private static string GetGroupedInfo(IReadOnlyCollection<IGrouping<(int, string), ExternalSourceInfo>> groupedItems)
+    private static string GetGroupedInfo(IEnumerable<IGrouping<(int, string), ExternalSourceInfo>> groupedItems)
     {
         var resourceIds = string.Join(", ", groupedItems
             .Where(group => group.Key.Item1 > 0 && group.Key.Item1 != SourceId.Screenshot)
@@ -44,7 +44,6 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
             }));
 
         return $"Provider: {resourceIds}";
-
     }
 
     private string CreateResources(IEnumerable<ResultDetail> selectedResources)

@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-	  
+
+	  <!-- ReSharper disable once VulnerablePackage -->
 	  <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.5.3" />
     <PackageReference Include="Fanex.Logging" Version="2.0.1.1" />
-	  <!-- ReSharper disable once VulnerablePackage -->
 	  <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />

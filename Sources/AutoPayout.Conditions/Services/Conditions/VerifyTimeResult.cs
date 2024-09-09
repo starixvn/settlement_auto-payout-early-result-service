@@ -3,13 +3,11 @@ using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingsKey)
     : ICondition
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value;
-
     public async Task HandleCondition(Match match)
     {
         var timeResults = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
@@ -24,26 +22,26 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
 
         var scores = await resultDetailService.GetScores(match);
 
-        CompareScore(match, scores);
+        await CompareScore(match, scores);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
-        match.ResultDetails = match.ResultDetails.Concat(normalResults).ToList();
+        match.ResultDetails = [.. match.ResultDetails, .. normalResults];
 
-        if (!match.ResultDetails.Any())
+        if (match.ResultDetails.Count == 0)
         {
             throw new ServiceException { MarkFail = false };
         }
     }
 
-    private void CompareScore(Match match, IEnumerable<Score> scores)
+    private async Task CompareScore(Match match, IEnumerable<Score> scores)
     {
         var groupedScores = scores.GroupBy(s => new KeyGroupScore(s.ResourceId, s.ResultType)).ToList();
 
-        groupedScores.ForEach(async group =>
+        foreach (var group in groupedScores)
         {
             var resultDetail = match.ResultDetails.First(r => r.ResourceId.Trim() == group.Key.ResourceId.Trim());
 
-            if (TryGetTraderScore(group, out string minute, out string second)
+            if (TryGetTraderScore(group, out var minute, out var second)
                 && group.Distinct(new ScoreComparer(true)).Count() == 1
                 && Convert.ToInt32(second) >= 0 && Convert.ToInt32(second) < 60)
             {
@@ -61,10 +59,10 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
             {
                 await MarkFail(resultDetail, group, match);
             }
-        });
+        }
     }
 
-    private bool TryGetTraderScore(IGrouping<KeyGroupScore, Score> group, out string homeScore, out string awayScore)
+    private static bool TryGetTraderScore(IEnumerable<Score> group, out string homeScore, out string awayScore)
     {
         var traderScore = group.FirstOrDefault(x => x.SourceId == SourceId.Trader);
 
@@ -83,13 +81,15 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
         var maxDate = groupScore.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
 
-        if (!TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalSeconds > match.EarlyRetryTime)
+        resultDetail.IsValid = false;
+
+        if (!TryGetTraderScore(groupScore, out _, out _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
         }
-        else if (TryGetTraderScore(groupScore, out string _, out string _) && processTime.TotalMilliseconds > appSettingsKey.RetryProcessScore)
+        else if (TryGetTraderScore(groupScore, out _, out _) && processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
             await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
@@ -97,9 +97,7 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
         }
         else
         {
-            //do not thing
+            resultDetail.IsValid = false;
         }
-
-        resultDetail.IsValid = false;
     }
 }

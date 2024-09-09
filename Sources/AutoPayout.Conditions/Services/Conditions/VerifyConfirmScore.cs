@@ -3,7 +3,7 @@ using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
     : ICondition
@@ -23,9 +23,9 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         await resultDetailService.UpdateResultStatus(match.MatchId, failureResults, errorMessage);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
-        match.ResultDetails = match.ResultDetails.Concat(timeResult).ToList();
+        match.ResultDetails = [.. match.ResultDetails, .. timeResult];
 
-        if (!match.ResultDetails.Any())
+        if (match.ResultDetails.Count == 0)
         {
             throw new ServiceException { MarkFail = false };
         }

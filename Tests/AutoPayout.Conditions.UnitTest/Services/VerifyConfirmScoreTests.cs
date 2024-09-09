@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Models;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
@@ -109,7 +110,6 @@ public class VerifyConfirmScoreTests
         await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
-
     [Fact]
     public async void HandleCondition_ScoreNotEqualAndTimeOverCurrentTime_MarkFail()
     {
@@ -137,7 +137,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             },
         };
 
@@ -214,7 +213,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             },
             new()
             {
@@ -223,7 +221,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             },
         };
 
@@ -270,7 +267,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "1",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             },
             new()
             {
@@ -279,7 +275,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             }, new()
             {
                 ResourceId = "02",
@@ -287,7 +282,6 @@ public class VerifyConfirmScoreTests
                 AwayValue = "2",
                 SourceId = 200,
                 CreateDate = DateTime.Now.AddMinutes(-6),
-
             },
         };
 
@@ -351,7 +345,6 @@ public class VerifyConfirmScoreTests
         Assert.Equal("3", secondResultDetail.AwayValue);
         await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
     }
-
 
     [Fact]
     public async void HandleCondition_AwayValueNotValid_MarkFail()

@@ -1,7 +1,7 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyInningStatus(IDynamicRepository repository, ResultDetailService resultDetailService,
         WriteLogService writeLogService)
@@ -9,9 +9,9 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
 {
     private const int MatchTestSession = 1;
 
-    private static readonly string[] InningOneIds = { "H1", "A1" };
+    private static readonly string[] InningOneIds = ["H1", "A1"];
 
-    private static readonly string[] InningIds = { "H1", "A1", "H2", "A2" };
+    private static readonly string[] InningIds = ["H1", "A1", "H2", "A2"];
 
     public async Task HandleCondition(Match match)
     {

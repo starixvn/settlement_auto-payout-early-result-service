@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿using AutoPayout.Conditions.Services.Conditions;
+
+namespace AutoPayout.Conditions.Services;
 
 public class IgnoreVerify : ICondition
 {

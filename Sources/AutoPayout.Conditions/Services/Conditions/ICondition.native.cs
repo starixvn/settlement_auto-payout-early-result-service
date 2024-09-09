@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.Conditions.Services;
+﻿namespace AutoPayout.Conditions.Services.Conditions;
 
 public interface ICondition
 {

@@ -12,11 +12,9 @@ public interface MatchService
     Task<List<Match>> GetMatches();
 }
 
-public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDynamicRepository repository)
+public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cache, IDynamicRepository repository)
     : MatchService
 {
-    private readonly AppSettingsKey appSettingsKey = options.Value; //NOSONAR
-
     public async Task<List<Match>> GetMatches()
     {
         var matches = await FetchMatch();
@@ -26,16 +24,15 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
 
     private async Task<List<Match>> MatchBranching(List<Match> matches)
     {
-        if (appSettingsKey.GroupTest > 0)
+        if (appSettingsKey.Value.GroupTest > 0)
         {
             return matches;
         }
 
-
-        var (_, response) = await cache.TryGetAsync<string>(appSettingsKey.CacheKey);
+        var (_, response) = await cache.TryGetAsync<string>(appSettingsKey.Value.CacheKey);
         var leagueIds = (response ?? "").Split(",");
 
-        return appSettingsKey.EnvironmentName switch
+        return appSettingsKey.Value.EnvironmentName switch
         {
             "PRO" => leagueIds.Length > 0
                 ? matches.Where(m => !leagueIds.Contains(m.LeagueId.ToString())).ToList()
@@ -49,8 +46,8 @@ public class MatchServiceImp(IOptions<AppSettingsKey> options, ICache cache, IDy
     {
         var criteria = new GetResultCriteria
         {
-            AutoPayoutGroup = appSettingsKey.GroupTest > 0 ? appSettingsKey.GroupTest : appSettingsKey.AutoPayoutGroup,
-            ResourceType = appSettingsKey.ResourceType
+            AutoPayoutGroup = appSettingsKey.Value.GroupTest > 0 ? appSettingsKey.Value.GroupTest : appSettingsKey.Value.AutoPayoutGroup,
+            ResourceType = appSettingsKey.Value.ResourceType
         };
 
         var results = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);

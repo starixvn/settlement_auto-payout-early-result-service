@@ -17,5 +17,6 @@ public static class EventStatus
 public static class SettlementStatusId
 {
     public const int Calculated = 4;
+
     public const int Running = 0;
 }

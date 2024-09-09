@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Exceptions;
 
-namespace AutoPayout.Conditions.Services;
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService,
         XmlConvertService xmlConvertService)

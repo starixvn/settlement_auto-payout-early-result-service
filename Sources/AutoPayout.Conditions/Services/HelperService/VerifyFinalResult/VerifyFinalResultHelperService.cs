@@ -1,4 +1,4 @@
-﻿namespace AutoPayout.Conditions.Services.HelperSerivce.VerifyFinalResult;
+﻿namespace AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 
 public static class VerifyFinalResultHelper
 {
@@ -31,8 +31,6 @@ public static class VerifyFinalResultHelper
     {
         return !setsResults.Select((i, j) => i.IntervalNo - j).Distinct().Skip(1).Any();
     }
-
-    public static bool FinalScoreEqual(ResultDetail final) => final.HomeValue.Equals(final.AwayValue, StringComparison.OrdinalIgnoreCase);
 
     public static (int, int) GetMinMaxSetPlay(MatchDetail matchDetail, bool isGameSession = true)
     {
@@ -78,12 +76,12 @@ public static class VerifyFinalResultHelper
         return finalResult.HomeValue != finalResult.AwayValue && mapOne != null && results.Count == 1;
     }
 
-    public static bool VerifyResultSettled(List<ResultDetail> settledResults, int playedGame)
+    public static bool VerifyResultSettled(IEnumerable<ResultDetail> settledResults, int playedGame)
     {
         var fakeCalculatedResults = settledResults.Where(x => x.SettlementStatusId == SettlementStatusId.Calculated
             && x.IntervalNo > playedGame).ToList();
 
-        return !fakeCalculatedResults.Any();
+        return fakeCalculatedResults.Count == 0;
     }
 
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
