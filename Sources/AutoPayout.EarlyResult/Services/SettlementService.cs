@@ -73,6 +73,8 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         await SetUnderSettleFlag(criteria, isExistedFinalResource);
 
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Waiting);
+
         await UpdateMatchInfo(criteria);
 
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
@@ -95,6 +97,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
         await extraStepBeforeSettle.Process(match, settleCriteria);
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)
