@@ -112,6 +112,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
         await extraStepBeforeSettle.Process(match, settleCriteria);
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)
