@@ -18,7 +18,8 @@
   <ItemGroup>
 
 	  <!-- ReSharper disable once VulnerablePackage -->
-	  <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.5.3" />
+	  <PackageReference Include="AutoMapper" Version="13.0.1" />
+	  <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.6" />
     <PackageReference Include="Fanex.Logging" Version="2.0.1.1" />
 	  <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
@@ -28,7 +29,7 @@
     <PackageReference Include="ONEbook.UM" Version="3.1.6" />
     <PackageReference Include="ONEbook.UM.AspNetCore" Version="3.1.1.1" />
     <PackageReference Include="ONEbook.UM.Transport" Version="3.1.2" />
-    <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.4" />
+    <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.5" />
   </ItemGroup>
 
   <ItemGroup>

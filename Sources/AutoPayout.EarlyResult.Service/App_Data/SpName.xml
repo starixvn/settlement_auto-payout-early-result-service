@@ -25,21 +25,21 @@
   <Function Name="Scale Out TransDb">
     <Function Name="NAP_Admin_Settlement_Validation_Ticket">
       <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBTXN" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBTXN.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID01" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID01.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID02" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID02.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSID03" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSID03.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSITE01" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSITE01.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSITE02" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSITE02.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Validation_Ticket_DBSITE03" SpName="NAP_Admin_Settlement_Validation_Ticket" DbName="DBSITE03.bodb02.wsv_nap" />
     </Function>
     <Function Name="NAP_Admin_Settlement_Profile_Push">
       <Setting Key="NAP_Admin_Settlement_Profile_Push_DBTXN" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBTXN.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID01" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSID01.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID02" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSID02.bodb02.wsv_nap" />
-      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSID03" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSID03.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSITE01" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSITE01.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSITE02" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSITE02.bodb02.wsv_nap" />
+      <Setting Key="NAP_Admin_Settlement_Profile_Push_DBSITE03" SpName="NAP_Admin_Settlement_Profile_Push" DbName="DBSITE03.bodb02.wsv_nap" />
     </Function>
     <Function Name="NAP_Set_CashoutSel">
       <Setting Key="NAP_Set_CashoutSel_DBTXN" SpName="NAP_Set_CashoutSel" DbName="DBTXN.bodb02.wsv_nap" />
-      <Setting Key="NAP_Set_CashoutSel_DBSID01" SpName="NAP_Set_CashoutSel" DbName="DBSID01.bodb02.wsv_nap" />
-      <Setting Key="NAP_Set_CashoutSel_DBSID02" SpName="NAP_Set_CashoutSel" DbName="DBSID02.bodb02.wsv_nap" />
-      <Setting Key="NAP_Set_CashoutSel_DBSID03" SpName="NAP_Set_CashoutSel" DbName="DBSID03.bodb02.wsv_nap" />
+      <Setting Key="NAP_Set_CashoutSel_DBSITE01" SpName="NAP_Set_CashoutSel" DbName="DBSITE01.bodb02.wsv_nap" />
+      <Setting Key="NAP_Set_CashoutSel_DBSITE02" SpName="NAP_Set_CashoutSel" DbName="DBSITE02.bodb02.wsv_nap" />
+      <Setting Key="NAP_Set_CashoutSel_DBSITE03" SpName="NAP_Set_CashoutSel" DbName="DBSITE03.bodb02.wsv_nap" />
     </Function>
   </Function>
 </Functions>

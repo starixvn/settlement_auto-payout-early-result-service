@@ -50,16 +50,16 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
             ResourceType = appSettingsKey.Value.ResourceType
         };
 
-        var results = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
+        var (firstResultSet, secondResultSet) = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
 
-        return IgnoreResult(results.SecondResultSet).GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
+        return IgnoreResult(secondResultSet).GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
         {
             MatchId = g.Key.MatchId,
             LeagueId = g.Key.LeagueId,
             ResultDetails = g.ToList(),
             ResourceType = g.Key.ResourceType,
             SportType = g.Key.SportType,
-            Conditions = results.FirstResultSet.Where(r => r.SportType == g.Key.SportType)
+            Conditions = firstResultSet.Where(r => r.SportType == g.Key.SportType)
                .Select(r => g.Key.ResourceType == ResourceType.MainResource ? r.MainCheckList : r.EarlyCheckList)
                .FirstOrDefault(string.Empty),
             EarlyRetryTime = g.First().EarlyRetryTime,
