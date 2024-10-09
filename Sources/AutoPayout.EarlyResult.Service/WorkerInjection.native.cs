@@ -62,7 +62,7 @@ public static class WorkerInjection
 		service.AddSingleton<VerifyFinalResult>();
 		service.AddSingleton<VerifyFinalResult>();
 		service.AddSingleton<VerifyFinalByBestOfMap>();
-		service.AddSingleton<VerifyBaseballRegularFinalResult>();
+		service.AddSingleton<VerifyFinalWithExtraResult>();
 		service.AddSingleton<IgnoreVerify>();
 		service.AddSingleton<VerifyBasketBallResult>();
 		service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
