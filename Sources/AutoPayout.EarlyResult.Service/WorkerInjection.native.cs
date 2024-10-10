@@ -51,7 +51,7 @@ public static class WorkerInjection
 		service.AddSingleton<MatchService, MatchServiceImp>();
 		service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
 		service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
-		service.AddTransient<OverTimeService, OverTimeServiceImp>();
+		service.AddTransient<ExtraResultService, OverTimeServiceImp>();
 		service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
 		service.AddSingleton<VerifyMatchStatus>();
 		service.AddSingleton<VerifyRunningOdds>();

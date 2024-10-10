@@ -16,13 +16,13 @@ public class BasketballHelperServiceTests
 
     private readonly BasketballHelperServiceImp service;
 
-    private readonly OverTimeService overTimeService;
+    private readonly ExtraResultService overTimeService;
 
     private readonly ResultDetailService resultDetailService;
 
     public BasketballHelperServiceTests()
     {
-        overTimeService = Substitute.For<OverTimeService>();
+        overTimeService = Substitute.For<ExtraResultService>();
         resultDetailService = Substitute.For<ResultDetailService>();
         var appSetting = new AppSettingsKey { RetryProcessScore = 300000 };
         var option = Options.Create(appSetting);

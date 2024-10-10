@@ -9,7 +9,7 @@ public class OverTimeServiceTests
 {
     private readonly ResultDetailService resultDetailService;
 
-    private readonly OverTimeService service;
+    private readonly ExtraResultService service;
 
     private readonly ResultDetail final;
 

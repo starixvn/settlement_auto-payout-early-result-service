@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
-using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
+using AutoPayout.Helpers;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
@@ -10,11 +10,18 @@ public class VerifyFinalWithExtraResult : ICondition
 	private readonly ResultDetailService resultDetailService;
 	private readonly IDynamicRepository repository;
 	private readonly IOptions<AppSettingsKey> appSettingsKey;
+	private readonly ExtraResultService extraResultService;
 
-	public VerifyFinalWithExtraResult(ResultDetailService resultDetailService, IDynamicRepository repository)
+	public VerifyFinalWithExtraResult(
+		ResultDetailService resultDetailService,
+		IDynamicRepository repository,
+		IOptions<AppSettingsKey> options,
+		ExtraResultService extraResultService)
 	{
 		this.resultDetailService = resultDetailService;
 		this.repository = repository;
+		this.appSettingsKey = options;
+		this.extraResultService = extraResultService;
 	}
 
 	public async Task HandleCondition(Match match)
@@ -34,18 +41,34 @@ public class VerifyFinalWithExtraResult : ICondition
 
 		var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 
-		var (setsResults, _) = await resultDetailService.GetResultsChecking(match, matchDetail.GameSession, settledResults);
+		var errorMessage = await VerifyFinalResult(match, matchDetail, finalResult, settledResults);
 
-		var isMatchResultsConsecutive = VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults);
-
-		var isSetResultsRunningOrSettled = VerifyFinalResultHelper.VerifySetResultsRunningOrSettled(setsResults);
-
-		var isFinalResultScoreInvalid = await FinalResultScoreInvalid(match, finalResult, setsResults);
-
-		if (!isMatchResultsConsecutive || !isSetResultsRunningOrSettled || isFinalResultScoreInvalid)
+		if (!string.IsNullOrEmpty(errorMessage))
 		{
-			await HandleInValidFinalResult(match, finalResult);
+			await HandleInValidFinalResult(match, finalResult, errorMessage);
 		}
+	}
+
+	public async Task<string> VerifyFinalResult(Match match, MatchDetail matchDetail, ResultDetail finalResult, List<ResultDetail> settledResults)
+	{
+		var (setResults, resources) = await resultDetailService.GetResultsChecking(match, matchDetail.GameSession, settledResults);
+
+		var validResources = resources.Where(x => !x.Equals(ResourceIds.ExtraInning)).ToList();
+
+		if (validResources.Count != setResults.Count)
+		{
+			return await FullTimeRelatedResultInValidAndMaxTimeScore(match, finalResult, setResults.Select(x => x.ResourceId), validResources.Select(x => x.ResourceId));
+		}
+
+		var isInvalid = await FinalResultScoreInvalid(match, finalResult, setResults);
+		if (isInvalid)
+		{
+			return CreateMessageService.ResultRelatedInconsistent(finalResult, setResults);
+		}
+
+		match.ResultDetails.AddIf(setResults.TryGetValue(r => r.ResourceId == ResourceIds.OverTime && r.IsValid, out var overTime), overTime);
+
+		return string.Empty;
 	}
 
 	private async Task<bool> FinalResultScoreInvalid(Match match, ResultDetail finalResult, List<ResultDetail> results)
@@ -53,7 +76,7 @@ public class VerifyFinalWithExtraResult : ICondition
 		var totalHomeValue = results.Sum(x => int.Parse(x.HomeValue));
 		var totalAwayValue = results.Sum(x => int.Parse(x.AwayValue));
 
-		var extraResult = await GetScoreExtraInning(finalResult.MatchId, finalResult.SportType, totalHomeValue, totalAwayValue);
+		var extraResult = await extraResultService.GetScoreExtraInning(match, totalHomeValue, totalAwayValue);
 
 		results.Add(extraResult);
 
@@ -63,81 +86,29 @@ public class VerifyFinalWithExtraResult : ICondition
 			return false;
 		}
 
-		var isTotalScoreInValid = IsTotalScoreInValid(finalResult, totalHomeValue, totalAwayValue, extraResult);
+		var isTotalScoreInValid = resultDetailService.InValidTotalWithExtraScore(finalResult, extraResult, totalHomeValue, totalAwayValue);
+
 		return !extraResult.IsValid || isTotalScoreInValid;
 	}
 
 
-	private static bool IsTotalScoreInValid(ResultDetail finalResult, int totalHomeValue, int totalAwayValue, ResultDetail otResult)
+	private async Task HandleInValidFinalResult(Match match, ResultDetail finalResult, string errorMessage)
 	{
-		totalHomeValue += otResult == null ? 0 : int.Parse(otResult.HomeValue);
-		totalAwayValue += otResult == null ? 0 : int.Parse(otResult.AwayValue);
-
-		return totalHomeValue != int.Parse(finalResult.HomeValue) || totalAwayValue != int.Parse(finalResult.AwayValue);
-	}
-
-	private async Task<ResultDetail> GetScoreExtraInning(int matchId, int sportType, int totalHomeValue, int totalAwayValue)
-	{
-		var result = new ResultDetail
-		{
-			MatchId = matchId,
-			SportType = sportType,
-			ResourceId = ResourceIds.ExtraInning,
-			HomeValue = "0",
-			AwayValue = "0"
-		};
-
-		var scoresExtraInning = (await resultDetailService.GetSingleScore(result)).ToList();
-
-		var validScores = scoresExtraInning.Where(x => !string.IsNullOrEmpty(x.HomeValue) && !string.IsNullOrEmpty(x.AwayValue)).ToList();
-
-		result.IsValid = IsOtValid(result, totalHomeValue, totalAwayValue, validScores);
-		result.RelatedInfo = string.Join(',', validScores.Select(s => $"{s.SourceName ?? "Trader"}: {s.HomeValue}-{s.AwayValue}"));
-
-
-		if (result.IsValid && totalAwayValue == totalHomeValue)
-		{
-			result.HomeValue = validScores[0].HomeValue;
-			result.AwayValue = validScores[0].AwayValue;
-		}
-
-		return result;
-	}
-
-
-	private bool IsOtValid(ResultDetail extraResult, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
-	{
-		var variantCount = scores.Distinct(new ScoreComparer()).Count();
-		if (totalAwayValue != totalHomeValue)
-		{
-			return variantCount == 0;
-		}
-
-		switch (variantCount)
-		{
-			case > 1:
-				{
-					var maxDate = scores.Max(t => t.CreateDate);
-					var processTime = DateTimeOffset.Now - maxDate;
-					extraResult.Expired = processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore;
-					extraResult.NeedRetry = !extraResult.Expired;
-					return false;
-				}
-			case 1:
-				return int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
-
-			default:
-				return false;
-		}
-	}
-
-	private async Task HandleInValidFinalResult(Match match, ResultDetail finalResult)
-	{
-		var message = "";
-		var errorMessage = message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
-
 		await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
 		resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
 		match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+	}
+
+	private async Task<string> FullTimeRelatedResultInValidAndMaxTimeScore(Match match, ResultDetail finalResult, IEnumerable<string> resultsValid, IEnumerable<string> validResources)
+	{
+		var maxTimeScore = await resultDetailService.MaxTimeScore(finalResult);
+		if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
+		{
+			return CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, validResources);
+		}
+
+		match.ResultDetails.Remove(finalResult);
+
+		return string.Empty;
 	}
 }
