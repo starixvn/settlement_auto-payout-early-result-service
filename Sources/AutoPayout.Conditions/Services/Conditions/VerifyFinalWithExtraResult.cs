@@ -63,7 +63,7 @@ public class VerifyFinalWithExtraResult : ICondition
 		var isInvalid = await FinalResultScoreInvalid(match, finalResult, setResults);
 		if (isInvalid)
 		{
-			return CreateMessageService.ResultRelatedInconsistent(finalResult, setResults);
+			return CreateMessageService.ResultRelatedInconsistent(finalResult, setResults, ResourceIds.ExtraInning, false);
 		}
 
 		match.ResultDetails.AddIf(setResults.TryGetValue(r => r.ResourceId == ResourceIds.OverTime && r.IsValid, out var overTime), overTime);
@@ -104,7 +104,7 @@ public class VerifyFinalWithExtraResult : ICondition
 		var maxTimeScore = await resultDetailService.MaxTimeScore(finalResult);
 		if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
 		{
-			return CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, validResources);
+			return CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, validResources, false);
 		}
 
 		match.ResultDetails.Remove(finalResult);
