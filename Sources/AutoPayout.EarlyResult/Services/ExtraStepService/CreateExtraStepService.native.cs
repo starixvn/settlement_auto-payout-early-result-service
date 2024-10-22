@@ -27,6 +27,7 @@ public class CreateExtraStepServiceImp(
         return match.SportType switch
         {
             SportType.ESports => eSportExtraStep,
+            SportType.BaseBall => eSportExtraStep,
             SportType.Tennis => tennisExtraStep,
             SportType.BasketBall => basketBallCashOut,
             _ => extraStepService
