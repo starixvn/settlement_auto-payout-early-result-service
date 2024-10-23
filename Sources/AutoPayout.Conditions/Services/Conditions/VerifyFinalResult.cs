@@ -29,7 +29,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail);
 
-        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResult(setsResults, finalResult, minSet, maxSet);
+        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResultSetWin(setsResults, finalResult, minSet, maxSet);
 
         var isValid = !setsResults.IsNullOrEmpty()
             && isFinalConsistentWithGameSession
