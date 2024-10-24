@@ -5,153 +5,157 @@ namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 
 public interface ExtraResultService
 {
-	Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue);
+    Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue);
 
-	Task<ResultDetail> GetScoreExtraInning(Match match, int totalHomeValue, int totalAwayValue);
+    Task<ResultDetail> GetScoreExtraInning(Match match, int totalHomeValue, int totalAwayValue);
 }
 
 public class OverTimeServiceImp(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingsKey) : ExtraResultService
 {
-	private const string overTimeDefaultValue = "0";
+    private const string overTimeDefaultValue = "0";
 
-	public async Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue)
-	{
-		var resultOt = new ResultDetail
-		{
-			MatchId = finalResult.MatchId,
-			SportType = finalResult.SportType,
-			ResourceId = ResourceIds.OverTime,
-			HomeValue = overTimeDefaultValue,
-			AwayValue = overTimeDefaultValue
-		};
+    public async Task<ResultDetail> GetOtBasketBall(ResultDetail finalResult, int totalHomeValue, int totalAwayValue)
+    {
+        var resultOt = new ResultDetail
+        {
+            MatchId = finalResult.MatchId,
+            SportType = finalResult.SportType,
+            ResourceId = ResourceIds.OverTime,
+            HomeValue = overTimeDefaultValue,
+            AwayValue = overTimeDefaultValue
+        };
 
-		var scoresOt = (await resultDetailService.GetSingleScore(resultOt)).ToList();
+        var scoresOt = (await resultDetailService.GetSingleScore(resultOt)).ToList();
 
-		var scoresValid = scoresOt.Where(IsValidNonZeroScore).ToList();
-
-
-		resultOt.IsValid = IsOtValid(resultOt, totalHomeValue, totalAwayValue, scoresValid);
-		resultOt.RelatedInfo = GetRelatedInfo(scoresValid);
+        var scoresValid = scoresOt.Where(IsValidNonZeroScore).ToList();
 
 
-		if (resultOt.IsValid && totalAwayValue == totalHomeValue)
-		{
-			resultOt.HomeValue = scoresValid[0].HomeValue;
-			resultOt.AwayValue = scoresValid[0].AwayValue;
-		}
+        resultOt.IsValid = IsOtValid(resultOt, totalHomeValue, totalAwayValue, scoresValid);
+        resultOt.RelatedInfo = GetRelatedInfo(scoresValid);
 
-		return resultOt;
-	}
 
-	public async Task<ResultDetail> GetScoreExtraInning(Match match, int totalHomeValue, int totalAwayValue)
-	{
-		var result = new ResultDetail
-		{
-			MatchId = match.MatchId,
-			SportType = match.SportType,
-			ResourceId = ResourceIds.ExtraInning,
-			HomeValue = "0",
-			AwayValue = "0"
-		};
+        if (resultOt.IsValid && totalAwayValue == totalHomeValue)
+        {
+            resultOt.HomeValue = scoresValid[0].HomeValue;
+            resultOt.AwayValue = scoresValid[0].AwayValue;
+        }
 
-		var validScores = (await resultDetailService.GetSingleScore(result))
-			.Where(score => IsValidScore(score))
-			.ToList();
+        return resultOt;
+    }
 
-		result.IsValid = IsExtraScoreValid(result, totalHomeValue, totalAwayValue, validScores);
-		result.RelatedInfo = GetRelatedInfo(validScores);
+    public async Task<ResultDetail> GetScoreExtraInning(Match match, int totalHomeValue, int totalAwayValue)
+    {
+        var result = new ResultDetail
+        {
+            MatchId = match.MatchId,
+            SportType = match.SportType,
+            ResourceId = ResourceIds.ExtraInning,
+            HomeValue = "",
+            AwayValue = ""
+        };
 
-		if (!result.IsValid)
-			return result;
+        var validScores = (await resultDetailService.GetSingleScore(result))
+            .Where(score => IsValidScore(score))
+            .ToList();
 
-		if (IsTieGame(totalHomeValue, totalAwayValue))
-		{
-			AssignFirstValidScore(result, validScores);
-		}
-		else if (IsZeroScore(validScores))
-		{
-			ClearScore(result);
-		}
+        result.IsValid = IsExtraScoreValid(result, totalHomeValue, totalAwayValue, validScores);
+        result.RelatedInfo = GetRelatedInfo(validScores);
 
-		return result;
-	}
+        if (!result.IsValid)
+            return result;
 
-	private bool IsOtValid(ResultDetail resultOt, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
-	{
-		var variantCount = scores.Distinct(new ScoreComparer()).Count();
+        if (IsTieGame(totalHomeValue, totalAwayValue))
+        {
+            AssignFirstValidScore(result, validScores);
+        }
+        else if (IsZeroScore(validScores))
+        {
+            ClearScore(result);
+        }
 
-		if (totalAwayValue != totalHomeValue)
-		{
-			return variantCount == 0;
-		}
+        return result;
+    }
 
-		return variantCount switch
-		{
-			> 1 => HandleMultipleVariants(resultOt, scores),
-			1 => AreScoresUnEqual(scores),
-			_ => false
-		};
-	}
+    private bool IsOtValid(ResultDetail resultOt, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
+    {
+        var variantCount = scores.Distinct(new ScoreComparer()).Count();
 
-	private bool HandleMultipleVariants(ResultDetail resultOt, IReadOnlyList<Score> scores)
-	{
-		var maxDate = scores.Max(t => t.CreateDate);
-		var processTime = DateTimeOffset.Now - maxDate;
+        if (totalAwayValue != totalHomeValue)
+        {
+            return variantCount == 0;
+        }
 
-		resultOt.Expired = processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore;
-		resultOt.NeedRetry = !resultOt.Expired;
+        return variantCount switch
+        {
+            > 1 => HandleMultipleVariants(resultOt, scores),
+            1 => AreScoresUnEqual(scores),
+            _ => false
+        };
+    }
 
-		return false;
-	}
+    private bool HandleMultipleVariants(ResultDetail resultOt, IReadOnlyList<Score> scores)
+    {
+        var maxDate = scores.Max(t => t.CreateDate);
+        var processTime = DateTimeOffset.Now - maxDate;
 
-	private bool AreScoresUnEqual(IReadOnlyList<Score> scores) => int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
+        resultOt.Expired = processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore;
+        resultOt.NeedRetry = !resultOt.Expired;
 
-	private bool IsExtraScoreValid(ResultDetail resultOt, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
-	{
-		var variantCount = scores.Distinct(new ScoreComparer()).Count();
+        return false;
+    }
 
-		if (totalAwayValue != totalHomeValue)
-		{
-			return variantCount == 0;
-		}
+    private bool AreScoresUnEqual(IReadOnlyList<Score> scores) => int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
 
-		return variantCount switch
-		{
-			> 1 => HandleMultipleVariants(resultOt, scores),
-			1 => true,
-			_ => false
-		};
-	}
+    private bool IsExtraScoreValid(ResultDetail resultExtra, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
+    {
+        var variantCount = scores.Distinct(new ScoreComparer()).Count();
 
-	private static bool IsValidScore(Score score) => !string.IsNullOrEmpty(score.HomeValue) && !string.IsNullOrEmpty(score.AwayValue);
+        if (totalAwayValue != totalHomeValue)
+        {
+            return variantCount == 0 || variantCount == 1 && IsValidSpecialExtraScore(scores[0]); // valid extra score is 0-0 or ""-"" or no score
+        }
 
-	private static bool IsValidNonZeroScore(Score score)
-		=> !string.IsNullOrEmpty(score.HomeValue)
-		&& !string.IsNullOrEmpty(score.AwayValue)
-		&& (score.HomeValue != "0" || score.AwayValue != "0");
+        // draw 
+        return variantCount switch
+        {
+            > 1 => HandleMultipleVariants(resultExtra, scores),
+            _ => true,
+            //_ => false
+        };
+    }
 
-	private static string GetRelatedInfo(List<Score> validScores)
-		=> string.Join(',', validScores.Select(score => $"{score.SourceName ?? "Trader"}: {score.HomeValue}-{score.AwayValue}"));
+    private static bool IsValidSpecialExtraScore(Score score) => (score.HomeValue == "0" && score.AwayValue == "0")
+        || (string.IsNullOrEmpty(score.AwayValue) && string.IsNullOrEmpty(score.HomeValue));
 
-	private static bool IsTieGame(int totalHomeValue, int totalAwayValue) => totalHomeValue == totalAwayValue;
+    private static bool IsValidScore(Score score) => !string.IsNullOrEmpty(score.HomeValue) && !string.IsNullOrEmpty(score.AwayValue);
 
-	private static void AssignFirstValidScore(ResultDetail result, List<Score> validScores)
-	{
-		if (validScores.Any())
-		{
-			result.HomeValue = validScores[0].HomeValue;
-			result.AwayValue = validScores[0].AwayValue;
-		}
-	}
+    private static bool IsValidNonZeroScore(Score score)
+        => !string.IsNullOrEmpty(score.HomeValue)
+        && !string.IsNullOrEmpty(score.AwayValue)
+        && (score.HomeValue != "0" || score.AwayValue != "0");
 
-	private static void ClearScore(ResultDetail result)
-	{
-		result.HomeValue = string.Empty;
-		result.AwayValue = string.Empty;
-	}
+    private static string GetRelatedInfo(List<Score> validScores)
+        => string.Join(',', validScores.Select(score => $"{score.SourceName ?? "Trader"}: {score.HomeValue}-{score.AwayValue}"));
 
-	private static bool IsZeroScore(List<Score> validScores)
-		=> validScores.Count >= 1
-		&& validScores[0].HomeValue == "0"
-		&& validScores[0].AwayValue == "0";
+    private static bool IsTieGame(int totalHomeValue, int totalAwayValue) => totalHomeValue == totalAwayValue;
+
+    private static void AssignFirstValidScore(ResultDetail result, List<Score> validScores)
+    {
+        if (validScores.Any())
+        {
+            result.HomeValue = validScores[0].HomeValue;
+            result.AwayValue = validScores[0].AwayValue;
+        }
+    }
+
+    private static void ClearScore(ResultDetail result)
+    {
+        result.HomeValue = string.Empty;
+        result.AwayValue = string.Empty;
+    }
+
+    private static bool IsZeroScore(List<Score> validScores)
+        => validScores.Count >= 1
+        && validScores[0].HomeValue == "0"
+        && validScores[0].AwayValue == "0";
 }
