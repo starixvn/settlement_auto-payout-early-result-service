@@ -1,4 +1,5 @@
-﻿using Fanex.Settlement.Converter.Services;
+﻿using AutoPayout.Conditions.Constants;
+using Fanex.Settlement.Converter.Services;
 
 namespace AutoPayout.EarlyResult.Services;
 
@@ -16,10 +17,22 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
         {
             MatchId = match.MatchId,
             SelectedResources = resourcesResult,
-            AutoSourceInfo = GetExternalInfo(match.ResultDetails.ToList())
+            AutoSourceInfo = GetExternalInfo(match.ResultDetails.ToList()),
+            RemarkInfo = GetRemarkInfo(match)
         };
 
         return criteria;
+    }
+
+    private static string GetRemarkInfo(Match match)
+    {
+        int[] shorts = [SportType.BaseBall, SportType.ESports];
+        if (shorts.Contains(match.SportType))
+        {
+            return $"<r n=\"Auto Refund\" v=\"{(!string.IsNullOrEmpty(match.ResourceRefund) ? 1 : 0)}\"/>";
+        }
+
+        return string.Empty;
     }
 
     private static string GetExternalInfo(IEnumerable<ResultDetail> resultDetails)
