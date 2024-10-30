@@ -35,6 +35,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
             await ProcessBeforeSettle(match, settleCriteria);
             await Execute(settleCriteria, match, isExistedFinalResource);
+            await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
             await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
             await ProcessAfterSettle(match, settleCriteria);
         }
@@ -66,6 +67,11 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             criteria.MatchId = hedgeMatchDetail.MatchId;
             await Execute(criteria, match, isExistedFinalResource, false);
+            await updateResultStatusService.UpdateResultStatus(new Match 
+            {
+                MatchId = hedgeMatchDetail.MatchId,
+                ResultDetails = match.ResultDetails
+            }, MatchStatus.Complete);
         }
     }
 
@@ -73,16 +79,27 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         await SetUnderSettleFlag(criteria, isExistedFinalResource);
 
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Waiting);
+
         await UpdateMatchInfo(criteria);
 
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
+        await ExecuteSettleAllSite(criteria);
+               
+    }
 
-        foreach (var server in appSettingsKey.Value.SiteDbServer)
-        {
-            criteria.DbServer = server;
-            await repository.ExecuteAsync(criteria);
-        }
+    private async Task ExecuteSettleAllSite(SettleCriteria criteria)
+    {
+        var servers = appSettingsKey.Value.SiteDbServer;
+        var tasks = servers.Select(server => ExecuteSettleOneSiteDb(criteria, server));
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task ExecuteSettleOneSiteDb(SettleCriteria criteria, string server)
+    {
+        criteria.DbServer = server;
+        await repository.ExecuteAsync(criteria);
     }
 
     private async Task ProcessBeforeSettle(Match match, SettleCriteria settleCriteria)
@@ -95,6 +112,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
         await extraStepBeforeSettle.Process(match, settleCriteria);
+        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)
