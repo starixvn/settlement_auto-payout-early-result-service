@@ -10,7 +10,14 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
-        if (match.ResourceType != ResourceType.MainResource || finalResult is null)
+
+        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+
+        var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
+            || finalResult is null
+            || match.SportType == SportType.BaseBall && (int)matchDetail.SessionTime == 0;
+
+        if (notCheckFinalResult)
         {
             return;
         }
@@ -18,13 +25,11 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         var maxSetPlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 
-        var (setsResults, _) = await resultDetailService.GetResultsChecking(match, maxSetPlayed, settledResults);
-
-        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+        var (setsResults, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxSetPlayed, settledResults);
 
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail);
 
-        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResult(setsResults, finalResult, minSet, maxSet);
+        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResultSetWin(setsResults, finalResult, minSet, maxSet);
 
         var isValid = !setsResults.IsNullOrEmpty()
             && isFinalConsistentWithGameSession
@@ -34,6 +39,12 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         {
             await HandleFinalResult(finalResult, match, !isFinalConsistentWithGameSession);
         }
+        else
+        {
+            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, matchDetail, maxSetPlayed);
+
+        }
+
     }
 
     private static bool VerifyFinal(IEnumerable<ResultDetail> settledResults, IReadOnlyCollection<ResultDetail> setsResults, ResultDetail finalResult, int maxSetPlayed)
@@ -52,4 +63,27 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
+
+
+    private static string GetResourceToRefund(
+        IEnumerable<ResultDetail> resultSettled,
+        IReadOnlyList<ResourceIndex> resourceIndexes,
+        MatchDetail matchDetail,
+        int maxGamePlayed)
+    {
+        var resourceToRefund = new List<string>();
+        var resourceSettled = resultSettled.Select(x => x.ResourceId).ToList();
+
+        for (var i = maxGamePlayed + 1; i <= matchDetail.GameSession; i++)
+        {
+            var resource = resourceIndexes.FirstOrDefault(r => r.IntervalNo == i);
+            if (resource is not null && !resourceSettled.Contains(resource.ResourceId))
+            {
+                resourceToRefund.Add(resource.ResourceId);
+            }
+        }
+
+        return string.Join(",", resourceToRefund);
+    }
+
 }

@@ -22,6 +22,10 @@ public interface ResultDetailService
     Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled);
 
     Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
+
+    Task<double> MaxTimeScore(ResultDetail resultDetail);
+    bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
+
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -87,8 +91,31 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails.ToList() };
-        await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
+        if (resultDetails.Any())
+        {
+            var cloneMatch = new Match { MatchId = matchId, ResultDetails = resultDetails.ToList() };
+            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
+        }
+    }
+
+
+    public async Task<double> MaxTimeScore(ResultDetail resultDetail)
+    {
+        var scoreInfo = (await GetSingleScore(resultDetail)).ToList();
+        var maxDateScoresFinal = scoreInfo.Max(t => t.CreateDate);
+        var processTime = DateTimeOffset.Now - maxDateScoresFinal;
+        return processTime.TotalMilliseconds;
+    }
+
+    public bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue)
+    {
+        _ = int.TryParse(string.IsNullOrEmpty(extraResult.HomeValue) ? "0" : extraResult.HomeValue, out var homeValue);
+        _ = int.TryParse(string.IsNullOrEmpty(extraResult.AwayValue) ? "0" : extraResult.AwayValue, out var awayValue);
+
+        totalHomeValue += homeValue;
+        totalAwayValue += awayValue;
+
+        return totalHomeValue != int.Parse(finalResult.HomeValue) || totalAwayValue != int.Parse(finalResult.AwayValue);
     }
 
     private static List<string> ProviderScore(IEnumerable<Score> scores)

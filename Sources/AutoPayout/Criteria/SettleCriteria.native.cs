@@ -22,6 +22,7 @@ public class SettleCriteria : NonQueryCommand
     public byte DeterminedType { get; set; }
 
     public string BetStatus { get; set; }
+    public string RemarkInfo { get; set; }
 
     public int ErrCode { get; set; }
 

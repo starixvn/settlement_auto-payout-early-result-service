@@ -5,36 +5,38 @@ namespace AutoPayout.Conditions;
 
 public interface Creator
 {
-    ICondition Create(string id);
+	ICondition Create(string id);
 }
 
 public class CreatorImp(VerifyMatchStatus verifyMatchStatus,
-        VerifyRunningOdds verifyRunningOdds,
-        VerifyConfirmScore verifyConfirmScore,
-        VerifyBeforePushProfile verifyBeforePushProfile,
-        VerifyInningStatus verifyInningStatus,
-        VerifyFinalResult verifyFinalResult,
-        VerifyFinalByBestOfMap verifyFinalByBestOfMap,
-        VerifyTimeResult verifyTimeResult,
-        VerifyBasketBallResult verifyBasketBallFinalResult,
-        IgnoreVerify ignoreVerify
-       )
-    : Creator
+		VerifyRunningOdds verifyRunningOdds,
+		VerifyConfirmScore verifyConfirmScore,
+		VerifyBeforePushProfile verifyBeforePushProfile,
+		VerifyInningStatus verifyInningStatus,
+		VerifyFinalResult verifyFinalResult,
+		VerifyFinalByBestOfMap verifyFinalByBestOfMap,
+		VerifyTimeResult verifyTimeResult,
+		VerifyBasketBallResult verifyBasketBallFinalResult,
+		VerifyFinalWithExtraResult verifyBaseballFinalResult,
+		IgnoreVerify ignoreVerify
+	   )
+	: Creator
 {
-    public ICondition Create(string id)
-    {
-        return id switch
-        {
-            ConditionId.VerifyMatchStatus => verifyMatchStatus,
-            ConditionId.VerifyRunningOdds => verifyRunningOdds,
-            ConditionId.VerifyEsTimeResult => verifyTimeResult,
-            ConditionId.VerifyConfirmScore => verifyConfirmScore,
-            ConditionId.VerifyBeforePush => verifyBeforePushProfile,
-            ConditionId.VerifyInningStatus => verifyInningStatus,
-            ConditionId.VerifyFinalResult => verifyFinalResult,
-            ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
-            ConditionId.VerifyBasketBallFinalResult => verifyBasketBallFinalResult,
-            _ => ignoreVerify,
-        };
-    }
+	public ICondition Create(string id)
+	{
+		return id switch
+		{
+			ConditionId.VerifyMatchStatus => verifyMatchStatus,
+			ConditionId.VerifyRunningOdds => verifyRunningOdds,
+			ConditionId.VerifyConfirmScore => verifyConfirmScore,
+			ConditionId.VerifyEsTimeResult => verifyTimeResult,
+			ConditionId.VerifyBeforePush => verifyBeforePushProfile,
+			ConditionId.VerifyInningStatus => verifyInningStatus,
+			ConditionId.VerifyBaseballFinalResult => verifyBaseballFinalResult,
+			ConditionId.VerifyFinalResult => verifyFinalResult,
+			ConditionId.VerifyFinalResultByBestOfMap => verifyFinalByBestOfMap,
+			ConditionId.VerifyBasketBallFinalResult => verifyBasketBallFinalResult,
+			_ => ignoreVerify,
+		};
+	}
 }

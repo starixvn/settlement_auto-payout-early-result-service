@@ -69,6 +69,25 @@ public static class VerifyFinalResultHelper
                && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
 
+
+    public static bool IsValidFinalResultSetWin(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
+    {
+        var homeValue = Convert.ToInt32(finalResult.HomeValue);
+        var awayValue = Convert.ToInt32(finalResult.AwayValue);
+
+        return (homeValue == numberOfSetWin || awayValue == numberOfSetWin)
+              && (homeValue + awayValue) <= maxSetPlay;
+    }
+
+    public static bool IsValidSumFinalResult(List<ResultDetail> results, ResultDetail finalResult)
+    {
+        var totalHomeScore = SumHomeScore(results);
+        var totalAwayScore = SumAwayScore(results);
+
+        return Convert.ToInt32(finalResult.HomeValue) == totalHomeScore
+               && Convert.ToInt32(finalResult.AwayValue) == totalAwayScore;
+    }
+
     public static bool VerifyFinalBO1(ResultDetail finalResult, List<ResultDetail> results)
     {
         var mapOne = results.Find(r => r.ResourceId == ESportsFirstMap);
@@ -84,6 +103,9 @@ public static class VerifyFinalResultHelper
         return fakeCalculatedResults.Count == 0;
     }
 
+    public static bool VerifySetResultsRunningOrSettled(List<ResultDetail> setResults)
+        => setResults.TrueForAll(x => (new[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId));
+
     public static bool VerifyAnyDrawResults(List<ResultDetail> resultsChecking)
         => !resultsChecking.Exists(x => (new[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
@@ -96,4 +118,10 @@ public static class VerifyFinalResultHelper
 
         return mapOne != null && mapTwo != null && totalScore == GameType.Bo2;
     }
+
+    public static int SumHomeScore(List<ResultDetail> results)
+        => results.Sum(set => Convert.ToInt32(set.HomeValue));
+
+    public static int SumAwayScore(List<ResultDetail> results)
+        => results.Sum(set => Convert.ToInt32(set.AwayValue));
 }
