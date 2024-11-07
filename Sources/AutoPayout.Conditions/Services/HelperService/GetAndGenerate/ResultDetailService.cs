@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Constants;
+using Fanex.Logging;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -41,6 +42,8 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
         };
+
+        LogService.Info($"AP2 GetScores {criteria.MatchId} {criteria.ResourceIds}");
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
 

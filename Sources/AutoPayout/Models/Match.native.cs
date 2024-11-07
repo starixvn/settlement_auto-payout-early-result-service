@@ -22,7 +22,7 @@ public class Match
 
     public MatchDetail MatchDetail { get; set; }
 
-    public string UId = Guid.NewGuid().ToString();
+    public string UId => Guid.NewGuid().ToString();
 
     public override bool Equals(object obj)
     {
@@ -32,4 +32,6 @@ public class Match
     }
 
     public override int GetHashCode() => MatchId * ResourceType;
+
+    public override string ToString() => $"{MatchId} {string.Join(",", ResultDetails.Select(x => $"{x.ResourceId}({x.HomeValue}-{x.AwayValue})"))}";
 }

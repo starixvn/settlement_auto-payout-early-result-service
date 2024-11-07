@@ -1,6 +1,7 @@
 ﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
+using Fanex.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 
@@ -23,6 +24,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         try
         {
+            LogService.Info($"AP2 Process {match.ToString()}");
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
             await PushAndWriteLog(match, conditions);
         }
@@ -32,7 +34,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
         catch (Exception exception)
         {
-            await writeLogService.ExceptionLog(match.MatchId, exception);
+            await writeLogService.ExceptionLog(match, exception);
         }
         finally
         {

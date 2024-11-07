@@ -10,7 +10,7 @@ namespace AutoPayout.Services;
 
 public interface WriteLogService
 {
-    Task ExceptionLog(int matchId, Exception exception);
+    Task ExceptionLog(Match match, Exception exception);
 
     Task WriteLog(Match match, ServiceException exception);
 
@@ -23,9 +23,9 @@ public interface WriteLogService
 
 public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSettingsKey> options) : WriteLogService
 {
-    public async Task ExceptionLog(int matchId, Exception exception)
+    public async Task ExceptionLog(Match match, Exception exception)
     {
-        var logMessage = new LogMessage($"Match Id: {matchId} - {exception.Message}")
+        var logMessage = new LogMessage($"Match: {match.ToString()} - {exception.Message}")
             .AddSection("Database Info", DatabaseInfoGetters.GetDbExceptionInfo(exception))
             .AddSection("Server Info", CommonInfoGetters.GetServerInfo())
             .AddSection("Exception Info", CommonInfoGetters.GetExceptionInfo(exception))
