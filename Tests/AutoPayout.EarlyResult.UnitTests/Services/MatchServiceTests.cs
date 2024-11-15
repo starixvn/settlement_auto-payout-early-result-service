@@ -1,4 +1,6 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.Constants;
+using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using AutoPayout.EarlyResult.Services;
 using AutoPayout.Models;
@@ -8,10 +10,11 @@ using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services;
+
 public class MatchServiceTests
 {
     private readonly IDynamicRepository repository;
-    private readonly MatchService matchService;
+    private readonly MatchServiceImp matchService;
     private readonly ICache cache;
 
     public MatchServiceTests()
@@ -26,7 +29,7 @@ public class MatchServiceTests
         var settings = new AppSettingsKey()
         {
             EnvironmentName = "PRO",
-            SiteDbServer = new List<string> { "abc" },
+            SiteDbServer = ["abc"],
             RetryCount = 1,
             CacheKey = "Settlement-AutoPayoutOtherSport-LeagueId"
         };
@@ -39,7 +42,6 @@ public class MatchServiceTests
     [Fact]
     public async Task GetMatches_ExistedIncludeLeagueIdAndExcludeLeagueId_ReturnsRightMatches()
     {
-        // Arrange
         var results = new List<ResultDetail>
             {
                 new () { MatchId = 1, LeagueId = 123, SportType = 5},
@@ -58,18 +60,14 @@ public class MatchServiceTests
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "111123,456", cachePolicy);
 
-        // Act
         var list = await matchService.GetMatches();
 
-        // Assert
         Assert.Single(list);
     }
-
 
     [Fact]
     public async Task GetMatches_NotExistConditions_NotReturnThatMatch()
     {
-        // Arrange
         var results = new List<ResultDetail>
         {
             new () { MatchId = 1, LeagueId = 123, SportType = 5, ResourceType = ResourceType.MainResource},
@@ -88,12 +86,88 @@ public class MatchServiceTests
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "", cachePolicy);
 
-        // Act
         var list = await matchService.GetMatches();
 
-        // Assert
         Assert.Single(list);
         Assert.Equal(1, list[0].MatchId);
         Assert.Equal("4,5,6", list[0].Conditions);
+    }
+
+    [Fact]
+    public async Task GetMatches_IgnoreResultExistedIncludeLeagueIdAndExcludeLeagueId_ReturnsRightMatches()
+    {
+        var results = new List<ResultDetail>
+        {
+            new ()
+            {
+                MatchId = 1,
+                ResourceId = ResourceIds.OverTime,
+                LeagueId = 123,
+                SportType = SportType.BasketBall,
+            },
+            new ()
+            {
+                MatchId = 2,
+                ResourceId = ResourceIds.FullTime,
+                LeagueId = 123,
+                SportType = SportType.BasketBall
+            }
+        };
+        var conditions = new List<ConditionSetting>()
+        {
+            new ()
+            {
+                SportType = SportType.BasketBall,
+                EarlyCheckList = "1,2,3",
+                MainCheckList = "4,5,6"
+            },
+        };
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
+        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "456", cachePolicy);
+
+        var list = await matchService.GetMatches();
+        const int expectedMatchId = 2;
+        Assert.Equal(expectedMatchId, list[0].MatchId);
+    }
+
+    [Fact]
+    public async Task GetMatches_ResourceStatusExpiredExistedIncludeLeagueIdAndExcludeLeagueId_ReturnsRightMatches()
+    {
+        var results = new List<ResultDetail>
+        {
+            new ()
+            {
+                MatchId = 1,
+                ResourceId = ResourceIds.OverTime,
+                LeagueId = 123,
+                SportType = SportType.BasketBall,
+                ResourceStatus = ResourceStatus.Expired
+            },
+            new ()
+            {
+                MatchId = 2,
+                ResourceId = ResourceIds.FullTime,
+                LeagueId = 123,
+                SportType = SportType.BasketBall
+            }
+        };
+        var conditions = new List<ConditionSetting>()
+        {
+            new ()
+            {
+                SportType = SportType.BasketBall,
+                EarlyCheckList = "1,2,3",
+                MainCheckList = "4,5,6"
+            },
+        };
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
+        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "456", cachePolicy);
+
+        var list = await matchService.GetMatches();
+        const int expectedMatchId = 1;
+        Assert.Equal(expectedMatchId, list[0].MatchId);
+        Assert.Equal(2, list.Count);
     }
 }

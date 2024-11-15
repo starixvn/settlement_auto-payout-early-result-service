@@ -140,7 +140,7 @@ public class ProcessServiceTests
         createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
         await writeLogService.DidNotReceive().WriteLog(match, Arg.Any<ServiceException>());
         await updateResultStatusService.DidNotReceive().UpdateResultStatus(match, MatchStatus.Failed);
-        await writeLogService.Received().ExceptionLog(match.MatchId, Arg.Any<Exception>());
+        await writeLogService.Received().ExceptionLog(match, Arg.Any<Exception>());
         matchPoolService.Received().RemoveMatch(match);
     }
 }

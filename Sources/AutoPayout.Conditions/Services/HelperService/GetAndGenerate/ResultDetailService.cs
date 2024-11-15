@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Constants;
-using Fanex.Logging;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -25,8 +24,8 @@ public interface ResultDetailService
     Task<List<ResultDetail>> GetResultSettled(int matchId, int sportType);
 
     Task<double> MaxTimeScore(ResultDetail resultDetail);
-    bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
 
+    bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -42,8 +41,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
         };
-
-        LogService.Info($"AP2 GetScores {criteria.MatchId} {criteria.ResourceIds}");
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
 
@@ -100,7 +97,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
         }
     }
-
 
     public async Task<double> MaxTimeScore(ResultDetail resultDetail)
     {

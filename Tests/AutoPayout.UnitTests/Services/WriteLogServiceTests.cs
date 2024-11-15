@@ -58,8 +58,7 @@ public class WriteLogServiceTests
                 {
                     ResourceId = "01"
                 }
-            },
-            UId = "123"
+            }
         };
 
         var exception = new ServiceException("Message");
@@ -106,8 +105,7 @@ public class WriteLogServiceTests
                 {
                     ResourceId = "01"
                 }
-            },
-            UId = "123"
+            }
         };
 
         await tempService.WriteLog(match, "Message");
