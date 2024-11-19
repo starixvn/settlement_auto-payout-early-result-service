@@ -72,7 +72,7 @@ public class VerifyBasketBallFinalResultTests
             Arg.Any<int>()).Returns("Error");
 
         await service.HandleCondition(match);
-        await resultDetailService.Received(1).UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        await resultDetailService.Received(1).UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received(1).WriteLogResult(1, Arg.Any<ResultDetail>(), Arg.Any<string>());
         await basketballHelper.DidNotReceive()
             .FinalOfBo2InValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>());
@@ -98,7 +98,7 @@ public class VerifyBasketBallFinalResultTests
         basketballHelper.FinalOfBo2InValid(Arg.Any<Match>(), Arg.Any<ResultDetail>(), Arg.Any<ResultDetail>()).Returns("true");
 
         await service.HandleCondition(match);
-        await resultDetailService.Received(2).UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        await resultDetailService.Received(2).UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received(2).WriteLogResult(1, Arg.Any<ResultDetail>(), Arg.Any<string>());
         Assert.Empty(match.ResultDetails);
     }

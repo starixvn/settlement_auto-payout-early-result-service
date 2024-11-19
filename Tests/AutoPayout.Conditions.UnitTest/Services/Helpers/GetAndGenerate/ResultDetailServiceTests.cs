@@ -121,7 +121,7 @@ public class ResultDetailServiceTests
             }
         };
 
-        await service.UpdateResultStatus(1, resultDetails);
+        await service.UpdateInvalidResultStatus(1, resultDetails);
 
         await updateResultStatusService.Received().UpdateResultStatus(Arg.Is<Match>(m => m.MatchId == 1
             && m.ResultDetails.Count() == 1

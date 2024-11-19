@@ -110,7 +110,7 @@ public static class VerifyFinalResultHelper
         => !resultsChecking.Exists(x => (new[] { SettlementStatusId.Calculated, SettlementStatusId.Running }).Contains(x.SettlementStatusId)
                 && x.HomeValue.Equals(x.AwayValue, StringComparison.OrdinalIgnoreCase));
 
-    public static bool VerifyFinalBestOfTWO(ResultDetail finalResult, List<ResultDetail> results)
+    public static bool VerifyFinalBestOfTwo(ResultDetail finalResult, List<ResultDetail> results)
     {
         var mapOne = results.Find(r => r.ResourceId == ESportsFirstMap);
         var mapTwo = results.Find(r => r.ResourceId == ESportsSecondMap);
@@ -119,9 +119,9 @@ public static class VerifyFinalResultHelper
         return mapOne != null && mapTwo != null && totalScore == GameType.Bo2;
     }
 
-    public static int SumHomeScore(List<ResultDetail> results)
+    private static int SumHomeScore(List<ResultDetail> results)
         => results.Sum(set => Convert.ToInt32(set.HomeValue));
 
-    public static int SumAwayScore(List<ResultDetail> results)
+    private static int SumAwayScore(List<ResultDetail> results)
         => results.Sum(set => Convert.ToInt32(set.AwayValue));
 }

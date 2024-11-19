@@ -33,12 +33,12 @@ public class BasketballExtraStepTests
     [InlineData(8)]
     [InlineData(17)]
     [InlineData(69)]
-    public void Process_BitInstantIsOff_ReturnDeterminedTypeZero(byte AutoSetting)
+    public void Process_BitInstantIsOff_ReturnDeterminedTypeZero(byte autoSetting)
     {
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            MatchDetail = new MatchDetail { AutoSetting = AutoSetting }
+            MatchDetail = new MatchDetail { AutoSetting = autoSetting }
         };
 
         var criteria = new SettleCriteria();

@@ -59,7 +59,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         var message = isFinalInconsistentWithGameSession ? ErrorMessage.FinalInconsistentWithGameSession : ErrorMessage.FinalInconsistent;
         var errorMessage = message.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
 
-        await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }

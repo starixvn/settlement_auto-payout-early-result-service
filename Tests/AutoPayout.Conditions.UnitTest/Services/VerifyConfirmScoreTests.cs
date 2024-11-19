@@ -68,7 +68,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Empty(secondResultDetail.AwayValue);
         Assert.Equal(2, secondResultDetail.ExternalSourceInfo.Count());
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -236,7 +236,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class VerifyConfirmScoreTests
 
         Assert.IsType<ServiceException>(exception);
         Assert.False(((ServiceException)exception).MarkFail);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2), errorMessage);
     }
 
     [Fact]
@@ -343,7 +343,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal(string.Empty, firstResultDetail.AwayValue);
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("3", secondResultDetail.AwayValue);
-        await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+        await resultDetailService.DidNotReceive().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>());
     }
 
     [Fact]
@@ -380,6 +380,6 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 }

@@ -81,7 +81,7 @@ public class VerifyBasketBallResult(
         if (match.MatchDetail.GameSession is GameType.Bo1 or GameType.Bo2 && quarter.Any())
         {
             var message = CreateMessageService.ResultsInconsistentWithGameSession(quarter, match.MatchDetail.GameSession);
-            await resultDetailService.UpdateResultStatus(match.MatchId, quarter, message);
+            await resultDetailService.UpdateInvalidResultStatus(match.MatchId, quarter, message);
             resultDetailService.WriteLogResults(
                 match.MatchId,
                 quarter,
@@ -94,11 +94,11 @@ public class VerifyBasketBallResult(
     {
         if (match.MatchDetail.GameSession == GameType.Bo4 && result.ResourceId == ResourceIds.FullTime)
         {
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { result, new() { ResourceId = ResourceIds.OverTime } }, message);
+            await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { result, new() { ResourceId = ResourceIds.OverTime } }, message);
         }
         else
         {
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { result }, message);
+            await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { result }, message);
         }
         resultDetailService.WriteLogResult(
             match.MatchId,

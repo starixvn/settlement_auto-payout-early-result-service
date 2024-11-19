@@ -18,7 +18,7 @@ public interface ResultDetailService
 
     void WriteLogResults(int matchId, List<ResultDetail> result, string message);
 
-    Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
+    Task UpdateInvalidResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "");
 
     Task<(List<ResultDetail>, List<ResourceIndex>)> GetResultsChecking(Match match, int maxResultIndex, IEnumerable<ResultDetail> resultSettled);
 
@@ -90,7 +90,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return message;
     }
 
-    public async Task UpdateResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
+    public async Task UpdateInvalidResultStatus(int matchId, IEnumerable<ResultDetail> resultDetails, string remark = "")
     {
         if (resultDetails.Any())
         {

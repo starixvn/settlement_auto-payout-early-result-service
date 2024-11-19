@@ -86,13 +86,13 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
         if (!TryGetTraderScore(groupScore, out _, out _) && processTime.TotalSeconds > match.EarlyRetryTime)
         {
             var remark = resultDetailService.WriteLogResultNotTrader(match.MatchId, resultDetail);
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
+            await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
         }
         else if (TryGetTraderScore(groupScore, out _, out _) && processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore)
         {
             var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
-            await resultDetailService.UpdateResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
+            await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
         }
         else

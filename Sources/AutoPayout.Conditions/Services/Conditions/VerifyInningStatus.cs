@@ -54,7 +54,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
     {
         var finalResource = match.ResultDetails.Where(r => r.ResourceId == ResourceIds.FullTime).ToList();
         match.ResultDetails = match.ResultDetails.Except(finalResource).ToList();
-        await resultDetailService.UpdateResultStatus(match.MatchId, finalResource, ErrorMessage.IntervalNotSettled);
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, finalResource, ErrorMessage.IntervalNotSettled);
         await writeLogService.WriteLog(new Match { MatchId = match.MatchId, ResultDetails = finalResource },
             new IntervalNotSettledException());
     }

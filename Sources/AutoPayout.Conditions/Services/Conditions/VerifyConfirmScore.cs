@@ -23,7 +23,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
         var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
 
-        await resultDetailService.UpdateResultStatus(match.MatchId, failureResults, errorMessage);
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, errorMessage);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
         match.ResultDetails = [.. match.ResultDetails, .. timeResult];
@@ -45,6 +45,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
             {
                 resultDetail.HomeValue = group.First().HomeValue;
                 resultDetail.AwayValue = group.First().AwayValue;
+                resultDetail.Scores = group.ToList();
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }
