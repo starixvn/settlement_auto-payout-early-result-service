@@ -82,7 +82,7 @@ public class VerifySettledRelateResult : ICondition
             .Where(x => settlingResultsIds.Contains(x.ResourceId))
             .Select(x => x.ResourceId).ToList();
 
-        return existingResourceIds.Count > 0;
+        return existingResourceIds.Count == settlingResultsIds.Count;
     }
 
     private void SetExpiredResult(ResultDetail resultDetail)

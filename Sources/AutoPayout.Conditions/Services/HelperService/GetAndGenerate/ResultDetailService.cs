@@ -43,6 +43,8 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             ResourceIds = string.Join(',', resources)
         };
 
+        Console.WriteLine($"AP2 GetScores {criteria.MatchId} Resources: {JsonConvert.SerializeObject(criteria)}");
+
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
 
         return scores;

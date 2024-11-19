@@ -22,6 +22,7 @@ public class VerifyBasketBallResult(
 
     private async Task HandleFinal(Match match)
     {
+        Console.WriteLine($"VerifyBasketBallResult {match}");
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 
         var resultCalculated = settledResults.Where(r => r.SettlementStatusId == SettlementStatusId.Calculated);
