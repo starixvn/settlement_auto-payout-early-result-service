@@ -67,4 +67,6 @@ public class ResultDetail
 
     [XmlIgnore]
     public List<Score> Scores { get; set; } = [];
+
+    public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";
 }

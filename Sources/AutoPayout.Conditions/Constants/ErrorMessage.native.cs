@@ -44,4 +44,6 @@ public static class ErrorMessage
 
     public const string ExpiredResults = "Auto Payout failed: Result({0}) corresponding intervals have not been calculated.";
 
+    public const string InvalidInput = "Failed Auto Payout: Results({0}) due to invalid value inputted";
+
 }

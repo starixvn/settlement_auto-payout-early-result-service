@@ -23,4 +23,6 @@ public static class ConditionId
     public const string VerifyBaseballFinalResult = "92";
 
     public const string VerifyRelatedSettleResult = "4";
+
+    public const string VerifyWithResourceId = "93"; // for volleyball
 }
