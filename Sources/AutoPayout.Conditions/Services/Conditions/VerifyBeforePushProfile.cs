@@ -23,8 +23,6 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
             SelectedResources = CreateXmlResources(match.ResultDetails)
         };
 
-        Console.WriteLine("VerifyBeforePushProfile");
-
         var resultMessage = await scaleOutSettleService.ValidateEventAndTicket(request);
 
         if (resultMessage.ErrorCode > 0)

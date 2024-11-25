@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Constants;
-using Newtonsoft.Json;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -42,8 +41,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
         };
-
-        Console.WriteLine($"AP2 GetScores {criteria.MatchId} Resources: {JsonConvert.SerializeObject(criteria)}");
 
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
 

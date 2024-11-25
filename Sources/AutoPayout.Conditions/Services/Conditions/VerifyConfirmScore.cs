@@ -1,9 +1,7 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Exceptions;
-using Fanex.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
@@ -12,15 +10,12 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 {
     public async Task HandleCondition(Match match)
     {
-        Console.WriteLine($"VerifyConfirmScore {match}");
         var timeResult = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
         match.ResultDetails = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
 
         var scores = await resultDetailService.GetScores(match);
-        Console.WriteLine($"VerifyConfirmScore2 {scores.Count()}");
 
         CompareScore(match, scores);
-        await LogService.InfoAsync($"AP2 GetScores {match.MatchId} Resources: {JsonConvert.SerializeObject(match.ResultDetails)}");
 
         var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
         var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
