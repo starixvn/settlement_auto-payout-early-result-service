@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
+using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
@@ -25,6 +26,11 @@ public class VerifySettledRelateResult : ICondition
         await HandleExpiredResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
+
+        if (match.ResultDetails.Count == 0)
+        {
+            throw new ServiceException { MarkFail = false };
+        }
 
     }
 
