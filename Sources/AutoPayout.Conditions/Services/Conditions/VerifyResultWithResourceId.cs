@@ -1,5 +1,6 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
+using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
@@ -30,39 +31,34 @@ public class VerifyResultWithResourceId : ICondition
                 var id when id.StartsWith(BetTypes.SetXRaceToPoints) => VerifyScorePointsPlayed(result),
                 _ => result.IsValid
             };
-
-            SetExpiredResult(result);
         }
 
 
-        await HandleExpiredResults(match);
+        await HandleInvalidResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
+
+        if (match.ResultDetails.Count == 0)
+        {
+            throw new ServiceException { MarkFail = false };
+        }
     }
 
-    private async Task HandleExpiredResults(Match match)
+    private async Task HandleInvalidResults(Match match)
     {
-        var expiredResults = match.ResultDetails
-            .Where(x => !x.IsValid && x.Expired)
+        var invalidResults = match.ResultDetails
+            .Where(x => !x.IsValid)
             .ToList();
 
-        if (!expiredResults.Any()) { return; }
+        if (!invalidResults.Any()) { return; }
 
-        var errorMessage = string.Format(ErrorMessage.InvalidInput, string.Join(",", expiredResults.Select(x => x.ToString())));
-        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, expiredResults, errorMessage);
+        var errorMessage = string.Format(ErrorMessage.InvalidInput, string.Join(",", invalidResults.Select(x => x.ToString())));
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, invalidResults, errorMessage);
         await repository.ExecuteAsync(new WriteLogCriteria(match.MatchId, errorMessage));
     }
 
     private bool HasSpecialResources(ResultDetail item)
         => item.Scores.Count != 0 && (item.ResourceId.StartsWith(BetTypes.SetXWinner) || item.ResourceId.StartsWith(BetTypes.SetXRaceToPoints));
-
-    private void SetExpiredResult(ResultDetail resultDetail)
-    {
-        var maxDate = resultDetail.Scores.Max(t => t.CreateDate);
-        var processTime = DateTimeOffset.Now - maxDate;
-
-        resultDetail.Expired = processTime.TotalMilliseconds > appSettings.RetryProcessScore;
-    }
 
     private static bool VerifyScoreRaceToPoint(ResultDetail result)
     {

@@ -27,11 +27,6 @@ public class VerifySettledRelateResult : ICondition
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
-        if (match.ResultDetails.Count == 0)
-        {
-            throw new ServiceException { MarkFail = false };
-        }
-
     }
 
     private async Task CheckRelatedResults(Match match)
