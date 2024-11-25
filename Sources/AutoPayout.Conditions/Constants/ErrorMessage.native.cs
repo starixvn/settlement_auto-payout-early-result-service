@@ -42,4 +42,6 @@ public static class ErrorMessage
 
     public const string FullTimeDraw = "Failed Auto Payout: {0} due to FT should not be tie.";
 
+    public const string ExpiredResults = "Auto Payout failed: Result({0}) corresponding intervals have not been calculated.";
+
 }

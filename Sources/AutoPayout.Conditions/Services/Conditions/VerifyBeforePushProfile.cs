@@ -23,6 +23,8 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
             SelectedResources = CreateXmlResources(match.ResultDetails)
         };
 
+        Console.WriteLine("VerifyBeforePushProfile");
+
         var resultMessage = await scaleOutSettleService.ValidateEventAndTicket(request);
 
         if (resultMessage.ErrorCode > 0)
@@ -30,7 +32,7 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
             throw resultMessage.ErrorCode switch
             {
                 ErrorCode.DeploymentError => new ServiceException { MarkFail = false },
-                ErrorCode.MatchInQueue => new ServiceException(ErrorMessage.MatchInQueue) { NeedRetry = true },
+                ErrorCode.MatchInQueue => new ServiceException(ErrorMessage.MatchInQueue) { MarkFail = false },
                 _ => new ServiceException(resultMessage.ErrorMessage)
             };
         }

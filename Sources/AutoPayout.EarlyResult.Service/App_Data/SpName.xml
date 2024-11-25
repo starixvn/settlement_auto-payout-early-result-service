@@ -21,6 +21,7 @@
     <Setting Key="WriteLog_UserLog_Settle" SpName="WriteLog_UserLog_Settle" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoPayoutPrepareOS_Insert" SpName="NAP_Set_AutoPayoutPrepareOS_Insert" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoPayout_LeagueSetting_Sel" SpName="NAP_Set_AutoPayout_LeagueSetting_Sel" DbName="DBPRO.bodb02.wsv_nap" />
+	  <Setting Key="NAP_Set_AutoPayout_ResultStatusSel" SpName="NAP_Set_AutoPayout_ResultStatusSel" DbName="DBPRO.bodb02.wsv_nap" />
   </Function>
   <Function Name="Scale Out TransDb">
     <Function Name="NAP_Admin_Settlement_Validation_Ticket">

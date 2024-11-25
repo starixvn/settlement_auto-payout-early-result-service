@@ -31,99 +31,100 @@ namespace AutoPayout.EarlyResult.Service;
 
 public static class WorkerInjection
 {
-	public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
-	{
-		ConfigureAutoMapper(service);
-		service.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
-		service.AddTransient<GeneralService, GeneralServiceImp>();
+    public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
+    {
+        ConfigureAutoMapper(service);
+        service.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
+        service.AddTransient<GeneralService, GeneralServiceImp>();
 
-		service.AddTransient<IMaintenanceService, MaintenanceServiceImp>();
-		service.AddSingleton<IAutoService, AutoService>();
-		service.AddSingleton<ProcessService, ProcessServiceImp>();
-		service.AddSingleton<Creator, CreatorImp>();
-		service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        service.AddTransient<IMaintenanceService, MaintenanceServiceImp>();
+        service.AddSingleton<IAutoService, AutoService>();
+        service.AddSingleton<ProcessService, ProcessServiceImp>();
+        service.AddSingleton<Creator, CreatorImp>();
+        service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-		service.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
-		service.AddSingleton<SettlementService, SettlementServiceImp>();
-		service.AddSingleton<CreateQueryService, CreateQueryServiceImp>();
-		service.AddSingleton<WriteLogService, WriteLogServiceImp>();
-		service.AddSingleton<MatchPoolService, MatchPoolServiceImp>();
-		service.AddSingleton<MatchService, MatchServiceImp>();
-		service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
-		service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
-		service.AddTransient<ExtraResultService, OverTimeServiceImp>();
-		service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
-		service.AddSingleton<VerifyMatchStatus>();
-		service.AddSingleton<VerifyRunningOdds>();
-		service.AddSingleton<VerifyConfirmScore>();
-		service.AddSingleton<VerifyTimeResult>();
-		service.AddSingleton<VerifyBeforePushProfile>();
-		service.AddSingleton<VerifyInningStatus>();
-		service.AddSingleton<VerifyFinalResult>();
-		service.AddSingleton<VerifyFinalResult>();
-		service.AddSingleton<VerifyFinalByBestOfMap>();
-		service.AddSingleton<VerifyFinalWithExtraResult>();
-		service.AddSingleton<IgnoreVerify>();
-		service.AddSingleton<VerifyBasketBallResult>();
-		service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
-		service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
+        service.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
+        service.AddSingleton<SettlementService, SettlementServiceImp>();
+        service.AddSingleton<CreateQueryService, CreateQueryServiceImp>();
+        service.AddSingleton<WriteLogService, WriteLogServiceImp>();
+        service.AddSingleton<MatchPoolService, MatchPoolServiceImp>();
+        service.AddSingleton<MatchService, MatchServiceImp>();
+        service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
+        service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
+        service.AddTransient<ExtraResultService, OverTimeServiceImp>();
+        service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
+        service.AddSingleton<VerifyMatchStatus>();
+        service.AddSingleton<VerifyRunningOdds>();
+        service.AddSingleton<VerifyConfirmScore>();
+        service.AddSingleton<VerifyTimeResult>();
+        service.AddSingleton<VerifyBeforePushProfile>();
+        service.AddSingleton<VerifyInningStatus>();
+        service.AddSingleton<VerifyFinalResult>();
+        service.AddSingleton<VerifyFinalResult>();
+        service.AddSingleton<VerifyFinalByBestOfMap>();
+        service.AddSingleton<VerifyFinalWithExtraResult>();
+        service.AddSingleton<IgnoreVerify>();
+        service.AddSingleton<VerifyBasketBallResult>();
+        service.AddSingleton<VerifySettledRelateResult>();
+        service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
+        service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
 
-		service.AddSingleton<BasketBallCashOut>();
-		service.AddSingleton<BasketballExtraStep>();
-		service.AddSingleton<ESportsAddResourceRefund>();
-		service.AddSingleton<TennisInsResourceResult>();
-		service.AddSingleton<InitExtraStepService>();
-		service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
+        service.AddSingleton<BasketBallCashOut>();
+        service.AddSingleton<BasketballExtraStep>();
+        service.AddSingleton<ESportsAddResourceRefund>();
+        service.AddSingleton<TennisInsResourceResult>();
+        service.AddSingleton<InitExtraStepService>();
+        service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
 
-		service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
-		service.AddSingleton<IDynamicRepository, DynamicRepository>();
-		service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
-		service.AddSingleton<IUMCacheService, UMCacheService>();
-		service.AddSingleton<IUMRestClient, UMRestClient>();
-		service.AddSingleton<ONEbook.UM.Services.IMaintenanceService, ONEbook.UM.Services.MaintenanceService>();
-		service.AddMemoryCache();
-		ConfigureRedis(service, configuration);
-		StartLogSetting(configuration);
-	}
+        service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
+        service.AddSingleton<IDynamicRepository, DynamicRepository>();
+        service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
+        service.AddSingleton<IUMCacheService, UMCacheService>();
+        service.AddSingleton<IUMRestClient, UMRestClient>();
+        service.AddSingleton<ONEbook.UM.Services.IMaintenanceService, ONEbook.UM.Services.MaintenanceService>();
+        service.AddMemoryCache();
+        ConfigureRedis(service, configuration);
+        StartLogSetting(configuration);
+    }
 
-	private static void ConfigureRedis(IServiceCollection service, IConfiguration configuration)
-	{
-		service.AddSingleton<ICacheService, CacheService>();
-		service.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
-	}
+    private static void ConfigureRedis(IServiceCollection service, IConfiguration configuration)
+    {
+        service.AddSingleton<ICacheService, CacheService>();
+        service.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
+    }
 
-	public static void StartUmSetting(this IServiceCollection service, IConfiguration configuration)
-	{
-		var umConfig = new UMClientConfiguration().Initialize(configuration);
+    public static void StartUmSetting(this IServiceCollection service, IConfiguration configuration)
+    {
+        var umConfig = new UMClientConfiguration().Initialize(configuration);
 
-		UMClientManager
-			.UseConfig(umConfig)
-			.UseCacheService(new UMCacheService(new CacheService()))
-			.UseRestClient(new UMRestClient(umConfig));
-	}
+        UMClientManager
+            .UseConfig(umConfig)
+            .UseCacheService(new UMCacheService(new CacheService()))
+            .UseRestClient(new UMRestClient(umConfig));
+    }
 
-	private static void StartLogSetting(IConfiguration configuration)
-	{
-		var logEngine = new List<ILogEngine>();
+    private static void StartLogSetting(IConfiguration configuration)
+    {
+        var logEngine = new List<ILogEngine>();
 
-		var sentryEngineOptions = new SentryEngineOptions
-		{
-			Dsn = new Dsn(configuration.GetSection("SentryToken").Value)
-		};
+        var sentryEngineOptions = new SentryEngineOptions
+        {
+            Dsn = new Dsn(configuration.GetSection("SentryToken").Value)
+        };
 
-		logEngine.Add(new SentryLogging(sentryEngineOptions));
+        logEngine.Add(new SentryLogging(sentryEngineOptions));
 
-		LogManager.SetDefaultLogCategory(configuration.GetSection("SiteCategory").Value).Use(logEngine);
-	}
+        LogManager.SetDefaultLogCategory(configuration.GetSection("SiteCategory").Value).Use(logEngine);
+    }
 
-	private static void ConfigureAutoMapper(IServiceCollection service)
-	{
-		var mapperConfig = new MapperConfiguration(mc =>
-		{
-			mc.AddProfile(typeof(ScaleOutMappingProfile));
-		});
+    private static void ConfigureAutoMapper(IServiceCollection service)
+    {
+        var mapperConfig = new MapperConfiguration(mc =>
+        {
+            mc.AddProfile(typeof(ScaleOutMappingProfile));
+        });
 
-		var mapper = mapperConfig.CreateMapper();
-		service.AddSingleton(mapper);
-	}
+        var mapper = mapperConfig.CreateMapper();
+        service.AddSingleton(mapper);
+    }
 }

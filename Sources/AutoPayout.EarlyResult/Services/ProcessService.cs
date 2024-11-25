@@ -1,9 +1,7 @@
 ﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
-using Fanex.Logging;
 using Microsoft.Extensions.Options;
-using Polly;
 
 namespace AutoPayout.EarlyResult.Services;
 
@@ -24,7 +22,8 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         try
         {
-            LogService.Info($"AP2 Process {match.ToString()}");
+            // LOG
+            Console.WriteLine($"Process {match}");
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
             await PushAndWriteLog(match, conditions);
         }
@@ -34,10 +33,12 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
         catch (Exception exception)
         {
+            Console.WriteLine(exception);
             await writeLogService.ExceptionLog(match, exception);
         }
         finally
         {
+            Console.WriteLine($"Remove {match}");
             matchPoolService.RemoveMatch(match);
         }
     }
@@ -72,15 +73,10 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
     {
-        await Policy.Handle<ServiceException>(e => e.NeedRetry)
-            .WaitAndRetryAsync(appSettingsKey.Value.RetryCount,
-                _ => TimeSpan.FromMilliseconds(appSettingsKey.Value.RetryInterval))
-            .ExecuteAsync(async () =>
-            {
-                foreach (var condition in conditions)
-                {
-                    await condition.HandleCondition(match);
-                }
-            });
+        Console.WriteLine($"HandleAndRetryCondition {match}");
+        foreach (var condition in conditions)
+        {
+            await condition.HandleCondition(match);
+        }
     }
 }

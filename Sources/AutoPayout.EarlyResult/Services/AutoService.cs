@@ -11,6 +11,7 @@ public class AutoService(ProcessService processService, MatchPoolService matchPo
     public async Task Handle()
     {
         var matches = await matchPoolService.GetNewMatches();
+
         matches.ForEach(m =>
          {
              Task.Run(() => processService.Process(m))

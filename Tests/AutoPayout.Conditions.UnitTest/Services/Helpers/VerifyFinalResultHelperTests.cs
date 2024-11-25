@@ -140,7 +140,7 @@ public class VerifyFinalResultHelperTests
             }
         };
 
-        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results);
+        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTwo(finalResult, results);
 
         Assert.False(actual);
     }
@@ -162,7 +162,7 @@ public class VerifyFinalResultHelperTests
             }
         };
 
-        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results);
+        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTwo(finalResult, results);
 
         Assert.False(actual);
     }
@@ -188,7 +188,7 @@ public class VerifyFinalResultHelperTests
             }
         };
 
-        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results);
+        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTwo(finalResult, results);
 
         Assert.False(actual);
     }
@@ -214,7 +214,7 @@ public class VerifyFinalResultHelperTests
             }
         };
 
-        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTWO(finalResult, results);
+        var actual = VerifyFinalResultHelper.VerifyFinalBestOfTwo(finalResult, results);
 
         Assert.True(actual);
     }

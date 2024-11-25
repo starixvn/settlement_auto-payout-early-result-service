@@ -1,6 +1,6 @@
 ﻿using AutoPayout.Constants;
 
-namespace AutoPayout.Conditions.Models;
+namespace AutoPayout.Models;
 
 public class Score
 {
@@ -30,4 +30,9 @@ public class Score
     public DateTime CreateDate { get; set; }
 
     public byte ResultType => ResourceIds.TimePattern.Any(x => ResourceId.StartsWith(x)) ? ResultTypes.Time : default;
+
+    public string RelatedCalResources { get; set; }
+    public List<string> RelatedCalResourceIds => string.IsNullOrEmpty(RelatedCalResources) ? [] : [.. RelatedCalResources.Split(",")];
+    public string RelatedSettResources { get; set; }
+    public List<string> RelatedSettResourcesIds => string.IsNullOrEmpty(RelatedSettResources) ? [] : [.. RelatedSettResources.Split(",")];
 }

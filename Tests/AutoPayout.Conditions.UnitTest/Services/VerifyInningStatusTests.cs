@@ -127,7 +127,7 @@ public class VerifyInningStatusTests
         await condition.HandleCondition(match);
 
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceIds.FullTime);
-        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
+        await resultDetailService.Received().UpdateInvalidResultStatus(Arg.Any<int>(),
             Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceIds.FullTime)), ErrorMessage.IntervalNotSettled);
         await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }
@@ -159,7 +159,7 @@ public class VerifyInningStatusTests
         await condition.HandleCondition(match);
 
         Assert.DoesNotContain(match.ResultDetails, r => r.ResourceId == ResourceIds.FullTime);
-        await resultDetailService.Received().UpdateResultStatus(Arg.Any<int>(),
+        await resultDetailService.Received().UpdateInvalidResultStatus(Arg.Any<int>(),
             Arg.Is<List<ResultDetail>>(lr => lr.TrueForAll(r => r.ResourceId == ResourceIds.FullTime)), ErrorMessage.IntervalNotSettled);
         await writeLogService.Received().WriteLog(Arg.Any<Match>(), Arg.Any<IntervalNotSettledException>());
     }

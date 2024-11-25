@@ -25,7 +25,7 @@ public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSetti
 {
     public async Task ExceptionLog(Match match, Exception exception)
     {
-        var logMessage = new LogMessage($"Match: {match.ToString()} - {exception.Message}")
+        var logMessage = new LogMessage($"Match: {match} - {exception.Message}")
             .AddSection("Database Info", DatabaseInfoGetters.GetDbExceptionInfo(exception))
             .AddSection("Server Info", CommonInfoGetters.GetServerInfo())
             .AddSection("Exception Info", CommonInfoGetters.GetExceptionInfo(exception))

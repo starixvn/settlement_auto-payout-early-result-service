@@ -106,7 +106,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
@@ -153,7 +153,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.DidNotReceive().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>());
+        await resultDetailService.DidNotReceive().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>());
         resultDetailService.DidNotReceive().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
         Assert.NotNull(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
@@ -195,7 +195,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
@@ -237,7 +237,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
@@ -268,7 +268,7 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
