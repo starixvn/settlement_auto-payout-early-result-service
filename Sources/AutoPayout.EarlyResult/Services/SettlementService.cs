@@ -47,7 +47,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         if (resultExpired.Count != 0)
         {
             match.ResultDetails = match.ResultDetails.Except(resultExpired).ToList();
-            var resultExpiredIds = string.Join(',', resultExpired.Select(r => r.ResourceId));
+            var resultExpiredIds = string.Join(", ", resultExpired.Select(r => r.ResourceId));
             var cloneMatch = new Match
             {
                 MatchId = match.MatchId,
@@ -67,7 +67,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             criteria.MatchId = hedgeMatchDetail.MatchId;
             await Execute(criteria, match, isExistedFinalResource, false);
-            await updateResultStatusService.UpdateResultStatus(new Match 
+            await updateResultStatusService.UpdateResultStatus(new Match
             {
                 MatchId = hedgeMatchDetail.MatchId,
                 ResultDetails = match.ResultDetails
@@ -86,7 +86,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
         await ExecuteSettleAllSite(criteria);
-               
+
     }
 
     private async Task ExecuteSettleAllSite(SettleCriteria criteria)

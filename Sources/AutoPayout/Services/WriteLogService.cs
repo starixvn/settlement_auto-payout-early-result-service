@@ -87,7 +87,7 @@ public class WriteLogServiceImp(IDynamicRepository repository, IOptions<AppSetti
     {
         var resourceIds = match.ResultDetails.Select(resultDetail => resultDetail.ResourceId).ToList();
 
-        var resources = string.Join(",", resourceIds);
+        var resources = string.Join(", ", resourceIds);
         var title = $"NAP: Auto Payout: {resources}";
         var remark = new List<string>
         {
