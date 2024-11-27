@@ -1,18 +1,15 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
 using AutoPayout.Exceptions;
-using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyResultWithResourceId : ICondition
 {
-    private readonly AppSettingsKey appSettings;
     private readonly ResultDetailService resultDetailService;
     private readonly IDynamicRepository repository;
-    public VerifyResultWithResourceId(IOptions<AppSettingsKey> options, ResultDetailService resultDetailService, IDynamicRepository repository)
+    public VerifyResultWithResourceId(ResultDetailService resultDetailService, IDynamicRepository repository)
     {
-        appSettings = options.Value;
         this.resultDetailService = resultDetailService;
         this.repository = repository;
     }

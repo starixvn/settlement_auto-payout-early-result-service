@@ -75,11 +75,11 @@ public class VerifySettledRelateResult : ICondition
         };
 
 
-    private bool TryGetExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
+    private bool TryGetExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relateResults, out List<string> existingResourceIds)
     {
         var settlingResultsIds = settlingResults.Select(x => x.ResourceId).ToList();
 
-        existingResourceIds = relatedResults
+        existingResourceIds = relateResults
             .Where(x => settlingResultsIds.Contains(x.ResourceId))
             .Select(x => x.ResourceId).ToList();
 
