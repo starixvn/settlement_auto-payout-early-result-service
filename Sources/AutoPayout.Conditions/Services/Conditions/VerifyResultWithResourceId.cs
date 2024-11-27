@@ -20,7 +20,10 @@ public class VerifyResultWithResourceId : ICondition
         {
             var resourceId = result.ResourceId;
 
-            if (!HasSpecialResources(result)) { continue; }
+            if (!HasSpecialResources(result))
+            {
+                continue;
+            }
 
             result.IsValid = resourceId switch
             {
@@ -47,7 +50,10 @@ public class VerifyResultWithResourceId : ICondition
             .Where(x => !x.IsValid)
             .ToList();
 
-        if (!invalidResults.Any()) { return; }
+        if (!invalidResults.Any())
+        {
+            return;
+        }
 
         var errorMessage = string.Format(ErrorMessage.InvalidInput, string.Join(",", invalidResults.Select(x => x.ToString())));
         await resultDetailService.UpdateInvalidResultStatus(match.MatchId, invalidResults, errorMessage);

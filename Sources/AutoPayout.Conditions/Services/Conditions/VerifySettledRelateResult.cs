@@ -33,7 +33,10 @@ public class VerifySettledRelateResult : ICondition
     {
         foreach (var item in match.ResultDetails)
         {
-            if (!HasRelatedResources(item)) { continue; }
+            if (!HasRelatedResources(item))
+            {
+                continue;
+            }
 
             var criteria = CreateCriteria(match, item.Scores[0]);
             var relatedResults = (await repository.FetchAsync<ResultDetail>(criteria)).ToList();
@@ -107,14 +110,16 @@ public class VerifySettledRelateResult : ICondition
             || relatedResults.TrueForAll(x => relatedSettResourcesIds.Contains(x.ResourceId) && (x.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted));
     }
 
-
     private async Task HandleExpiredResults(Match match)
     {
         var expiredResults = match.ResultDetails
             .Where(x => !x.IsValid && x.Expired)
             .ToList();
 
-        if (!expiredResults.Any()) { return; }
+        if (!expiredResults.Any())
+        {
+            return;
+        }
 
         var expiredResultsInfo = new StringBuilder();
         foreach (var result in expiredResults)

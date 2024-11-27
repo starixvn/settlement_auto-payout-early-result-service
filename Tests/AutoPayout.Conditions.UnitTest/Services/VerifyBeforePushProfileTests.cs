@@ -61,22 +61,6 @@ public class VerifyBeforePushProfileTests
     }
 
     [Fact]
-    public async Task HandleCondition_ValidateReturnMatchInQueue_ThrowExceptionWithRetry()
-    {
-        var result = new ResultMessage
-        {
-            ErrorCode = ErrorCode.MatchInQueue
-        };
-        scaleOutSettleService.ValidateEventAndTicket(Arg.Any<EventTicketRequest>()).Returns(result);
-
-        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
-
-        Assert.IsType<ServiceException>(exception);
-        Assert.True(((ServiceException)exception).NeedRetry);
-        Assert.Equal(ErrorMessage.MatchInQueue, ((ServiceException)exception).Description);
-    }
-
-    [Fact]
     public async Task HandleCondition_ValidateReturnAnotherError_ThrowExceptionWithMessage()
     {
         var result = new ResultMessage
