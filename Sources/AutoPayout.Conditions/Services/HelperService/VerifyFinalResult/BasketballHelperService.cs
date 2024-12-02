@@ -63,7 +63,7 @@ public class BasketballHelperServiceImp(
 
         var isInconsistentScoreHalfTime = IsInconsistentScoreHalfTime(halfTimeResult, resultRelated);
 
-        return isInconsistentScoreHalfTime ? CreateMessageService.ResultRelatedInconsistent(halfTimeResult, resultRelated, ResourceIds.OverTime, true) : string.Empty;
+        return isInconsistentScoreHalfTime ? CreateMessageService.ResultRelatedInconsistent(halfTimeResult, resultRelated, ResourceIds.OverTime) : string.Empty;
     }
 
     private static bool IsInconsistentScoreHalfTime(ResultDetail halfTimeResult, IEnumerable<ResultDetail> resultRelated)

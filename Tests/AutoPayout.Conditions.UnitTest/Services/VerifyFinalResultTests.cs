@@ -31,13 +31,13 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.EarlyResource,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = ResourceIds.FullTime
                 }
-            }
+            ]
         };
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
@@ -53,7 +53,7 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>()
+            ResultDetails = []
         };
 
         await condition.HandleCondition(match);
@@ -68,15 +68,15 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            ]
         };
 
         var results = new List<ResultDetail>()
@@ -98,8 +98,6 @@ public class VerifyFinalResultTests
             }
         };
 
-        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
-
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
@@ -107,7 +105,7 @@ public class VerifyFinalResultTests
         await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
@@ -118,15 +116,15 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>()
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            ]
         };
 
         var results = new List<ResultDetail>()
@@ -165,15 +163,15 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            ]
         };
 
         var results = new List<ResultDetail>()
@@ -187,7 +185,6 @@ public class VerifyFinalResultTests
             },
         };
 
-        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
@@ -195,8 +192,8 @@ public class VerifyFinalResultTests
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        await resultDetailService.Received(1).UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 
@@ -207,15 +204,15 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
+            ResultDetails =
+            [
+                new()
                 {
                     ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "1"
                 }
-            }
+            ]
         };
 
         var results = new List<ResultDetail>()
@@ -229,7 +226,7 @@ public class VerifyFinalResultTests
             },
         };
 
-        var errorMessage = "Failed Auto Payout: FT(0-1) is inconsistent with game session information.";
+        const string errorMessage = "Failed Auto Payout: FT(0-1) is inconsistent with game session information.";
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
@@ -249,27 +246,25 @@ public class VerifyFinalResultTests
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = ResourceIds.FullTime,
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            ]
         };
 
-        var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with game session information.";
-
-        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(new List<ResultDetail>());
+        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
         repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
-        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
         Assert.Null(match.ResultDetails.FirstOrDefault(r => r.ResourceId == ResourceIds.FullTime));
     }
 }

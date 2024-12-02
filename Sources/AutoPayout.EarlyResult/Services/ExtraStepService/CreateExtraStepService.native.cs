@@ -28,6 +28,7 @@ public class CreateExtraStepServiceImp(
         {
             SportType.ESports => eSportExtraStep,
             SportType.BaseBall => eSportExtraStep,
+            SportType.VolleyBall => eSportExtraStep,
             SportType.Tennis => tennisExtraStep,
             SportType.BasketBall => basketBallCashOut,
             _ => extraStepService

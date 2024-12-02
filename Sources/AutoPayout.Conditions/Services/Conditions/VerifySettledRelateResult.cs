@@ -27,18 +27,16 @@ public class VerifySettledRelateResult : ICondition
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
-        if (match.ResultDetails.Count == 0)
-        {
-            throw new ServiceException { MarkFail = false };
-        }
-
     }
 
     private async Task CheckRelatedResults(Match match)
     {
         foreach (var item in match.ResultDetails)
         {
-            if (!HasRelatedResources(item)) { continue; }
+            if (!HasRelatedResources(item))
+            {
+                continue;
+            }
 
             var criteria = CreateCriteria(match, item.Scores[0]);
             var relatedResults = (await repository.FetchAsync<ResultDetail>(criteria)).ToList();
@@ -80,11 +78,11 @@ public class VerifySettledRelateResult : ICondition
         };
 
 
-    private bool TryGetExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
+    private bool TryGetExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relateResults, out List<string> existingResourceIds)
     {
         var settlingResultsIds = settlingResults.Select(x => x.ResourceId).ToList();
 
-        existingResourceIds = relatedResults
+        existingResourceIds = relateResults
             .Where(x => settlingResultsIds.Contains(x.ResourceId))
             .Select(x => x.ResourceId).ToList();
 
@@ -112,14 +110,16 @@ public class VerifySettledRelateResult : ICondition
             || relatedResults.TrueForAll(x => relatedSettResourcesIds.Contains(x.ResourceId) && (x.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted));
     }
 
-
     private async Task HandleExpiredResults(Match match)
     {
         var expiredResults = match.ResultDetails
             .Where(x => !x.IsValid && x.Expired)
             .ToList();
 
-        if (!expiredResults.Any()) { return; }
+        if (!expiredResults.Any())
+        {
+            return;
+        }
 
         var expiredResultsInfo = new StringBuilder();
         foreach (var result in expiredResults)

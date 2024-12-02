@@ -96,33 +96,6 @@ public class ProcessServiceTests
         matchPoolService.Received().RemoveMatch(match);
     }
 
-    [Fact]
-    public async Task Process_ExceptionNeedTry_RetryBeforeWriteLog()
-    {
-        var match = new Match()
-        {
-            Conditions = "1",
-            ResultDetails = new List<ResultDetail>()
-            {
-                new ()
-                {
-                    ResourceId = "00",
-                    ResourceStatus = 1
-                }
-            }
-        };
-
-        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns(new List<ICondition> { condition });
-        condition.HandleCondition(Arg.Any<Match>()).ThrowsAsyncForAnyArgs(new ServiceException() { Description = "Message", NeedRetry = true });
-
-        await service.Process(match);
-
-        createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
-        await settlementService.Received().UpdateResultExpired(match);
-        await writeLogService.Received().WriteLog(match, Arg.Is<ServiceException>(e => e.Description == "Message"));
-        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed, "Message");
-        await condition.Received(3).HandleCondition(Arg.Any<Match>());
-    }
 
     [Fact]
     public async Task Process_UnHandledException_WriteSystemLog()

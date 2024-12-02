@@ -48,13 +48,8 @@ public static class BasketBallHelperService
     {
         var elements = DefaultBetStatus.Split(',');
 
-        foreach (var resultDetail in match.ResultDetails)
+        foreach (var resultDetail in match.ResultDetails.Where(resultDetail => resultDetail.ResourceId is ResourceIds.FullTime or ResourceIds.Halftime))
         {
-            if (resultDetail.ResourceId != ResourceIds.FullTime && resultDetail.ResourceId != ResourceIds.Halftime)
-            {
-                continue;
-            }
-
             if (resultDetail.ResourceId == ResourceIds.FullTime)
             {
                 elements[FtPosition] = $"{resultDetail.HomeValue}-{resultDetail.AwayValue}";

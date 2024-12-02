@@ -29,10 +29,8 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
 
         var scoresValid = scoresOt.Where(IsValidNonZeroScore).ToList();
 
-
         resultOt.IsValid = IsOtValid(resultOt, totalHomeValue, totalAwayValue, scoresValid);
         resultOt.RelatedInfo = GetRelatedInfo(scoresValid);
-
 
         if (resultOt.IsValid && totalAwayValue == totalHomeValue)
         {
@@ -55,14 +53,16 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         };
 
         var validScores = (await resultDetailService.GetSingleScore(result))
-            .Where(score => IsValidScore(score))
+            .Where(IsValidScore)
             .ToList();
 
         result.IsValid = IsExtraScoreValid(result, totalHomeValue, totalAwayValue, validScores);
         result.RelatedInfo = GetRelatedInfo(validScores);
 
         if (!result.IsValid)
+        {
             return result;
+        }
 
         if (IsTieGame(totalHomeValue, totalAwayValue))
         {
@@ -93,7 +93,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         };
     }
 
-    private bool HandleMultipleVariants(ResultDetail resultOt, IReadOnlyList<Score> scores)
+    private bool HandleMultipleVariants(ResultDetail resultOt, IEnumerable<Score> scores)
     {
         var maxDate = scores.Max(t => t.CreateDate);
         var processTime = DateTimeOffset.Now - maxDate;
@@ -104,7 +104,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         return false;
     }
 
-    private bool AreScoresUnEqual(IReadOnlyList<Score> scores) => int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
+    private static bool AreScoresUnEqual(IReadOnlyList<Score> scores) => int.Parse(scores[0].HomeValue) != int.Parse(scores[0].AwayValue);
 
     private bool IsExtraScoreValid(ResultDetail resultExtra, int totalHomeValue, int totalAwayValue, IReadOnlyList<Score> scores)
     {
@@ -112,16 +112,10 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
 
         if (totalAwayValue != totalHomeValue)
         {
-            return variantCount == 0 || variantCount == 1 && IsValidSpecialExtraScore(scores[0]); // valid extra score is 0-0 or ""-"" or no score
+            return variantCount == 0 || variantCount == 1 && IsValidSpecialExtraScore(scores[0]);
         }
 
-        // draw 
-        return variantCount switch
-        {
-            > 1 => HandleMultipleVariants(resultExtra, scores),
-            _ => true,
-            //_ => false
-        };
+        return variantCount <= 1 || HandleMultipleVariants(resultExtra, scores);
     }
 
     private static bool IsValidSpecialExtraScore(Score score) => (score.HomeValue == "0" && score.AwayValue == "0")
@@ -134,12 +128,12 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         && !string.IsNullOrEmpty(score.AwayValue)
         && (score.HomeValue != "0" || score.AwayValue != "0");
 
-    private static string GetRelatedInfo(List<Score> validScores)
+    private static string GetRelatedInfo(IEnumerable<Score> validScores)
         => string.Join(',', validScores.Select(score => $"{score.SourceName ?? "Trader"}: {score.HomeValue}-{score.AwayValue}"));
 
     private static bool IsTieGame(int totalHomeValue, int totalAwayValue) => totalHomeValue == totalAwayValue;
 
-    private static void AssignFirstValidScore(ResultDetail result, List<Score> validScores)
+    private static void AssignFirstValidScore(ResultDetail result, IReadOnlyList<Score> validScores)
     {
         if (validScores.Any())
         {
@@ -154,7 +148,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         result.AwayValue = string.Empty;
     }
 
-    private static bool IsZeroScore(List<Score> validScores)
+    private static bool IsZeroScore(IReadOnlyList<Score> validScores)
         => validScores.Count >= 1
         && validScores[0].HomeValue == "0"
         && validScores[0].AwayValue == "0";

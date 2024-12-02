@@ -1,4 +1,4 @@
-﻿using AutoPayout.Constants;
+using AutoPayout.Constants;
 using Match = AutoPayout.Models.Match;
 
 namespace AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -25,6 +25,7 @@ public interface ResultDetailService
 
     Task<double> MaxTimeScore(ResultDetail resultDetail);
 
+
     bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
 }
 
@@ -41,7 +42,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             SportType = match.SportType,
             ResourceIds = string.Join(',', resources)
         };
-
         var scores = (await repository.FetchAsync<Score>(criteria)).ToList();
 
         return scores;

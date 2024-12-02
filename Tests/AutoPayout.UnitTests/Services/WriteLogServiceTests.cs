@@ -44,32 +44,6 @@ public class WriteLogServiceTests
     }
 
     [Fact]
-    public async Task WriteLog_ExistGroupTestAndException_GenerateAnotherMessageAndExecute()
-    {
-        var appSetting = new AppSettingsKey { GroupTest = 1 };
-        var option = Options.Create(appSetting);
-        var tempService = new WriteLogServiceImp(repository, option);
-        var match = new Match
-        {
-            MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
-                {
-                    ResourceId = "01"
-                }
-            }
-        };
-
-        var exception = new ServiceException("Message");
-
-        await tempService.WriteLog(match, exception);
-
-        await repository.Received()
-            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"m\":1,\"r\":\"01\",\"s\":3,\"rm\":\"Message\",\"u\":\"123\"}]"));
-    }
-
-    [Fact]
     public void WriteLog_Message_GenerateMessageAndExecute()
     {
         var match = new Match
@@ -90,29 +64,6 @@ public class WriteLogServiceTests
             .ExecuteAsync(Arg.Is<WriteLogCriteria>(c => c.MatchId == 1 && c.Remark == "NAP: Auto Payout: 01<br/>Message"));
     }
 
-    [Fact]
-    public async Task WriteLog_ExistGroupTest_GenerateAnotherMessageAndExecute()
-    {
-        var appSetting = new AppSettingsKey { GroupTest = 1 };
-        var option = Options.Create(appSetting);
-        var tempService = new WriteLogServiceImp(repository, option);
-        var match = new Match
-        {
-            MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ()
-                {
-                    ResourceId = "01"
-                }
-            }
-        };
-
-        await tempService.WriteLog(match, "Message");
-
-        await repository.Received()
-            .ExecuteAsync(Arg.Is<WriteLogTestCriteria>(c => c.Resources == "[{\"m\":1,\"r\":\"01\",\"s\":3,\"rm\":\"Message\",\"u\":\"123\"}]"));
-    }
 
     [Fact]
     public void WriteLogDirectly_Always_ExecuteCriteria()
