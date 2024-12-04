@@ -15,7 +15,8 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
             || finalResult is null
-            || match.SportType == SportType.BaseBall && (int)matchDetail.SessionTime == 0;
+            || match.SportType == SportType.BaseBall && (int)matchDetail.SessionTime == 0
+            || match.SportType == SportType.Tennis && matchDetail.ParentID != 0;
 
         if (notCheckFinalResult)
         {
