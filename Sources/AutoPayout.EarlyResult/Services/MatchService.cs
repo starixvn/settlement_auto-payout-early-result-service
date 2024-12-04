@@ -47,7 +47,6 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
         var criteria = new GetResultCriteria
         {
             AutoPayoutGroup = appSettingsKey.Value.GroupTest > 0 ? appSettingsKey.Value.GroupTest : appSettingsKey.Value.AutoPayoutGroup,
-            ResourceType = appSettingsKey.Value.ResourceType
         };
 
         var (firstResultSet, secondResultSet) = await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
