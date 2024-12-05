@@ -34,10 +34,29 @@ public static class VerifyFinalResultHelper
 
     public static (int, int) GetMinMaxSetPlay(MatchDetail matchDetail, bool isGameSession = true)
     {
-        var maxSet = isGameSession ? matchDetail.GameSession : matchDetail.BestOfMap;
+        var maxSet = GetMaxSetPlay(matchDetail, isGameSession);
+
         var minSet = (maxSet + 1) / 2;
 
         return (minSet, maxSet);
+    }
+
+    private static int GetMaxSetPlay(MatchDetail match, bool isGameSession)
+    {
+        if (!isGameSession)
+        {
+            return match.BestOfMap;
+        }
+
+        return (match.GameSession, match.SportType) switch
+        {
+            (0, SportType.Badminton) => GamePlay.Five,
+            (0, SportType.TableTennis) => GamePlay.Seven,
+            (6, SportType.TableTennis) => GamePlay.Five,
+            (_, SportType.TableTennis) => match.GameSession,
+            _ => match.GameSession
+        };
+
     }
 
     public static bool IsValidFinalResult(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
