@@ -10,18 +10,17 @@ namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyTimeResultTests
 {
     private readonly ResultDetailService _resultDetailService;
-    private readonly IOptions<AppSettingsKey> _appSettingsKey;
     private readonly VerifyTimeResult _verifyTimeResult;
     private readonly Match _mockMatch;
 
     public VerifyTimeResultTests()
     {
         _resultDetailService = Substitute.For<ResultDetailService>();
-        _appSettingsKey = Substitute.For<IOptions<AppSettingsKey>>();
+        var appSettingsKey = Substitute.For<IOptions<AppSettingsKey>>();
 
-        _verifyTimeResult = new VerifyTimeResult(_resultDetailService, _appSettingsKey);
+        _verifyTimeResult = new VerifyTimeResult(_resultDetailService, appSettingsKey);
 
-        _appSettingsKey.Value.Returns(new AppSettingsKey { RetryProcessScore = 200 });
+        appSettingsKey.Value.Returns(new AppSettingsKey { RetryProcessScore = 200 });
 
         _mockMatch = new Match
         {

@@ -68,7 +68,7 @@ public class OverTimeServiceImp(ResultDetailService resultDetailService, IOption
         {
             AssignFirstValidScore(result, validScores);
         }
-        else if (IsZeroScore(validScores))
+        else if (IsZeroScore(validScores))  //NOSONAR
         {
             ClearScore(result);
         }

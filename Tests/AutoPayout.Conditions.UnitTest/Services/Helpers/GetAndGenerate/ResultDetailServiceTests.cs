@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;

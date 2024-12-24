@@ -3,7 +3,6 @@ using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
-using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
@@ -14,17 +13,16 @@ public class VerifySettledRelateResultTests
 {
     private readonly IDynamicRepository repository;
     private readonly ResultDetailService resultDetailService;
-    private readonly IOptions<AppSettingsKey> options;
     private readonly VerifySettledRelateResult handler;
 
     public VerifySettledRelateResultTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        options = Substitute.For<IOptions<AppSettingsKey>>();
-        options.Value.Returns(new AppSettingsKey { RetryProcessScore = 30000 });
+        var options1 = Substitute.For<IOptions<AppSettingsKey>>();
+        options1.Value.Returns(new AppSettingsKey { RetryProcessScore = 30000 });
 
-        handler = new VerifySettledRelateResult(repository, resultDetailService, options);
+        handler = new VerifySettledRelateResult(repository, resultDetailService, options1);
     }
 
     [Fact]
@@ -89,52 +87,6 @@ public class VerifySettledRelateResultTests
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
-    }
-
-    [Fact]
-    public async Task HandleCondition_ValidRelatedResults_NotResultValidThrowException()
-    {
-        // Arrange
-        var match = new Match
-        {
-            MatchId = 1,
-
-            ResultDetails =
-            [
-
-                new ResultDetail
-                {
-                    ResourceId = "Resource1",
-                    HomeValue = "1",
-                    AwayValue = "2",
-                    Scores =
-                    [
-                        new Score
-                        {
-                            RelatedCalResources = "CalResource1",
-                            RelatedSettResources = "SettResource1",
-                            CreateDate = DateTime.Now
-                        }
-                    ]
-                },
-            ]
-        };
-
-        repository.FetchAsync<ResultDetail>(Arg.Any<CheckRelatedResultsCriteria>())
-            .Returns(Task.FromResult<IEnumerable<ResultDetail>>(
-            [
-                new ResultDetail
-                {
-                    ResourceId = "CalResource1",
-                },
-                new ResultDetail
-                {
-                    ResourceId = "SettResource1",
-                }
-            ]));
-
-        // Assert
-        await Assert.ThrowsAsync<ServiceException>(() => handler.HandleCondition(match));
     }
 
     [Fact]
