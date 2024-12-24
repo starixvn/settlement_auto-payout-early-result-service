@@ -4,6 +4,7 @@ using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using ONEbook.UM.Services;
 
 namespace AutoPayout.EarlyResult.Service;
 
@@ -26,7 +27,8 @@ public class Worker(IAutoService autoService, IConfiguration configuration, IMai
     {
         try
         {
-            if (!maintenanceService.IsMaintenance)
+            var isMaintenance = await maintenanceService.IsUnderMaintenanceAsync();
+            if (!isMaintenance)
             {
                 await autoService.Handle();
                 HandleGarbageCollector();

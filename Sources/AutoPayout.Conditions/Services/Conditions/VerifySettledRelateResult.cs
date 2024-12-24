@@ -1,8 +1,7 @@
-﻿using System.Text;
-using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
-using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
+using System.Text;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 

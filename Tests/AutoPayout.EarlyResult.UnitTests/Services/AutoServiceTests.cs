@@ -15,7 +15,7 @@ public class AutoServiceTests
         // Arrange
         var matches = new List<Match>
         {
-            new() { MatchId = 123 }
+            new() { MatchId = 123, ResultDetails = new List<ResultDetail>()}
         };
 
         matchPoolService.GetNewMatches().Returns(matches);

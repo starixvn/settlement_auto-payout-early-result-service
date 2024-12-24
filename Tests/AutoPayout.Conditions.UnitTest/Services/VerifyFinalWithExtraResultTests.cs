@@ -14,7 +14,6 @@ public class VerifyFinalWithExtraResultTests
 {
     private readonly ResultDetailService mockResultDetailService;
     private readonly IDynamicRepository mockRepository;
-    private readonly IOptions<AppSettingsKey> mockOptions;
     private readonly ExtraResultService mockExtraResultService;
     private readonly VerifyFinalWithExtraResult verifyFinalWithExtraResult;
 
@@ -23,7 +22,7 @@ public class VerifyFinalWithExtraResultTests
         // Sử dụng NSubstitute để tạo mock
         mockResultDetailService = Substitute.For<ResultDetailService>();
         mockRepository = Substitute.For<IDynamicRepository>();
-        mockOptions = Substitute.For<IOptions<AppSettingsKey>>();
+        var mockOptions = Substitute.For<IOptions<AppSettingsKey>>();
         mockExtraResultService = Substitute.For<ExtraResultService>();
 
         var appSettings = new AppSettingsKey { RetryProcessScore = 1000 };
@@ -160,7 +159,7 @@ public class VerifyFinalWithExtraResultTests
                                .Returns(new List<ResultDetail>());
 
         mockResultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>())
-                       .Returns((new List<ResultDetail> { }, new List<ResourceIndex>()));
+                       .Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
 
         mockExtraResultService.GetScoreExtraInning(match, Arg.Any<int>(), Arg.Any<int>())
             .Returns(new ResultDetail { ResourceId = "EI", IsValid = false, NeedRetry = true });

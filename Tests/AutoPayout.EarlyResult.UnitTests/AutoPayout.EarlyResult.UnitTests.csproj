@@ -1,20 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Services\ExtraStepService\**" />
     <EmbeddedResource Remove="Services\ExtraStepService\**" />
     <None Remove="Services\ExtraStepService\**" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Fanex.Caching.Redis" Version="2.2.5" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
@@ -29,9 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Sources\AutoPayout.EarlyResult\AutoPayout.EarlyResult.csproj" />
   </ItemGroup>
-
 </Project>

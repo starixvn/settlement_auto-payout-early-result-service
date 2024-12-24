@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Models;
-using AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
@@ -68,7 +67,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -107,7 +106,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Empty(secondResultDetail.AwayValue);
         Assert.Equal(2, secondResultDetail.ExternalSourceInfo.Count());
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -145,7 +144,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -183,7 +182,7 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => !r.Any()), Arg.Any<string>());
     }
 
     [Fact]
@@ -236,7 +235,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("2", secondResultDetail.AwayValue);
         Assert.Single(secondResultDetail.ExternalSourceInfo);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 
     [Fact]
@@ -291,7 +290,7 @@ public class VerifyConfirmScoreTests
 
         Assert.IsType<ServiceException>(exception);
         Assert.False(((ServiceException)exception).MarkFail);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 2), errorMessage);
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => r.Count() == 2), errorMessage);
     }
 
     [Fact]
@@ -380,6 +379,6 @@ public class VerifyConfirmScoreTests
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
-        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IEnumerable<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Is<IList<ResultDetail>>(r => r.Count() == 1), Arg.Any<string>());
     }
 }
