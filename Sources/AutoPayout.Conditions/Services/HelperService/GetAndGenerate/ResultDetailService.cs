@@ -25,7 +25,6 @@ public interface ResultDetailService
 
     Task<double> MaxTimeScore(ResultDetail resultDetail);
 
-
     bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
 }
 
@@ -140,7 +139,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     public void WriteLogResult(int matchId, ResultDetail result, string message)
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = [result] };
 
         writeLogService.WriteLog(cloneMatch, message);
     }

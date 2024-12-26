@@ -9,9 +9,9 @@ public interface MatchPoolService
 
 public class MatchPoolServiceImp(MatchService matchService) : MatchPoolService
 {
-    public List<Match> PoolOfMatches { get; } = new(); //NOSONAR
+    public List<Match> PoolOfMatches { get; } = new();
 
-    private readonly object lockObject = new();  //NOSONAR
+    private readonly Lock lockObject = new();
 
     public void RemoveMatch(Match match)
     {

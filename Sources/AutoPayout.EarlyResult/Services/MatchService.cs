@@ -29,7 +29,7 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
             return matches;
         }
 
-        var (_, response) = await cache.TryGetAsync<string>(appSettingsKey.Value.CacheKey);
+        var (_, response) = await cache.TryGetAsync<string>(CacheKey.LeagueId);
         var leagueIds = (response ?? "").Split(",");
 
         return appSettingsKey.Value.EnvironmentName switch
