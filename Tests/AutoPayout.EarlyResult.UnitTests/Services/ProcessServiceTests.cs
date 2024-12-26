@@ -26,6 +26,8 @@ public class ProcessServiceTests
 
     private readonly ProcessService service;
 
+    private readonly MatchService matchService;
+
     public ProcessServiceTests()
     {
         writeLogService = Substitute.For<WriteLogService>();
@@ -34,6 +36,7 @@ public class ProcessServiceTests
         matchPoolService = Substitute.For<MatchPoolService>();
         updateResultStatusService = Substitute.For<UpdateResultStatusService>();
         condition = Substitute.For<ICondition>();
+        matchService = Substitute.For<MatchService>();
         var settings = new AppSettingsKey()
         {
             RetryCount = 2,
@@ -42,7 +45,7 @@ public class ProcessServiceTests
 
         var appSettingsOptions = Options.Create(settings);
         service = new ProcessServiceImp(appSettingsOptions, writeLogService, createConditionChainService,
-            settlementService, matchPoolService, updateResultStatusService);
+            settlementService, matchPoolService, matchService, updateResultStatusService);
     }
 
     [Fact]
@@ -60,6 +63,7 @@ public class ProcessServiceTests
                 }
             }
         };
+        matchService.GetMatchDetail(Arg.Any<int>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await service.Process(match);
 

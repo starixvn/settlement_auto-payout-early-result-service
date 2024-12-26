@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
+public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : ICondition
 {
     public async Task HandleCondition(Match match)
     {
@@ -14,7 +14,7 @@ public class VerifyFinalByBestOfMap(IDynamicRepository repository, ResultDetailS
         {
             return;
         }
-        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+        var matchDetail = match.MatchDetail;
 
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 

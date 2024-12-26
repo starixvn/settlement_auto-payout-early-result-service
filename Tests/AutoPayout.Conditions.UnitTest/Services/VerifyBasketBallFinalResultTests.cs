@@ -1,18 +1,14 @@
-﻿using AutoPayout.Conditions.Criteria;
-using AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
 using AutoPayout.Models;
-using Fanex.Data.Repository;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyBasketBallFinalResultTests
 {
     private readonly ResultDetailService resultDetailService;
-
-    private readonly IDynamicRepository repository;
 
     private readonly BasketballHelperService basketballHelper;
 
@@ -25,9 +21,8 @@ public class VerifyBasketBallFinalResultTests
     public VerifyBasketBallFinalResultTests()
     {
         resultDetailService = Substitute.For<ResultDetailService>();
-        repository = Substitute.For<IDynamicRepository>();
         basketballHelper = Substitute.For<BasketballHelperService>();
-        service = new VerifyBasketBallResult(resultDetailService, repository, basketballHelper);
+        service = new VerifyBasketBallResult(resultDetailService, basketballHelper);
     }
 
     [Fact]
@@ -35,10 +30,10 @@ public class VerifyBasketBallFinalResultTests
     {
         var match = new Match()
         {
-            ResultDetails = []
+            ResultDetails = [],
+            MatchDetail = new MatchDetail() { GameSession = 2 }
         };
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 2 });
+
 
         resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>())
@@ -60,10 +55,9 @@ public class VerifyBasketBallFinalResultTests
         var match = new Match()
         {
             MatchId = 1,
-            ResultDetails = [halfTime]
+            ResultDetails = [halfTime],
+            MatchDetail = new MatchDetail() { GameSession = 2 }
         };
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 2 });
 
         resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>())
@@ -85,10 +79,12 @@ public class VerifyBasketBallFinalResultTests
         var match = new Match()
         {
             MatchId = 1,
-            ResultDetails = [halfTime, fullTime]
+            ResultDetails = [halfTime, fullTime],
+            MatchDetail = new MatchDetail()
+            {
+                GameSession = 2
+            }
         };
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 2 });
 
         resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<IEnumerable<ResultDetail>>())

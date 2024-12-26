@@ -1,4 +1,5 @@
 ﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.Conditions.Criteria;
 using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
@@ -10,6 +11,7 @@ namespace AutoPayout.EarlyResult.Services;
 public interface MatchService
 {
     Task<List<Match>> GetMatches();
+    Task<MatchDetail> GetMatchDetail(int matchId);
 }
 
 public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cache, IDynamicRepository repository)
@@ -69,5 +71,12 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
     private static IEnumerable<ResultDetail> IgnoreResult(IEnumerable<ResultDetail> resultDetails)
     {
         return resultDetails.Where(r => !IgnoreResultByCondition.Conditions.TryGetValue(r.SportType, out var condition) || condition(r));
+    }
+
+    public async Task<MatchDetail> GetMatchDetail(int matchId)
+    {
+        var matchDetails = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = matchId });
+
+        return matchDetails;
     }
 }

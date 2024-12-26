@@ -28,11 +28,9 @@ public class VerifyFinalWithExtraResult : ICondition
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
-        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
-
         var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
             || finalResult is null
-            || match.SportType == SportType.BaseBall && (int)matchDetail.SessionTime == 1;
+            || match.SportType == SportType.BaseBall && (int)match.MatchDetail.SessionTime == 1;
 
         if (notCheckFinalResult)
         {
@@ -41,7 +39,7 @@ public class VerifyFinalWithExtraResult : ICondition
 
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
 
-        var errorMessage = await VerifyFinalResult(match, matchDetail, finalResult, settledResults);
+        var errorMessage = await VerifyFinalResult(match, finalResult, settledResults);
 
         if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -49,11 +47,11 @@ public class VerifyFinalWithExtraResult : ICondition
         }
     }
 
-    public async Task<string> VerifyFinalResult(Match match, MatchDetail matchDetail, ResultDetail finalResult, List<ResultDetail> settledResults)
+    public async Task<string> VerifyFinalResult(Match match, ResultDetail finalResult, List<ResultDetail> settledResults)
     {
-        var (setResults, resources) = await resultDetailService.GetResultsChecking(match, matchDetail.GameSession, settledResults);
+        var (setResults, resources) = await resultDetailService.GetResultsChecking(match, match.MatchDetail.GameSession, settledResults);
 
-        var validResources = resources.Where(x => !x.ResourceId.Equals(ResourceIds.ExtraInning) && x.IntervalNo <= matchDetail.GameSession).ToList();
+        var validResources = resources.Where(x => !x.ResourceId.Equals(ResourceIds.ExtraInning) && x.IntervalNo <= match.MatchDetail.GameSession).ToList();
 
         if (validResources.Count != setResults.Count)
         {

@@ -21,7 +21,7 @@ public class VerifyFinalByBestOfMatchTests
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        condition = new VerifyFinalByBestOfMap(repository, resultDetailService);
+        condition = new VerifyFinalByBestOfMap(resultDetailService);
     }
 
     [Fact]
@@ -76,7 +76,8 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 3 }
         };
 
         var resultsCalculated = new List<ResultDetail>()
@@ -112,7 +113,6 @@ public class VerifyFinalByBestOfMatchTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -136,7 +136,8 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 3 }
         };
 
         var resultsCalculated = new List<ResultDetail>()
@@ -174,7 +175,6 @@ public class VerifyFinalByBestOfMatchTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -198,7 +198,8 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 3 }
         };
 
         var resultsCalculated = new List<ResultDetail>()
@@ -228,7 +229,6 @@ public class VerifyFinalByBestOfMatchTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -252,13 +252,13 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "1"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 3 }
         };
 
         var errorMessage = "Failed Auto Payout: FT(0-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await condition.HandleCondition(match);
 
@@ -282,7 +282,8 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "1",
                     AwayValue = "1"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 1 }
         };
 
         var results = new List<ResultDetail>()
@@ -299,7 +300,6 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed Auto Payout: FT(1-1) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 1 });
 
         await condition.HandleCondition(match);
 
@@ -323,7 +323,8 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 2 }
         };
 
         var results = new List<ResultDetail>()
@@ -347,7 +348,6 @@ public class VerifyFinalByBestOfMatchTests
         var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });
 
         await condition.HandleCondition(match);
 
@@ -371,13 +371,13 @@ public class VerifyFinalByBestOfMatchTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            }
+            },
+            MatchDetail = new MatchDetail() { BestOfMap = 2 }
         };
 
         var errorMessage = "Failed Auto Payout: FT(0-2) is inconsistent with Map information.";
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { BestOfMap = 2 });
 
         await condition.HandleCondition(match);
 

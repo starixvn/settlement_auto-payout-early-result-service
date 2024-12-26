@@ -11,7 +11,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
-        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+        var matchDetail = match.MatchDetail;
 
         var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
             || finalResult is null

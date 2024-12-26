@@ -6,15 +6,12 @@ namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyBasketBallResult(
     ResultDetailService resultDetailService,
-    IDynamicRepository repository,
     BasketballHelperService basketballHelper) : ICondition
 {
     private const int MaxQuarter = 4;
 
     public async Task HandleCondition(Match match)
     {
-        match.MatchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
-
         await HandleQuarter(match);
 
         await HandleFinal(match);

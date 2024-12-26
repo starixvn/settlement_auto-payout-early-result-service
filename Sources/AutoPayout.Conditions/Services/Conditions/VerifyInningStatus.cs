@@ -17,8 +17,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
     {
         if (match.ResourceType == ResourceType.MainResource && match.ResultDetails.Exists(r => r.ResourceId == ResourceIds.FullTime))
         {
-            var getMatchInfoCriteria = new GetMatchDetailCriteria { MatchId = match.MatchId };
-            var matchDetail = await repository.GetAsync<MatchDetail>(getMatchInfoCriteria);
+            var matchDetail = match.MatchDetail;
             await ValidateInning(match, matchDetail.GameSession);
         }
     }

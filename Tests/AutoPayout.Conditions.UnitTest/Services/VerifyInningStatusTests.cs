@@ -61,11 +61,9 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" }, new() { ResourceId = "A1" } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" }, new() { ResourceId = "A1" } },
+            MatchDetail = new MatchDetail() { GameSession = 0 }
         };
-
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 0 });
 
         await condition.HandleCondition(match);
 
@@ -78,7 +76,8 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = ResourceIds.FullTime }, new() { ResourceId = "H1" } },
+            MatchDetail = new MatchDetail() { GameSession = 0 }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -89,9 +88,6 @@ public class VerifyInningStatusTests
                 ResultStatusId = ResultStatusId.ManualCompleted
             }
         };
-
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 0 });
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
@@ -107,7 +103,8 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } },
+            MatchDetail = new MatchDetail() { GameSession = 0 }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -117,9 +114,6 @@ public class VerifyInningStatusTests
                 ResourceId = "H3"
             }
         };
-
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 0 });
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
@@ -138,7 +132,8 @@ public class VerifyInningStatusTests
         var match = new Match()
         {
             ResourceType = ResourceType.MainResource,
-            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } }
+            ResultDetails = new List<ResultDetail> { new() { ResourceId = "H1" }, new() { ResourceId = ResourceIds.FullTime } },
+            MatchDetail = new MatchDetail() { GameSession = 0 }
         };
 
         var resultDetails = new List<ResultDetail>
@@ -149,9 +144,6 @@ public class VerifyInningStatusTests
                 ResultStatusId = ResultStatusId.Running
             }
         };
-
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-            .Returns(new MatchDetail() { GameSession = 0 });
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
