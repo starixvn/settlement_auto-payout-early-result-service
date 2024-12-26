@@ -17,7 +17,6 @@ using Fanex.Settlement.ScaleOut.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ONEbook.UM.Services;
 
 namespace AutoPayout.EarlyResult.Service;
 
@@ -70,7 +69,6 @@ public static class WorkerInjection
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
         service.AddSingleton<IDynamicRepository, DynamicRepository>();
-        service.AddSingleton<IMaintenanceService, MaintenanceService>();
     }
 
     public static void AddAutoMapper(this IServiceCollection service)
