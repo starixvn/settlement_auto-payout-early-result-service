@@ -19,4 +19,6 @@ public class MatchDetail
     public int LeagueGroupId { get; set; }
 
     public float SessionTime { get; set; }
+
+    public short ChildMatchType { get; set; }
 }

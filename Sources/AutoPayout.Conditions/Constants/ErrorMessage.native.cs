@@ -46,4 +46,6 @@ public static class ErrorMessage
 
     public const string InvalidInput = "Failed Auto Payout: Results({0}) due to invalid value inputted";
 
+    public const string InvalidScoreGameWinner = "Failed Auto Payout: should not have FT＝'0:0' on Xth Set Game Winner League";
+
 }

@@ -21,7 +21,7 @@ public class VerifyFinalResultTests
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        condition = new VerifyFinalResult(repository, resultDetailService);
+        condition = new VerifyFinalResult(resultDetailService);
     }
 
     [Fact]
