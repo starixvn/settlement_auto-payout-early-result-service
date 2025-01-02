@@ -49,8 +49,7 @@ public static class WorkerInjection
         service.AddSingleton<VerifyTimeResult>();
         service.AddSingleton<VerifyBeforePushProfile>();
         service.AddSingleton<VerifyInningStatus>();
-        service.AddSingleton<VerifyFinalByGameSession>();
-        service.AddSingleton<VerifyFinalByGameSession>();
+        service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<VerifyFinalWithExtraResult>();
         service.AddSingleton<IgnoreVerify>();

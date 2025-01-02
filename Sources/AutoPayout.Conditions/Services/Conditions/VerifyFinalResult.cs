@@ -95,20 +95,18 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
 
     private async Task<bool> IsInvalidFinalResultForGameWinner(Match match, ResultDetail finalResult)
     {
-        if (match.MatchDetail.ParentID != 0 && match.SportType == SportType.Tennis)
+        if (!IsChildMatch(match))
         {
-            int[] gameWinnerTypes = [12, 14, 15, 16, 17];
-            if (gameWinnerTypes.Contains(match.MatchDetail.ChildMatchType) &&
-                finalResult.HomeValue == "0" && finalResult.AwayValue == "0")
-            {
-                await HandleInvalidResult(match, finalResult, ErrorMessage.InvalidScoreGameWinner);
-                return true;
-            }
+            return false;
+        }
 
+        if (IsGameWinnerType(match) && IsZeroScore(finalResult))
+        {
+            await HandleInvalidResult(match, finalResult, ErrorMessage.InvalidScoreGameWinner);
             return true;
         }
 
-        return false;
+        return true;
     }
 
     private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
@@ -117,4 +115,16 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
+
+
+    private bool IsChildMatch(Match match) => match.MatchDetail.ParentID != 0;
+
+    private bool IsGameWinnerType(Match match)
+    {
+        int[] gameWinnerTypes = { 12, 14, 15, 16, 17 };
+        return match.SportType == SportType.Tennis
+            && gameWinnerTypes.Contains(match.MatchDetail.ChildMatchType);
+    }
+
+    private bool IsZeroScore(ResultDetail finalResult) => finalResult.HomeValue == "0" && finalResult.AwayValue == "0";
 }

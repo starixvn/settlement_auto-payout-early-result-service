@@ -21,4 +21,6 @@ public class MatchDetail
     public float SessionTime { get; set; }
 
     public short ChildMatchType { get; set; }
+
+    public short SportType { get; set; }
 }
