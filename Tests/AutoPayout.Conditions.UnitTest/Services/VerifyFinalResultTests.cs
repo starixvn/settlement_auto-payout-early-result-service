@@ -21,7 +21,7 @@ public class VerifyFinalResultTests
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        condition = new VerifyFinalResult(repository, resultDetailService);
+        condition = new VerifyFinalResult(resultDetailService);
     }
 
     [Fact]
@@ -76,7 +76,8 @@ public class VerifyFinalResultTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            ]
+            ],
+            MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
         var results = new List<ResultDetail>()
@@ -100,7 +101,6 @@ public class VerifyFinalResultTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -124,7 +124,8 @@ public class VerifyFinalResultTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            ]
+            ],
+            MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
         var results = new List<ResultDetail>()
@@ -147,7 +148,6 @@ public class VerifyFinalResultTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -171,7 +171,8 @@ public class VerifyFinalResultTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            ]
+            ],
+            MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
         var results = new List<ResultDetail>()
@@ -188,7 +189,6 @@ public class VerifyFinalResultTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -212,7 +212,8 @@ public class VerifyFinalResultTests
                     HomeValue = "0",
                     AwayValue = "1"
                 }
-            ]
+            ],
+            MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
         var results = new List<ResultDetail>()
@@ -230,7 +231,6 @@ public class VerifyFinalResultTests
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 
@@ -254,12 +254,12 @@ public class VerifyFinalResultTests
                     HomeValue = "0",
                     AwayValue = "2"
                 }
-            ]
+            ],
+            MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
-        repository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>()).Returns(new MatchDetail() { GameSession = 3 });
 
         await condition.HandleCondition(match);
 

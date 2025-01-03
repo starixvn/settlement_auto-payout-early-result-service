@@ -5,19 +5,19 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalResult(IDynamicRepository repository, ResultDetailService resultDetailService) : ICondition
+public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondition
 {
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
-        var matchDetail = await repository.GetAsync<MatchDetail>(new GetMatchDetailCriteria { MatchId = match.MatchId });
+        if (ShouldSkipFinalResultCheck(match, finalResult))
+        {
+            return;
 
-        var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
-            || finalResult is null
-            || match.SportType == SportType.BaseBall && (int)matchDetail.SessionTime == 0;
+        }
 
-        if (notCheckFinalResult)
+        if (await IsInvalidFinalResultForGameWinner(match, finalResult))
         {
             return;
         }
@@ -27,7 +27,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
 
         var (setsResults, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxSetPlayed, settledResults);
 
-        var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail);
+        var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(match.MatchDetail);
 
         var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResultSetWin(setsResults, finalResult, minSet, maxSet);
 
@@ -41,7 +41,7 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         }
         else
         {
-            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, matchDetail, maxSetPlayed);
+            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, match.MatchDetail, maxSetPlayed);
 
         }
 
@@ -86,4 +86,35 @@ public class VerifyFinalResult(IDynamicRepository repository, ResultDetailServic
         return string.Join(",", resourceToRefund);
     }
 
+    private bool ShouldSkipFinalResultCheck(Match match, ResultDetail finalResult)
+    {
+        return match.ResourceType != ResourceType.MainResource
+               || finalResult is null
+               || (match.SportType == SportType.BaseBall && (int)match.MatchDetail.SessionTime == 0);
+    }
+
+    private async Task<bool> IsInvalidFinalResultForGameWinner(Match match, ResultDetail finalResult)
+    {
+        if (match.MatchDetail.ParentID != 0 && match.SportType == SportType.Tennis)
+        {
+            int[] gameWinnerTypes = [12, 14, 15, 16, 17];
+            if (gameWinnerTypes.Contains(match.MatchDetail.ChildMatchType) &&
+                finalResult.HomeValue == "0" && finalResult.AwayValue == "0")
+            {
+                await HandleInvalidResult(match, finalResult, ErrorMessage.InvalidScoreGameWinner);
+                return true;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
+    {
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
+        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+    }
 }

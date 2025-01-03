@@ -1,4 +1,5 @@
-﻿using AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Conditions.Constants;
+using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         CreateConditionChainService createConditionChainService,
         SettlementService settlementService,
         MatchPoolService matchPoolService,
+        MatchService matchService,
         UpdateResultStatusService updateResultStatusService)
     : ProcessService
 {
@@ -23,6 +25,12 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         try
         {
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
+
+            var matchDetail = await matchService.GetMatchDetail(match.MatchId);
+            match.MatchDetail = matchDetail;
+
+            match.ResultDetails = Filter(match);
+
             await PushAndWriteLog(match, conditions);
         }
         catch (ServiceException exception)
@@ -73,5 +81,15 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             await condition.HandleCondition(match);
         }
+    }
+
+    private List<ResultDetail> Filter(Match match)
+    {
+        if (match.SportType == SportType.Tennis && match.MatchDetail.ParentID != 0)
+        {
+            return match.ResultDetails.Where(x => x.ResourceId == ResourceIds.FullTime).ToList();
+        }
+
+        return match.ResultDetails;
     }
 }

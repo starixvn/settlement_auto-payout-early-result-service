@@ -1,5 +1,4 @@
 ﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Conditions.Criteria;
 using AutoPayout.Conditions.Models;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -63,17 +62,17 @@ public class VerifyFinalWithExtraResultTests
     {
         // Arrange
         var finalResult = new ResultDetail { ResourceId = ResourceIds.FullTime };
+        var matchDetail = new MatchDetail { SessionTime = 2 };
+
         var match = new Match
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
             SportType = SportType.BaseBall,
-            ResultDetails = new List<ResultDetail> { finalResult }
+            ResultDetails = new List<ResultDetail> { finalResult },
+            MatchDetail = matchDetail
         };
 
-        var matchDetail = new MatchDetail { SessionTime = 2 };
-        mockRepository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-                      .Returns(matchDetail);
 
         mockResultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>())
                                .Returns(new List<ResultDetail>());
@@ -103,17 +102,16 @@ public class VerifyFinalWithExtraResultTests
     {
         // Arrange
         var finalResult = new ResultDetail { ResourceId = ResourceIds.FullTime };
+        var matchDetail = new MatchDetail { SessionTime = 2 };
+
         var match = new Match
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
             SportType = SportType.BaseBall,
-            ResultDetails = new List<ResultDetail> { finalResult }
+            ResultDetails = new List<ResultDetail> { finalResult },
+            MatchDetail = matchDetail
         };
-
-        var matchDetail = new MatchDetail { SessionTime = 2 };
-        mockRepository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-                      .Returns(matchDetail);
 
         mockResultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>())
                                .Returns(new List<ResultDetail>());
@@ -143,17 +141,17 @@ public class VerifyFinalWithExtraResultTests
     {
         // Arrange
         var finalResult = new ResultDetail { ResourceId = ResourceIds.FullTime };
+        var matchDetail = new MatchDetail { SessionTime = 2 };
+
         var match = new Match
         {
             MatchId = 1,
             ResourceType = ResourceType.MainResource,
             SportType = SportType.BaseBall,
-            ResultDetails = new List<ResultDetail> { finalResult }
+            ResultDetails = new List<ResultDetail> { finalResult },
+            MatchDetail = matchDetail
         };
 
-        var matchDetail = new MatchDetail { SessionTime = 2 };
-        mockRepository.GetAsync<MatchDetail>(Arg.Any<GetMatchDetailCriteria>())
-                      .Returns(matchDetail);
 
         mockResultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>())
                                .Returns(new List<ResultDetail>());

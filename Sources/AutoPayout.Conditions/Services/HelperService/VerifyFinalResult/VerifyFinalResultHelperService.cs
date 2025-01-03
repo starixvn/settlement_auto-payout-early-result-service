@@ -55,7 +55,7 @@ public static class VerifyFinalResultHelper
 
             if (homeWinCount == numberOfSetWin || awayWinCount == numberOfSetWin)
             {
-                break; // NOSONAR
+                break;
             }
         }
 
@@ -68,7 +68,6 @@ public static class VerifyFinalResultHelper
                && (finalHomeScore == numberOfSetWin || finalAwayScore == numberOfSetWin)
                && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
-
 
     public static bool IsValidFinalResultSetWin(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
     {

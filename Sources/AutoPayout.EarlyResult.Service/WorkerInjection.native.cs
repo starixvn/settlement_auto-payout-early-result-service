@@ -10,7 +10,6 @@ using AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
 using AutoPayout.EarlyResult.Services.ExtraStepService.BeforeSettle;
 using AutoPayout.Services;
 using Fanex.Caching;
-using Fanex.Caching.Redis;
 using Fanex.Data.Repository;
 using Fanex.Settlement.Converter.Services;
 using Fanex.Settlement.ScaleOut;
@@ -18,7 +17,6 @@ using Fanex.Settlement.ScaleOut.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ONEbook.UM.Services;
 
 namespace AutoPayout.EarlyResult.Service;
 
@@ -26,7 +24,7 @@ public static class WorkerInjection
 {
     public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
     {
-        ConfigureAutoMapper(service);
+        service.AddSingleton<ICacheService, CacheService>();
         service.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
         service.AddTransient<GeneralService, GeneralServiceImp>();
 
@@ -71,18 +69,9 @@ public static class WorkerInjection
 
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
         service.AddSingleton<IDynamicRepository, DynamicRepository>();
-        service.AddSingleton<IMaintenanceService, MaintenanceService>();
-        service.AddMemoryCache();
-        ConfigureRedis(service, configuration);
     }
 
-    private static void ConfigureRedis(IServiceCollection service, IConfiguration configuration)
-    {
-        service.AddSingleton<ICacheService, CacheService>();
-        service.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
-    }
-
-    private static void ConfigureAutoMapper(IServiceCollection service)
+    public static void AddAutoMapper(this IServiceCollection service)
     {
         var mapperConfig = new MapperConfiguration(mc =>
         {

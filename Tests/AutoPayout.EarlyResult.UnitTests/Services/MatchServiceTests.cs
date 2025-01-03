@@ -31,7 +31,7 @@ public class MatchServiceTests
             EnvironmentName = "PRO",
             SiteDbServer = ["abc"],
             RetryCount = 1,
-            CacheKey = "Settlement-AutoPayoutOtherSport-LeagueId"
+            CacheKey = CacheKey.LeagueId
         };
 
         var appSettingsOptions = Options.Create(settings);
@@ -58,7 +58,7 @@ public class MatchServiceTests
         };
         repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
-        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "111123,456", cachePolicy);
+        await cache.SetAsync(CacheKey.LeagueId, "111123,456", cachePolicy);
 
         var list = await matchService.GetMatches();
 
@@ -84,7 +84,7 @@ public class MatchServiceTests
         };
         repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
-        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "", cachePolicy);
+        await cache.SetAsync(CacheKey.LeagueId, "", cachePolicy);
 
         var list = await matchService.GetMatches();
 
@@ -124,7 +124,7 @@ public class MatchServiceTests
         };
         repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
-        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "456", cachePolicy);
+        await cache.SetAsync(CacheKey.LeagueId, "456", cachePolicy);
 
         var list = await matchService.GetMatches();
         const int expectedMatchId = 2;
@@ -163,7 +163,7 @@ public class MatchServiceTests
         };
         repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
-        await cache.SetAsync("Settlement-AutoPayoutOtherSport-LeagueId", "456", cachePolicy);
+        await cache.SetAsync(CacheKey.LeagueId, "456", cachePolicy);
 
         var list = await matchService.GetMatches();
         const int expectedMatchId = 1;
