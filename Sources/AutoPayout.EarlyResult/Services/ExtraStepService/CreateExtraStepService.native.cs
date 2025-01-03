@@ -26,13 +26,13 @@ public class CreateExtraStepServiceImp(
     {
         return match.SportType switch
         {
-            SportType.ESports => eSportExtraStep,
-            SportType.BaseBall => eSportExtraStep,
-            SportType.VolleyBall => eSportExtraStep,
+            SportType.ESports or SportType.BaseBall or SportType.VolleyBall or SportType.TableTennis or SportType.Badminton => eSportExtraStep,
+            SportType.Tennis when match.MatchDetail.ParentID == 0 => eSportExtraStep,
             SportType.Tennis => tennisExtraStep,
             SportType.BasketBall => basketBallCashOut,
             _ => extraStepService
         };
     }
+
 }
 
