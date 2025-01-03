@@ -41,7 +41,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
         }
         else
         {
-            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, match.MatchDetail, maxSetPlayed);
+            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, maxSet, maxSetPlayed);
 
         }
 
@@ -68,13 +68,13 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
     private static string GetResourceToRefund(
         IEnumerable<ResultDetail> resultSettled,
         IReadOnlyList<ResourceIndex> resourceIndexes,
-        MatchDetail matchDetail,
+        int maxSet,
         int maxGamePlayed)
     {
         var resourceToRefund = new List<string>();
         var resourceSettled = resultSettled.Select(x => x.ResourceId).ToList();
 
-        for (var i = maxGamePlayed + 1; i <= matchDetail.GameSession; i++)
+        for (var i = maxGamePlayed + 1; i <= maxSet; i++)
         {
             var resource = resourceIndexes.FirstOrDefault(r => r.IntervalNo == i);
             if (resource is not null && !resourceSettled.Contains(resource.ResourceId))
