@@ -8,6 +8,8 @@ public interface CreateExtraStepService
     IExtraStepService Create(Match match);
 
     IExtraStepService CreateStepAfterSettle(Match match);
+
+    IEnumerable<IExtraStepService> CreateStepsServiceAfterSettle(Match match);
 }
 
 public class CreateExtraStepServiceImp(
@@ -15,7 +17,7 @@ public class CreateExtraStepServiceImp(
     BasketBallCashOut basketBallCashOut,
     BasketballExtraStep basketballExtraStep,
     TennisInsResourceResult tennisExtraStep,
-    ESportsAddResourceRefund eSportExtraStep) : CreateExtraStepService
+    AddResourceRefund eSportExtraStep) : CreateExtraStepService
 {
     public IExtraStepService Create(Match match)
     {
@@ -34,5 +36,15 @@ public class CreateExtraStepServiceImp(
         };
     }
 
+    public IEnumerable<IExtraStepService> CreateStepsServiceAfterSettle(Match match)
+    {
+        return match.SportType switch
+        {
+            SportType.ESports or SportType.BaseBall or SportType.VolleyBall or SportType.TableTennis or SportType.Badminton => [eSportExtraStep],
+            SportType.Tennis when match.MatchDetail.ParentID == 0 => [eSportExtraStep, tennisExtraStep],
+            SportType.BasketBall => [basketBallCashOut],
+            _ => [extraStepService]
+        };
+    }
 }
 

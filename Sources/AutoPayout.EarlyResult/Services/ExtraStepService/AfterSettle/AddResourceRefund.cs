@@ -2,7 +2,7 @@
 using Fanex.Data.Repository;
 
 namespace AutoPayout.EarlyResult.Services.ExtraStepService.AfterSettle;
-public class ESportsAddResourceRefund(IDynamicRepository repository) : IExtraStepService
+public class AddResourceRefund(IDynamicRepository repository) : IExtraStepService
 {
     public async Task Process(Match match, SettleCriteria settleCriteria)
     {

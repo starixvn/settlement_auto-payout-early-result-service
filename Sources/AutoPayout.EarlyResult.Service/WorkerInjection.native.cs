@@ -61,7 +61,7 @@ public static class WorkerInjection
 
         service.AddSingleton<BasketBallCashOut>();
         service.AddSingleton<BasketballExtraStep>();
-        service.AddSingleton<ESportsAddResourceRefund>();
+        service.AddSingleton<AddResourceRefund>();
         service.AddSingleton<TennisInsResourceResult>();
         service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
