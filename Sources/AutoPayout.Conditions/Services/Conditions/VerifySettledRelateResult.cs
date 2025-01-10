@@ -22,7 +22,7 @@ public class VerifySettledRelateResult : ICondition
     {
         await CheckRelatedResults(match);
 
-        await HandleExpiredResults(match);
+        //await HandleExpiredResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
@@ -43,7 +43,7 @@ public class VerifySettledRelateResult : ICondition
             var isValid = ValidateResultDetail(match, item, relatedResults);
             item.IsValid = isValid;
 
-            SetExpiredResult(item);
+            //SetExpiredResult(item);
         }
     }
 
