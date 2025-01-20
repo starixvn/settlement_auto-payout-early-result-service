@@ -65,8 +65,10 @@ public class ResultDetail
     [XmlIgnore]
     public int MainRetryTime { get; set; }
 
-    [XmlIgnore]
-    public List<Score> Scores { get; set; } = [];
+    public string RelatedCalResources { get; set; }
+    public List<string> RelatedCalResourceIds => string.IsNullOrEmpty(RelatedCalResources) ? [] : [.. RelatedCalResources.Split(",")];
+    public string RelatedSettResources { get; set; }
+    public List<string> RelatedSettResourcesIds => string.IsNullOrEmpty(RelatedSettResources) ? [] : [.. RelatedSettResources.Split(",")];
 
     public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";
 }
