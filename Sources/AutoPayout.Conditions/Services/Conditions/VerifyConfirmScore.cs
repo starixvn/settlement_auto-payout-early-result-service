@@ -43,7 +43,6 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
             {
                 resultDetail.HomeValue = group.First().HomeValue;
                 resultDetail.AwayValue = group.First().AwayValue;
-                resultDetail.Scores = group.ToList();
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }

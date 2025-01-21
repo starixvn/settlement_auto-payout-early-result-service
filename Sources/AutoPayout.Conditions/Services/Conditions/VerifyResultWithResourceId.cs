@@ -61,7 +61,7 @@ public class VerifyResultWithResourceId : ICondition
     }
 
     private bool HasSpecialResources(ResultDetail item)
-        => item.Scores.Count != 0 && (item.ResourceId.StartsWith(BetTypes.SetXWinner) || item.ResourceId.StartsWith(BetTypes.SetXRaceToPoints));
+        => (item.ResourceId.StartsWith(BetTypes.SetXWinner) || item.ResourceId.StartsWith(BetTypes.SetXRaceToPoints));
 
     private static bool VerifyScoreRaceToPoint(ResultDetail result)
     {

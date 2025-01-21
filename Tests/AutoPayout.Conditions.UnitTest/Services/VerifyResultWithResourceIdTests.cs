@@ -28,7 +28,7 @@ public class VerifyResultWithResourceIdTests
         {
             ResultDetails = new List<ResultDetail>
             {
-                new ResultDetail { ResourceId = "0102", Scores = [new Score { RelatedCalResources = "0101"}] }
+                new ResultDetail { ResourceId = "0102",  }
             }
         };
 
@@ -53,7 +53,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = new List<Score> { new Score() }
                 }
             }
         };
@@ -78,7 +77,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "N",
-                    Scores = new List<Score> { new Score() }
                 }
             }
         };
@@ -104,7 +102,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "5",
-                    Scores = new List<Score> { new Score() },
                     IsValid = false
                 },
                 new ResultDetail
@@ -112,7 +109,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "0101",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = new List<Score> { new Score() },
                     IsValid = true
                 }
             }
@@ -140,7 +136,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "21",
                     AwayValue = "5",
-                    Scores = new List<Score> { new Score() },
                     IsValid = false
                 },
                 new ResultDetail
@@ -148,7 +143,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "0101",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = new List<Score> { new Score() },
                     IsValid = true
                 }
             }
@@ -176,7 +170,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39150115",
                     HomeValue = "8",
                     AwayValue = "7",
-                    Scores = new List<Score> { new Score() }
                 }
             }
         };
@@ -202,7 +195,7 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39150115",
                     HomeValue = "N",
                     AwayValue = "N",
-                    Scores = new List<Score> { new Score() }
+
                 }
             }
         };
