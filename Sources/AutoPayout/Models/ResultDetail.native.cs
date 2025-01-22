@@ -1,5 +1,5 @@
-﻿using System.Xml.Serialization;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
+using System.Xml.Serialization;
 
 namespace AutoPayout.Models;
 
@@ -65,9 +65,16 @@ public class ResultDetail
     [XmlIgnore]
     public int MainRetryTime { get; set; }
 
+    [XmlIgnore]
     public string RelatedCalResources { get; set; }
+
+    [XmlIgnore]
     public List<string> RelatedCalResourceIds => string.IsNullOrEmpty(RelatedCalResources) ? [] : [.. RelatedCalResources.Split(",")];
+
+    [XmlIgnore]
     public string RelatedSettResources { get; set; }
+
+    [XmlIgnore]
     public List<string> RelatedSettResourcesIds => string.IsNullOrEmpty(RelatedSettResources) ? [] : [.. RelatedSettResources.Split(",")];
 
     public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";
