@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Exceptions;
+
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifySettledRelateResult : ICondition
 {
@@ -15,6 +17,10 @@ public class VerifySettledRelateResult : ICondition
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
+        if (!match.ResultDetails.Any())
+        {
+            throw new ServiceException { MarkFail = false };
+        }
     }
 
     private async Task CheckRelatedResults(Match match)
