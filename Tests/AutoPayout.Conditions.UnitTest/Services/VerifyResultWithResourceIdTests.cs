@@ -27,7 +27,7 @@ public class VerifyResultWithResourceIdTests
         var match = new Match
         {
             ResultDetails =
-                [new ResultDetail { ResourceId = "0102", Scores = [new Score { RelatedCalResources = "0101" }] }]
+                [new ResultDetail { ResourceId = "0102" }]
         };
 
         // Act
@@ -51,7 +51,7 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = [new Score()]
+
                 }
             ]
         };
@@ -76,7 +76,7 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "N",
-                    Scores = [new Score()]
+
                 }
             ]
         };
@@ -102,7 +102,7 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "5",
-                    Scores = [new Score()],
+
                     IsValid = false
                 },
 
@@ -111,7 +111,7 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "0101",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = [new Score()],
+
                     IsValid = true
                 }
             ]
@@ -139,7 +139,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39030510",
                     HomeValue = "21",
                     AwayValue = "5",
-                    Scores = [new Score()],
                     IsValid = false
                 },
 
@@ -148,7 +147,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "0101",
                     HomeValue = "10",
                     AwayValue = "5",
-                    Scores = [new Score()],
                     IsValid = true
                 }
             ]
@@ -176,7 +174,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39150115",
                     HomeValue = "8",
                     AwayValue = "7",
-                    Scores = [new Score()]
                 }
             ]
         };
@@ -202,7 +199,6 @@ public class VerifyResultWithResourceIdTests
                     ResourceId = "39150115",
                     HomeValue = "N",
                     AwayValue = "N",
-                    Scores = [new Score()]
                 }
             ]
         };
