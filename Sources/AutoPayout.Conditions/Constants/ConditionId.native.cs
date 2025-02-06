@@ -12,7 +12,7 @@ public static class ConditionId
 
     public const string VerifyFinalResultByBestOfMap = "96";
 
-    public const string VerifyFinalResult = "97";
+    public const string VerifyFinalResultGameSession = "97";
 
     public const string VerifyInningStatus = "98";
 

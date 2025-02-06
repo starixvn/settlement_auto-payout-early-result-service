@@ -9,15 +9,15 @@ namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyResultWithResourceIdTests
 {
-    private readonly IDynamicRepository _repository;
-    private readonly ResultDetailService _resultDetailService;
-    private readonly VerifyResultWithResourceId _handler;
+    private readonly IDynamicRepository repository;
+    private readonly ResultDetailService resultDetailService;
+    private readonly VerifyResultWithResourceId handler;
 
     public VerifyResultWithResourceIdTests()
     {
-        _repository = Substitute.For<IDynamicRepository>();
-        _resultDetailService = Substitute.For<ResultDetailService>();
-        _handler = new VerifyResultWithResourceId(_resultDetailService, _repository);
+        repository = Substitute.For<IDynamicRepository>();
+        resultDetailService = Substitute.For<ResultDetailService>();
+        handler = new VerifyResultWithResourceId(resultDetailService, repository);
     }
 
     [Fact]
@@ -26,18 +26,16 @@ public class VerifyResultWithResourceIdTests
         // Arrange
         var match = new Match
         {
-            ResultDetails = new List<ResultDetail>
-            {
-                new ResultDetail { ResourceId = "0102",  }
-            }
+            ResultDetails =
+                [new ResultDetail { ResourceId = "0102" }]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
-        await _resultDetailService.DidNotReceive().UpdateInvalidResultStatus(Arg.Any<int>(), Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
+        await resultDetailService.DidNotReceive().UpdateInvalidResultStatus(Arg.Any<int>(), Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -46,19 +44,19 @@ public class VerifyResultWithResourceIdTests
         // Arrange
         var match = new Match
         {
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39030510",
                     HomeValue = "10",
                     AwayValue = "5",
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
@@ -70,19 +68,19 @@ public class VerifyResultWithResourceIdTests
         // Arrange
         var match = new Match
         {
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "N",
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
@@ -95,33 +93,37 @@ public class VerifyResultWithResourceIdTests
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39030510",
                     HomeValue = "N",
                     AwayValue = "5",
+
                     IsValid = false
                 },
+
                 new ResultDetail
                 {
                     ResourceId = "0101",
                     HomeValue = "10",
                     AwayValue = "5",
+
                     IsValid = true
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
-        await _resultDetailService.Received(1)
+        await resultDetailService.Received(1)
             .UpdateInvalidResultStatus(Arg.Is(match.MatchId), Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
-        await _repository.Received(1).ExecuteAsync(Arg.Any<WriteLogCriteria>());
+        await repository.Received(1).ExecuteAsync(Arg.Any<WriteLogCriteria>());
     }
+
     [Fact]
     public async Task HandleCondition_InValidRaceToPointValue_AreHandledAndLogged()
     {
@@ -129,8 +131,8 @@ public class VerifyResultWithResourceIdTests
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39030510",
@@ -138,6 +140,7 @@ public class VerifyResultWithResourceIdTests
                     AwayValue = "5",
                     IsValid = false
                 },
+
                 new ResultDetail
                 {
                     ResourceId = "0101",
@@ -145,16 +148,16 @@ public class VerifyResultWithResourceIdTests
                     AwayValue = "5",
                     IsValid = true
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
-        await _resultDetailService.Received(1)
+        await resultDetailService.Received(1)
             .UpdateInvalidResultStatus(Arg.Is(match.MatchId), Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
-        await _repository.Received(1).ExecuteAsync(Arg.Any<WriteLogCriteria>());
+        await repository.Received(1).ExecuteAsync(Arg.Any<WriteLogCriteria>());
     }
 
     [Fact]
@@ -163,24 +166,23 @@ public class VerifyResultWithResourceIdTests
         // Arrange
         var match = new Match
         {
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39150115",
                     HomeValue = "8",
                     AwayValue = "7",
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
     }
-
 
     [Fact]
     public async Task HandleCondition_ValidPointsPlayedNoneValue_ResultsMarkedValid()
@@ -188,25 +190,23 @@ public class VerifyResultWithResourceIdTests
         // Arrange
         var match = new Match
         {
-            ResultDetails = new List<ResultDetail>
-            {
+            ResultDetails =
+            [
                 new ResultDetail
                 {
                     ResourceId = "39150115",
                     HomeValue = "N",
                     AwayValue = "N",
-
                 }
-            }
+            ]
         };
 
         // Act
-        await _handler.HandleCondition(match);
+        await handler.HandleCondition(match);
 
         // Assert
         Assert.All(match.ResultDetails, x => Assert.True(x.IsValid));
     }
-
 
     [Fact]
     public async Task HandleCondition_NoValidResults_ThrowsServiceException()
@@ -215,13 +215,17 @@ public class VerifyResultWithResourceIdTests
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
-                new ResultDetail { IsValid = false }
-            }
+            ResultDetails = [
+                new ResultDetail
+                {
+                    ResourceId = "123",
+                    HomeValue = "",
+                    AwayValue = "",
+                    IsValid = false
+                }]
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<ServiceException>(() => _handler.HandleCondition(match));
+        await Assert.ThrowsAsync<ServiceException>(() => handler.HandleCondition(match));
     }
 }

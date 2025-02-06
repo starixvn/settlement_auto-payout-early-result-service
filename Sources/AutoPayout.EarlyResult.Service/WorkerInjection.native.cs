@@ -50,7 +50,6 @@ public static class WorkerInjection
         service.AddSingleton<VerifyBeforePushProfile>();
         service.AddSingleton<VerifyInningStatus>();
         service.AddSingleton<VerifyFinalResult>();
-        service.AddSingleton<VerifyFinalResult>();
         service.AddSingleton<VerifyFinalByBestOfMap>();
         service.AddSingleton<VerifyFinalWithExtraResult>();
         service.AddSingleton<IgnoreVerify>();
@@ -62,7 +61,7 @@ public static class WorkerInjection
 
         service.AddSingleton<BasketBallCashOut>();
         service.AddSingleton<BasketballExtraStep>();
-        service.AddSingleton<ESportsAddResourceRefund>();
+        service.AddSingleton<AddResourceRefund>();
         service.AddSingleton<TennisInsResourceResult>();
         service.AddSingleton<InitExtraStepService>();
         service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();

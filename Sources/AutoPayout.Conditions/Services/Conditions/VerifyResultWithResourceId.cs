@@ -4,16 +4,9 @@ using AutoPayout.Exceptions;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyResultWithResourceId : ICondition
+public class VerifyResultWithResourceId(ResultDetailService resultDetailService, IDynamicRepository repository)
+    : ICondition
 {
-    private readonly ResultDetailService resultDetailService;
-    private readonly IDynamicRepository repository;
-    public VerifyResultWithResourceId(ResultDetailService resultDetailService, IDynamicRepository repository)
-    {
-        this.resultDetailService = resultDetailService;
-        this.repository = repository;
-    }
-
     public async Task HandleCondition(Match match)
     {
         foreach (var result in match.ResultDetails)
@@ -33,7 +26,6 @@ public class VerifyResultWithResourceId : ICondition
             };
         }
 
-
         await HandleInvalidResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
@@ -50,7 +42,7 @@ public class VerifyResultWithResourceId : ICondition
             .Where(x => !x.IsValid)
             .ToList();
 
-        if (!invalidResults.Any())
+        if (invalidResults.Count == 0)
         {
             return;
         }
@@ -60,7 +52,7 @@ public class VerifyResultWithResourceId : ICondition
         await repository.ExecuteAsync(new WriteLogCriteria(match.MatchId, errorMessage));
     }
 
-    private bool HasSpecialResources(ResultDetail item)
+    private static bool HasSpecialResources(ResultDetail item)
         => (item.ResourceId.StartsWith(BetTypes.SetXWinner) || item.ResourceId.StartsWith(BetTypes.SetXRaceToPoints));
 
     private static bool VerifyScoreRaceToPoint(ResultDetail result)
@@ -96,5 +88,4 @@ public class VerifyResultWithResourceId : ICondition
 
     private static bool VerifyValuesAreNone(string homeValue, string awayValue)
         => homeValue.Equals("N", StringComparison.Ordinal) && awayValue.Equals("N", StringComparison.Ordinal);
-
 }

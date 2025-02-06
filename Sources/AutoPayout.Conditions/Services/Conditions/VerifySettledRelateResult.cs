@@ -2,22 +2,15 @@
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifySettledRelateResult : ICondition
+public class VerifySettledRelateResult(IDynamicRepository repository) : ICondition
 {
-    private readonly IDynamicRepository repository;
-
-    public VerifySettledRelateResult(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task HandleCondition(Match match)
     {
         await CheckRelatedResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
-        if (!match.ResultDetails.Any())
+        if (match.ResultDetails.Count == 0)
         {
             throw new ServiceException { MarkFail = false };
         }
@@ -41,7 +34,6 @@ public class VerifySettledRelateResult : ICondition
             var isValid = ValidateResultDetail(match, item, correctRelatedResults);
 
             item.IsValid = isValid;
-
         }
     }
 
@@ -91,8 +83,6 @@ public class VerifySettledRelateResult : ICondition
     private bool HasRelatedResources(ResultDetail item)
         => item.RelatedSettResourcesIds.Count > 0 || item.RelatedCalResourceIds.Count > 0;
 
-
-
     private bool TryGetAllExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
     {
         var settlingResultsIds = settlingResults.Select(x => x.ResourceId).ToList();
@@ -104,13 +94,11 @@ public class VerifySettledRelateResult : ICondition
         return existingResourceIds.Count == relatedResults.Count;
     }
 
-
     private bool IsCalRelatedResults(List<ResultDetail> relatedResults, List<string> relatedCalResourceIds)
     {
         return relatedCalResourceIds.Count == 0
             || relatedResults.TrueForAll(x => relatedCalResourceIds.Contains(x.ResourceId) && x.SettlementStatusId == SettlementStatusId.Calculated);
     }
-
 
     private bool IsSettleRelatedResults(List<ResultDetail> relatedResults, List<string> relatedSettResourcesIds)
     {

@@ -5,25 +5,11 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalWithExtraResult : ICondition
+public class VerifyFinalWithExtraResult(
+    ResultDetailService resultDetailService,
+    IOptions<AppSettingsKey> options,
+    ExtraResultService extraResultService) : ICondition
 {
-    private readonly ResultDetailService resultDetailService;
-    private readonly IDynamicRepository repository;
-    private readonly IOptions<AppSettingsKey> appSettingsKey;
-    private readonly ExtraResultService extraResultService;
-
-    public VerifyFinalWithExtraResult(
-        ResultDetailService resultDetailService,
-        IDynamicRepository repository,
-        IOptions<AppSettingsKey> options,
-        ExtraResultService extraResultService)
-    {
-        this.resultDetailService = resultDetailService;
-        this.repository = repository;
-        this.appSettingsKey = options;
-        this.extraResultService = extraResultService;
-    }
-
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
@@ -100,7 +86,7 @@ public class VerifyFinalWithExtraResult : ICondition
     private async Task<string> FullTimeRelatedResultInValidAndMaxTimeScore(Match match, ResultDetail finalResult, IEnumerable<string> resultsValid, IEnumerable<string> validResources)
     {
         var maxTimeScore = await resultDetailService.MaxTimeScore(finalResult);
-        if (maxTimeScore > appSettingsKey.Value.RetryProcessScore)
+        if (maxTimeScore > options.Value.RetryProcessScore)
         {
             return CreateMessageService.RelatedResultInvalid(finalResult, resultsValid, validResources, false);
         }

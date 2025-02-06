@@ -9,20 +9,20 @@ namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyTimeResultTests
 {
-    private readonly ResultDetailService _resultDetailService;
-    private readonly VerifyTimeResult _verifyTimeResult;
-    private readonly Match _mockMatch;
+    private readonly ResultDetailService resultDetailService;
+    private readonly VerifyTimeResult verifyTimeResult;
+    private readonly Match mockMatch;
 
     public VerifyTimeResultTests()
     {
-        _resultDetailService = Substitute.For<ResultDetailService>();
+        resultDetailService = Substitute.For<ResultDetailService>();
         var appSettingsKey = Substitute.For<IOptions<AppSettingsKey>>();
 
-        _verifyTimeResult = new VerifyTimeResult(_resultDetailService, appSettingsKey);
+        verifyTimeResult = new VerifyTimeResult(resultDetailService, appSettingsKey);
 
         appSettingsKey.Value.Returns(new AppSettingsKey { RetryProcessScore = 200 });
 
-        _mockMatch = new Match
+        mockMatch = new Match
         {
             MatchId = 1,
             ResultDetails =
@@ -39,14 +39,14 @@ public class VerifyTimeResultTests
     public async Task HandleCondition_ShouldNotProcess_WhenNoTimeResultsExist()
     {
         // Arrange
-        _mockMatch.ResultDetails = _mockMatch.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
+        mockMatch.ResultDetails = mockMatch.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
 
         // Act
-        await _verifyTimeResult.HandleCondition(_mockMatch);
+        await verifyTimeResult.HandleCondition(mockMatch);
 
         // Assert
-        await _resultDetailService.DidNotReceiveWithAnyArgs().GetScores(null);
-        Assert.Single(_mockMatch.ResultDetails); // Only normal results remain
+        await resultDetailService.DidNotReceiveWithAnyArgs().GetScores(null);
+        Assert.Single(mockMatch.ResultDetails); // Only normal results remain
     }
 
     [Fact]
@@ -57,16 +57,16 @@ public class VerifyTimeResultTests
         {
             new Score { ResourceId = "909001", HomeValue = "1", AwayValue = "30", SourceId = SourceId.Trader }
         };
-        _mockMatch.ResultDetails = _mockMatch.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
-        _resultDetailService.GetScores(_mockMatch).Returns(scores);
+        mockMatch.ResultDetails = mockMatch.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
+        resultDetailService.GetScores(mockMatch).Returns(scores);
 
         // Act
-        await _verifyTimeResult.HandleCondition(_mockMatch);
+        await verifyTimeResult.HandleCondition(mockMatch);
 
         // Assert
-        Assert.Single(_mockMatch.ResultDetails); // Valid Time result remains
-        Assert.Equal("1", _mockMatch.ResultDetails.First().HomeValue);
-        Assert.Equal("30", _mockMatch.ResultDetails.First().AwayValue);
+        Assert.Single(mockMatch.ResultDetails); // Valid Time result remains
+        Assert.Equal("1", mockMatch.ResultDetails.First().HomeValue);
+        Assert.Equal("30", mockMatch.ResultDetails.First().AwayValue);
     }
 
     [Fact]
@@ -75,16 +75,24 @@ public class VerifyTimeResultTests
         // Arrange
         var scores = new List<Score>
         {
-            new Score { ResourceId = "909001", HomeValue = "1", AwayValue = "100", SourceId = SourceId.Trader, CreateDate = new DateTime(2022,11,11) }
+            new()
+            {
+                ResourceId = "909001",
+                HomeValue = "1",
+                AwayValue = "100",
+                SourceId = SourceId.Trader,
+                CreateDate = new(2022,11,11)
+
+            }
         }; // No valid scores
 
 
-        _mockMatch.ResultDetails = _mockMatch.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
+        mockMatch.ResultDetails = mockMatch.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
 
-        _resultDetailService.GetScores(_mockMatch).Returns(scores);
+        resultDetailService.GetScores(mockMatch).Returns(scores);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ServiceException>(() => _verifyTimeResult.HandleCondition(_mockMatch));
+        await Assert.ThrowsAsync<ServiceException>(() => verifyTimeResult.HandleCondition(mockMatch));
     }
 
 }

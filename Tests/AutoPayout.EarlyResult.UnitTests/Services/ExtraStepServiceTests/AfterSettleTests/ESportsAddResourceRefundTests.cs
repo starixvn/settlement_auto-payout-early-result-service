@@ -8,12 +8,12 @@ namespace AutoPayout.EarlyResult.UnitTests.Services.ExtraStepServiceTests.AfterS
 public class ESportsAddResourceRefundTests
 {
     private readonly IDynamicRepository repository;
-    private readonly ESportsAddResourceRefund extraStep;
+    private readonly AddResourceRefund extraStep;
 
     public ESportsAddResourceRefundTests()
     {
         repository = Substitute.For<IDynamicRepository>();
-        extraStep = new ESportsAddResourceRefund(repository);
+        extraStep = new AddResourceRefund(repository);
     }
 
     [Fact]

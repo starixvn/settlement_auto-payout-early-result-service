@@ -110,8 +110,11 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private async Task ProcessAfterSettle(Match match, SettleCriteria settleCriteria)
     {
-        var extraStepBeforeSettle = createExtraStepService.CreateStepAfterSettle(match);
-        await extraStepBeforeSettle.Process(match, settleCriteria);
+        var extraStepsBeforeSettle = createExtraStepService.CreateStepsServiceAfterSettle(match);
+        foreach (var extraStepBeforeSettle in extraStepsBeforeSettle)
+        {
+            await extraStepBeforeSettle.Process(match, settleCriteria);
+        }
         await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
     }
 

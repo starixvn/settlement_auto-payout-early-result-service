@@ -28,7 +28,7 @@ public class CreateConditionChainServiceTests
     [Fact]
     public void CreateConditionChain_ConditionIdsNotEmpty_ReturnCorrectly()
     {
-        var conditionIds = new[] { ConditionId.VerifyConfirmScore, ConditionId.VerifyFinalResult };
+        var conditionIds = new[] { ConditionId.VerifyConfirmScore, ConditionId.VerifyFinalResultGameSession };
         var conditions = service.CreateConditionChain(conditionIds);
 
         Assert.Equal(2, conditions.Count);
