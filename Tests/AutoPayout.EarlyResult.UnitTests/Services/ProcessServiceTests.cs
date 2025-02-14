@@ -63,7 +63,7 @@ public class ProcessServiceTests
                 }
             }
         };
-        matchService.GetMatchDetail(Arg.Any<int>()).Returns(new MatchDetail() { BestOfMap = 3 });
+        matchService.GetMatchDetails(Arg.Any<string>()).Returns(new MatchDetail() { BestOfMap = 3 });
 
         await service.Process(match);
 

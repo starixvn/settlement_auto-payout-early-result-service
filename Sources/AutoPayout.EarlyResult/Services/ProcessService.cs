@@ -25,9 +25,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
 
-            var matchDetail = await matchService.GetMatchDetail(match.MatchId);
-            match.MatchDetail = matchDetail;
-
             match.ResultDetails = Filter(match);
 
             await PushAndWriteLog(match, conditions);
@@ -76,10 +73,12 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
     {
-        foreach (var condition in conditions)
+        for (var i = 0; i < conditions.Count - 1; i++)
         {
-            await condition.HandleCondition(match);
+            conditions[i].SetNext(conditions[i + 1]);
         }
+
+        await conditions[0].HandleCondition(match);
     }
 
     private List<ResultDetail> Filter(Match match)

@@ -6,7 +6,7 @@ namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyInningStatus(IDynamicRepository repository, ResultDetailService resultDetailService,
         WriteLogService writeLogService, IOptions<AppSettingsKey> appSettingOptions)
-    : ICondition
+    : AbstractCondition
 {
     private const int MatchTestSession = 1;
 
@@ -14,13 +14,14 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
     private static readonly HashSet<string> InningIds = new(["H1", "A1", "H2", "A2"]);
 
 
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
         if (ShouldValidateInning(match))
         {
             await ValidateInning(match);
         }
 
+        await HandleNextCondition(match);
     }
 
     private bool ShouldValidateInning(Match match)

@@ -4,7 +4,7 @@ namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService,
         XmlConvertService xmlConvertService)
-    : ICondition
+    : AbstractCondition
 {
     private const string SpProfile = "NAP_Admin_Settlement_Profile_Push";
 
@@ -12,7 +12,7 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
 
     private const string Mode = "ALL";
 
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
         var request = new EventTicketRequest
         {
@@ -34,6 +34,8 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
                 _ => new ServiceException(resultMessage.ErrorMessage)
             };
         }
+
+        await HandleNextCondition(match);
     }
 
     private string CreateXmlResources(IEnumerable<ResultDetail> selectedResources)

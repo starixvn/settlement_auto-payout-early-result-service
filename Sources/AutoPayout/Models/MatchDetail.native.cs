@@ -2,6 +2,8 @@
 
 public class MatchDetail
 {
+    public int matchId { get; set; }
+
     public int GameSession { get; set; }
 
     public int BestOfMap { get; set; }

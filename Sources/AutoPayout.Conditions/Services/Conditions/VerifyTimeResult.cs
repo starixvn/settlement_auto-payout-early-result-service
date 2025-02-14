@@ -1,19 +1,19 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
-using AutoPayout.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingsKey)
-    : ICondition
+    : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
         var timeResults = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
 
         if (!timeResults.Any())
         {
+            await HandleNextCondition(match);
             return;
         }
 
@@ -27,10 +27,7 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
         match.ResultDetails = [.. match.ResultDetails, .. normalResults];
 
-        if (match.ResultDetails.Count == 0)
-        {
-            throw new ServiceException { MarkFail = false };
-        }
+        await HandleNextCondition(match);
     }
 
     private async Task CompareScore(Match match, IEnumerable<Score> scores)

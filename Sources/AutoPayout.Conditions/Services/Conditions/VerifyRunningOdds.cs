@@ -2,9 +2,9 @@
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyRunningOdds(IDynamicRepository repository) : ICondition
+public class VerifyRunningOdds(IDynamicRepository repository) : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
         var criteria = CreateCriteria(match);
 
@@ -14,6 +14,8 @@ public class VerifyRunningOdds(IDynamicRepository repository) : ICondition
         {
             throw new RunningOddsException();
         }
+
+        await HandleNextCondition(match);
     }
 
     private static VerifyOddsCriteria CreateCriteria(Match match)

@@ -1,8 +1,8 @@
 ﻿namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
+public class VerifyMatchStatus(IDynamicRepository repository) : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
         var criteria = new MatchRemarkCriteria { MatchId = match.MatchId };
         var (matchStatus, _) = await repository.FetchMultipleAsync<MatchRemark, object>(criteria);
@@ -11,6 +11,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : ICondition
         if (matchRemarks.Any())
         {
             VerifyMatch(matchRemarks[0], match.ResourceType);
+            await HandleNextCondition(match);
         }
         else
         {
