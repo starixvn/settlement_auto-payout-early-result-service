@@ -60,10 +60,14 @@ public class VerifyMatchStatusTests
     [Fact]
     public async Task HandleCondition_MatchRunningAndNotOnHod_DoNotThrowException()
     {
+        var match = new Match
+        {
+            ResultDetails = [new()]
+        };
         repository.FetchMultipleAsync<MatchRemark, object>(Arg.Any<MatchRemarkCriteria>())
             .Returns((new List<MatchRemark> { new() { SettlementStatus = 0, EventStatus = EventStatus.Running } }, null));
 
-        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(new Match()));
+        var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.Null(exception);
     }

@@ -6,7 +6,7 @@ namespace AutoPayout.EarlyResult.UnitTests.Services;
 public class MatchPoolServiceTests
 {
     private readonly MatchService matchService;
-    private readonly MatchPoolService matchPoolService;
+    private readonly MatchPoolServiceImp matchPoolService;
 
     public MatchPoolServiceTests()
     {
@@ -14,36 +14,76 @@ public class MatchPoolServiceTests
         matchPoolService = new MatchPoolServiceImp(matchService);
     }
 
-    private List<Match> CreateMatches(params int[] matchIds)
-    {
-        return matchIds.Select(i => new Match { MatchId = i }).ToList();
-    }
-
     [Fact]
-    public async Task FetchNewMatch_Twice_OnlyAddNewMatchToPool()
-    {
-        matchService.GetMatches().Returns(CreateMatches(1, 3));
-        await matchPoolService.GetNewMatches();
-
-        matchService.GetMatches().Returns(CreateMatches(2, 3));
-        var listMatch = await matchPoolService.GetNewMatches();
-
-        Assert.Single(listMatch);
-    }
-
-    [Fact]
-    public async Task RemoveMatch_ExistedMatchId_RemoveMatchFromPool()
+    public async Task GetNewMatches_ShouldReturnNewValidMatches()
     {
         // Arrange
-        var matches = CreateMatches(1, 2);
-        var serviceMock = new MatchPoolServiceImp(matchService);
-        matchService.GetMatches().Returns(matches);
+        var existingMatches = new List<Match>
+        {
+            new Match { MatchId = 1}
+        };
+        var newMatches = new List<Match>
+        {
+            new Match { MatchId = 2}
+        };
+        var newValidMatches = new List<Match>
+        {
+            new Match { MatchId = 2 }
+        };
+
+        matchService.GetMatches().Returns(existingMatches.Concat(newMatches).ToList());
+        matchService.GetMatchDetails(Arg.Any<List<Match>>()).Returns(newValidMatches);
 
         // Act
-        await serviceMock.GetNewMatches();
-        serviceMock.RemoveMatch(matches[0]);
+        var result = await matchPoolService.GetNewMatches();
 
         // Assert
-        Assert.Single(serviceMock.PoolOfMatches);
+        Assert.Single(result);
+        Assert.Equal(2, result.First().MatchId);
     }
+
+    [Fact]
+    public async Task GetNewMatches_ShouldAddNewMatchesToPool()
+    {
+        // Arrange
+        var existingMatches = new List<Match>
+        {
+            new Match { MatchId = 1}
+        };
+        var newMatches = new List<Match>
+        {
+            new Match { MatchId = 2}
+        };
+        var newValidMatches = new List<Match>
+        {
+            new Match { MatchId = 2 }
+        };
+
+        matchPoolService.PoolOfMatches.AddRange(existingMatches);
+        matchService.GetMatches().Returns(existingMatches.Concat(newMatches).ToList());
+        matchService.GetMatchDetails(Arg.Is<List<Match>>(m => m[0].MatchId == 2)).Returns(newValidMatches);
+
+        // Act
+        await matchPoolService.GetNewMatches();
+
+        // Assert
+
+        Assert.Equal(2, matchPoolService.PoolOfMatches.Count);
+        Assert.Equal(2, matchPoolService.PoolOfMatches[1].MatchId);
+    }
+
+    [Fact]
+    public void RemoveMatch_ShouldRemoveMatchFromPool()
+    {
+        // Arrange
+        var matchToRemove = new Match { MatchId = 1, ResourceType = 1 };
+        matchPoolService.PoolOfMatches.Add(matchToRemove);
+
+        // Act
+        matchPoolService.RemoveMatch(matchToRemove);
+
+        // Assert
+        Assert.Empty(matchPoolService.PoolOfMatches);
+    }
+
 }

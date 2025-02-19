@@ -45,7 +45,7 @@ public class VerifyRunningOddsTests
         var match = new Match()
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail>()
+            ResultDetails = [new()]
         };
 
         await repository.ExecuteAsync(Arg.Do<VerifyOddsCriteria>(c => c.ErrCode = 0));

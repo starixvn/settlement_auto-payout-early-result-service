@@ -15,7 +15,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         CreateConditionChainService createConditionChainService,
         SettlementService settlementService,
         MatchPoolService matchPoolService,
-        MatchService matchService,
         UpdateResultStatusService updateResultStatusService)
     : ProcessService
 {

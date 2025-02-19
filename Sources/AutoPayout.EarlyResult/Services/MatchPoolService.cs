@@ -9,7 +9,7 @@ public interface MatchPoolService
 
 public class MatchPoolServiceImp(MatchService matchService) : MatchPoolService
 {
-    public List<Match> PoolOfMatches { get; } = new();
+    public List<Match> PoolOfMatches { get; } = [];
 
     private readonly Lock lockObject = new();
 
