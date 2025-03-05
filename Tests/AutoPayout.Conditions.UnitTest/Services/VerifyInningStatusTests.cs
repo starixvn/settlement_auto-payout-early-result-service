@@ -10,7 +10,6 @@ using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
-
 public class VerifyInningStatusTests
 {
     private readonly IDynamicRepository repository;
@@ -20,13 +19,14 @@ public class VerifyInningStatusTests
     private readonly WriteLogService writeLogService;
 
     private readonly VerifyInningStatus condition;
+    private readonly IOptions<AppSettingsKey> appSettingOptions;
 
     public VerifyInningStatusTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
         writeLogService = Substitute.For<WriteLogService>();
-        var appSettingOptions = Substitute.For<IOptions<AppSettingsKey>>();
+        appSettingOptions = Substitute.For<IOptions<AppSettingsKey>>();
         condition = new VerifyInningStatus(repository, resultDetailService, writeLogService, appSettingOptions);
     }
 
@@ -35,7 +35,8 @@ public class VerifyInningStatusTests
     {
         var match = new Match()
         {
-            ResourceType = ResourceType.EarlyResource
+            ResourceType = ResourceType.EarlyResource,
+            ResultDetails = [new()]
         };
 
         await condition.HandleCondition(match);
@@ -91,6 +92,10 @@ public class VerifyInningStatusTests
             }
         };
 
+
+        appSettingOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(4000);
+
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
 
@@ -116,6 +121,10 @@ public class VerifyInningStatusTests
                 ResourceId = "H3"
             }
         };
+
+
+        appSettingOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(4000);
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);
@@ -146,6 +155,9 @@ public class VerifyInningStatusTests
                 ResultStatusId = ResultStatusId.Running
             }
         };
+
+        appSettingOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(4000);
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>())
             .Returns(resultDetails);

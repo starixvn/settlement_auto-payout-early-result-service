@@ -4,6 +4,7 @@ using AutoPayout.Conditions.Models;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
+using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
@@ -17,13 +18,14 @@ public class VerifyFinalResultTests
     private readonly ResultDetailService resultDetailService;
 
     private readonly VerifyFinalResult condition;
+    private readonly IOptions<AppSettingsKey> appSettingsOptions;
 
     public VerifyFinalResultTests()
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        var appSettingOptions = Substitute.For<IOptions<AppSettingsKey>>();
-        condition = new VerifyFinalResult(resultDetailService, appSettingOptions);
+        appSettingsOptions = Substitute.For<IOptions<AppSettingsKey>>();
+        condition = new VerifyFinalResult(resultDetailService, appSettingsOptions);
     }
 
     [Fact]
@@ -58,7 +60,7 @@ public class VerifyFinalResultTests
             ResultDetails = []
         };
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>());
     }
@@ -101,10 +103,14 @@ public class VerifyFinalResultTests
             }
         };
 
-        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns(results);
+        resultDetailService.GetValidSetResults(Arg.Any<Match>(), Arg.Any<List<ResultDetail>>(), Arg.Any<IEnumerable<ResourceIndex>>(), Arg.Any<int>()).Returns(results);
 
-        await condition.HandleCondition(match);
+        appSettingsOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(2);
+
+
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
@@ -137,6 +143,7 @@ public class VerifyFinalResultTests
                 ResourceId = "01",
                 HomeValue = "1",
                 AwayValue = "3",
+                ResultStatusId = 2,
                 IntervalNo = 1
             },
             new()
@@ -144,12 +151,45 @@ public class VerifyFinalResultTests
                 ResourceId = "02",
                 HomeValue = "1",
                 AwayValue = "2",
-                IntervalNo = 2
+                IntervalNo = 2,
+                 ResultStatusId = 2,
             },
         };
 
-        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns(results);
+        resultDetailService.GetValidSetResults(Arg.Any<Match>(), Arg.Any<List<ResultDetail>>(), Arg.Any<IEnumerable<ResourceIndex>>(), Arg.Any<int>()).Returns(results);
+
+        appSettingsOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(2);
+
+        resultDetailService.GetResourceIndex(Arg.Any<int>()).Returns(
+        [
+            new ResourceIndex
+            {
+                ResourceId = "01",
+                IntervalNo = 1
+            },
+            new ResourceIndex
+            {
+                ResourceId = "02",
+                IntervalNo = 2
+            },
+            new ResourceIndex
+            {
+                ResourceId = "03",
+                IntervalNo = 3
+            },
+            new ResourceIndex
+            {
+                ResourceId = "04",
+                IntervalNo = 4
+            },
+            new ResourceIndex
+            {
+                ResourceId = "05",
+                IntervalNo = 5
+            }
+        ]);
 
         await condition.HandleCondition(match);
 
@@ -179,6 +219,13 @@ public class VerifyFinalResultTests
 
         var results = new List<ResultDetail>()
         {
+                        new()
+            {
+                ResourceId = "01",
+                HomeValue = "4",
+                AwayValue = "2",
+                IntervalNo = 1
+            },
             new()
             {
                 ResourceId = "02",
@@ -189,10 +236,42 @@ public class VerifyFinalResultTests
         };
 
 
-        resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
-        resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
+        resultDetailService.GetResultSettled(Arg.Any<int>(), Arg.Any<int>()).Returns(results);
+        resultDetailService.GetValidSetResults(Arg.Any<Match>(), Arg.Any<List<ResultDetail>>(), Arg.Any<IEnumerable<ResourceIndex>>(), Arg.Any<int>()).Returns(results);
 
-        await condition.HandleCondition(match);
+        appSettingsOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(2);
+
+        resultDetailService.GetResourceIndex(Arg.Any<int>()).Returns(
+        [
+            new ResourceIndex
+            {
+                ResourceId = "01",
+                IntervalNo = 1
+            },
+            new ResourceIndex
+            {
+                ResourceId = "02",
+                IntervalNo = 2
+            },
+            new ResourceIndex
+            {
+                ResourceId = "03",
+                IntervalNo = 3
+            },
+            new ResourceIndex
+            {
+                ResourceId = "04",
+                IntervalNo = 4
+            },
+            new ResourceIndex
+            {
+                ResourceId = "05",
+                IntervalNo = 5
+            }
+        ]);
+
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received(1).UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
@@ -234,7 +313,7 @@ public class VerifyFinalResultTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -247,6 +326,7 @@ public class VerifyFinalResultTests
         var match = new Match
         {
             MatchId = 1,
+            SportType = SportType.Tennis,
             ResourceType = ResourceType.MainResource,
             ResultDetails =
             [
@@ -260,10 +340,40 @@ public class VerifyFinalResultTests
             MatchDetail = new MatchDetail() { GameSession = 3 }
         };
 
+        appSettingsOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
+        resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(2);
+        resultDetailService.GetResourceIndex(Arg.Any<int>()).Returns(
+        [
+            new ResourceIndex
+            {
+                ResourceId = "01",
+                IntervalNo = 1
+            },
+            new ResourceIndex
+            {
+                ResourceId = "02",
+                IntervalNo = 2
+            },
+            new ResourceIndex
+            {
+                ResourceId = "03",
+                IntervalNo = 3
+            },
+            new ResourceIndex
+            {
+                ResourceId = "04",
+                IntervalNo = 4
+            },
+            new ResourceIndex
+            {
+                ResourceId = "05",
+                IntervalNo = 5
+            }
+        ]);
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
