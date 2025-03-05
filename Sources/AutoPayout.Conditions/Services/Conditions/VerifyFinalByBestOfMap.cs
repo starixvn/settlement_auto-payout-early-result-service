@@ -96,7 +96,7 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : I
     private static bool ValidateBestOfTwo(ResultDetail finalResult, List<ResultDetail> results)
     {
         return VerifyFinalResultHelper.VerifyFinalBestOfTwo(finalResult, results) &&
-               VerifyFinalResultHelper.VerifyResult(results, finalResult);
+               VerifyFinalResultHelper.VerifyScoreSetWithFinalResult(results, finalResult);
     }
 
     private static bool IsOverTimeSession(MatchDetail matchDetail)
@@ -108,7 +108,7 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : I
     {
         return VerifyFinalResultHelper.VerifyDrawSetResults(results, maxGamePlayed) &&
                VerifyFinalResultHelper.IsMatchResultsConsecutive(results) &&
-               VerifyFinalResultHelper.VerifyResult(results, finalResult);
+               VerifyFinalResultHelper.VerifyScoreSetWithFinalResult(results, finalResult);
     }
 
     private static bool ValidateGeneralCase(
@@ -121,9 +121,9 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : I
     {
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(matchDetail, false);
 
-        var verifyRelatedResult = VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxGamePlayed) &&
+        var verifyRelatedResult = VerifyFinalResultHelper.VerifyFakeResultSettled(settledResults, maxGamePlayed) &&
                                   VerifyFinalResultHelper.IsMatchResultsConsecutive(results) &&
-                                  VerifyFinalResultHelper.VerifyResult(results, finalResult);
+                                  VerifyFinalResultHelper.VerifyScoreSetWithFinalResult(results, finalResult);
 
         return verifyRelatedResult &&
                VerifyFinalResultHelper.IsValidFinalResult(results, finalResult, minSet, maxSet) &&

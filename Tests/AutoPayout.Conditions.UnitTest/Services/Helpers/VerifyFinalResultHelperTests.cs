@@ -33,7 +33,7 @@ public class VerifyFinalResultHelperTests
             AwayValue = "2"
         };
 
-        var actual = VerifyFinalResultHelper.VerifyResult(resultDetails, final);
+        var actual = VerifyFinalResultHelper.VerifyScoreSetWithFinalResult(resultDetails, final);
 
         Assert.Equal(expected, actual);
     }

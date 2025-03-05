@@ -7,6 +7,7 @@ using AutoPayout.Constants;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
 
@@ -25,7 +26,8 @@ public class VerifyInningStatusTests
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
         writeLogService = Substitute.For<WriteLogService>();
-        condition = new VerifyInningStatus(repository, resultDetailService, writeLogService);
+        var appSettingOptions = Substitute.For<IOptions<AppSettingsKey>>();
+        condition = new VerifyInningStatus(repository, resultDetailService, writeLogService, appSettingOptions);
     }
 
     [Fact]

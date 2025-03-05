@@ -6,6 +6,7 @@ using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
 
@@ -21,7 +22,8 @@ public class VerifyFinalResultTests
     {
         repository = Substitute.For<IDynamicRepository>();
         resultDetailService = Substitute.For<ResultDetailService>();
-        condition = new VerifyFinalResult(resultDetailService);
+        var appSettingOptions = Substitute.For<IOptions<AppSettingsKey>>();
+        condition = new VerifyFinalResult(resultDetailService, appSettingOptions);
     }
 
     [Fact]

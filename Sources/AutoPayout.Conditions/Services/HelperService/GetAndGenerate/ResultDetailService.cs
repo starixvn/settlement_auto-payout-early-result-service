@@ -26,6 +26,15 @@ public interface ResultDetailService
     Task<double> MaxTimeScore(ResultDetail resultDetail);
 
     bool InValidTotalWithExtraScore(ResultDetail finalResult, ResultDetail extraResult, int totalHomeValue, int totalAwayValue);
+
+    List<ResultDetail> GetValidSetResults(
+        Match match,
+        IEnumerable<ResultDetail> resultSettled,
+        IEnumerable<ResourceIndex> indexes,
+        int maxResultIndex);
+
+    Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
+
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -151,7 +160,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         writeLogService.WriteLog(cloneMatch, message);
     }
 
-    private async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
+    public async Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType)
     {
         var criteria = new GetResourceIndexCriteria(sportType);
 
@@ -180,4 +189,23 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         return intervalDetails.Where(r => r.ResourceId != ResourceIds.FullTime).Where(r => r.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted).ToList();
     }
+
+    public List<ResultDetail> GetValidSetResults(
+        Match match,
+        IEnumerable<ResultDetail> resultSettled,
+        IEnumerable<ResourceIndex> indexes,
+        int maxResultIndex)
+    {
+        var resultInBatch = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+
+        var results = resultSettled.Concat(resultInBatch).ToList();
+
+
+        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
+
+        var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
+
+        return resultsChecking;
+    }
+
 }
