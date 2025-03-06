@@ -16,7 +16,6 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
             return;
         }
 
-
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(match.MatchDetail);
 
         if (!VerifyFinalResultHelper.IsValidFinalResultSetWin(finalResult, minSet, maxSet))
@@ -38,7 +37,9 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 
         var setsResults = resultDetailService.GetValidSetResults(match, settledResults, resourceIndexes, maxSetPlayed);
 
-        var isValid = setsResults.Count != 0 && VerifyFinal(settledResults, setsResults, finalResult, maxSetPlayed);
+        var isValid = setsResults.Count != 0
+            && VerifyValidRunningSetResults(match.ResultDetails, resourceIndexes, maxSetPlayed)
+            && VerifyFinal(settledResults, setsResults, finalResult, maxSetPlayed);
 
         if (!isValid)
         {
@@ -50,6 +51,15 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
         }
 
 
+    }
+
+    private bool VerifyValidRunningSetResults(List<ResultDetail> resultDetails, IEnumerable<ResourceIndex> resourceIndexes, int maxSetPlayed)
+    {
+        var inValidResources = resourceIndexes.Where(x => x.IntervalNo > maxSetPlayed)
+            .Select(x => x.ResourceId);
+
+        return !resultDetails.Where(x => x.ResourceId != ResourceIds.FullTime)
+            .Any(x => inValidResources.Contains(x.ResourceId));
     }
 
     private async Task<(bool, List<ResultDetail>)> CheckSetSettled(Match match, IEnumerable<ResourceIndex> validResourcesPlayed, ResultDetail finalResult)
