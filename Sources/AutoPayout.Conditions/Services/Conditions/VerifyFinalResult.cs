@@ -26,7 +26,9 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 
         var maxSetPlayed = GetMaxSetPlayed(finalResult);
         var resourceIndexes = await resultDetailService.GetResourceIndex(match.SportType);
-        var validResourcesPlayed = resourceIndexes.Where(x => x.IntervalNo <= maxSetPlayed).ToList();
+        var validResourcesPlayed = resourceIndexes
+            .Where(x => x.IntervalNo <= maxSetPlayed && x.ResourceId != ResourceIds.ExtraInning) // ignore baseball
+            .ToList();
 
         var (isSetSettled, settledResults) = await CheckSetSettled(match, validResourcesPlayed, finalResult);
 
@@ -84,6 +86,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
             var resultRelatedValid = settledResults.Select(x => x.ResourceId)
                 .Intersect(validResourcesPlayed.Select(x => x.ResourceId))
                 .ToList();
+
             var errorMsg = CreateMessageService.RelatedResultInvalid(finalResult, resultRelatedValid, validResourcesPlayed.Select(x => x.ResourceId), false);
             await HandleInvalidResult(match, finalResult, errorMsg);
 
