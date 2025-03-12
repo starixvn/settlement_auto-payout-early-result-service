@@ -5,7 +5,7 @@ public static class VerifyFinalResultHelper
     private const string ESportsFirstMap = "M1";
     private const string ESportsSecondMap = "M2";
 
-    public static bool VerifyResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
+    public static bool VerifyScoreSetWithFinalResult(IReadOnlyCollection<ResultDetail> setsResults, ResultDetail final)
     {
         var sumHomeScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) > Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
         var sumAwayScore = setsResults.Count(set => Convert.ToInt32(set.HomeValue) < Convert.ToInt32(string.IsNullOrEmpty(set.AwayValue) ? "0" : set.AwayValue)).ToString();
@@ -90,7 +90,7 @@ public static class VerifyFinalResultHelper
                && (finalHomeScore + finalAwayScore) <= maxSetPlay;
     }
 
-    public static bool IsValidFinalResultSetWin(List<ResultDetail> results, ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
+    public static bool IsValidFinalResultSetWin(ResultDetail finalResult, int numberOfSetWin, int maxSetPlay)
     {
         var homeValue = Convert.ToInt32(finalResult.HomeValue);
         var awayValue = Convert.ToInt32(finalResult.AwayValue);
@@ -115,7 +115,7 @@ public static class VerifyFinalResultHelper
         return finalResult.HomeValue != finalResult.AwayValue && mapOne != null && results.Count == 1;
     }
 
-    public static bool VerifyResultSettled(IEnumerable<ResultDetail> settledResults, int playedGame)
+    public static bool VerifyFakeResultSettled(IEnumerable<ResultDetail> settledResults, int playedGame)
     {
         var fakeCalculatedResults = settledResults.Where(x => x.SettlementStatusId == SettlementStatusId.Calculated
             && x.IntervalNo > playedGame).ToList();

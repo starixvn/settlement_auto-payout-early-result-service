@@ -1,58 +1,110 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
 using AutoPayout.Constants;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondition
+public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingOptions) : ICondition
 {
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
-        if (ShouldSkipFinalResultCheck(match, finalResult))
-        {
-            return;
-
-        }
-
-        if (await IsInvalidFinalResultForGameWinner(match, finalResult))
+        if (ShouldSkipFinalResultCheck(match, finalResult) || await IsInvalidFinalResultForGameWinner(match, finalResult))
         {
             return;
         }
-
-        var maxSetPlayed = int.Parse(finalResult.HomeValue) + int.Parse(finalResult.AwayValue);
-        var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
-
-        var (setsResults, resultIndexes) = await resultDetailService.GetResultsChecking(match, maxSetPlayed, settledResults);
 
         var (minSet, maxSet) = VerifyFinalResultHelper.GetMinMaxSetPlay(match.MatchDetail);
 
-        var isFinalConsistentWithGameSession = VerifyFinalResultHelper.IsValidFinalResultSetWin(setsResults, finalResult, minSet, maxSet);
+        if (!VerifyFinalResultHelper.IsValidFinalResultSetWin(finalResult, minSet, maxSet))
+        {
+            await HandleFinalResult(finalResult, match, true);
+            return;
+        }
 
-        var isValid = !setsResults.IsNullOrEmpty()
-            && isFinalConsistentWithGameSession
+        var maxSetPlayed = GetMaxSetPlayed(finalResult);
+        var resourceIndexes = await resultDetailService.GetResourceIndex(match.SportType);
+        var validResourcesPlayed = resourceIndexes
+            .Where(x => x.IntervalNo <= maxSetPlayed && x.ResourceId != ResourceIds.ExtraInning) // ignore baseball
+            .ToList();
+
+        var (isSetSettled, settledResults) = await CheckSetSettled(match, validResourcesPlayed, finalResult);
+
+        if (!isSetSettled)
+        {
+            return;
+        }
+
+        var setsResults = resultDetailService.GetValidSetResults(match, settledResults, resourceIndexes, maxSetPlayed);
+
+        var isValid = setsResults.Count != 0
+            && VerifyValidRunningSetResults(match.ResultDetails, resourceIndexes, maxSetPlayed)
             && VerifyFinal(settledResults, setsResults, finalResult, maxSetPlayed);
 
         if (!isValid)
         {
-            await HandleFinalResult(finalResult, match, !isFinalConsistentWithGameSession);
+            await HandleFinalResult(finalResult, match, false);
         }
         else
         {
-            match.ResourceRefund = GetResourceToRefund(settledResults, resultIndexes, maxSet, maxSetPlayed);
-
+            match.ResourceRefund = GetResourceToRefund(settledResults, resourceIndexes, maxSet, maxSetPlayed);
         }
 
+
     }
 
-    private static bool VerifyFinal(IEnumerable<ResultDetail> settledResults, IReadOnlyCollection<ResultDetail> setsResults, ResultDetail finalResult, int maxSetPlayed)
+    private bool VerifyValidRunningSetResults(List<ResultDetail> resultDetails, IEnumerable<ResourceIndex> resourceIndexes, int maxSetPlayed)
     {
-        return VerifyFinalResultHelper.VerifyResultSettled(settledResults, maxSetPlayed)
-            && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
-            && VerifyFinalResultHelper.VerifyResult(setsResults, finalResult);
+        var inValidResources = resourceIndexes.Where(x => x.IntervalNo > maxSetPlayed)
+            .Select(x => x.ResourceId);
+
+        return !resultDetails.Where(x => x.ResourceId != ResourceIds.FullTime)
+            .Any(x => inValidResources.Contains(x.ResourceId));
     }
+
+    private async Task<(bool, List<ResultDetail>)> CheckSetSettled(Match match, IEnumerable<ResourceIndex> validResourcesPlayed, ResultDetail finalResult)
+    {
+        var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
+        var setSettlingResults = match.ResultDetails
+            .Where(x => x.ResourceId != ResourceIds.FullTime)
+            .Select(x => x.ResourceId).ToHashSet();
+
+        var maxTimeScore = await resultDetailService.MaxTimeScore(finalResult);
+
+        var existsSettle = validResourcesPlayed.All(resource => setSettlingResults.TryGetValue(resource.ResourceId, out var _)
+                || settledResults.Exists(x => x.ResourceId == resource.ResourceId));
+
+        if (existsSettle)
+        {
+            return (true, settledResults);
+        }
+
+        if (maxTimeScore > appSettingOptions.Value.RetryProcessScore) // false greater 5 min
+        {
+            var resultRelatedValid = settledResults.Select(x => x.ResourceId)
+                .Intersect(validResourcesPlayed.Select(x => x.ResourceId))
+                .ToList();
+
+            var errorMsg = CreateMessageService.RelatedResultInvalid(finalResult, resultRelatedValid, validResourcesPlayed.Select(x => x.ResourceId), false);
+            await HandleInvalidResult(match, finalResult, errorMsg);
+
+            return (false, settledResults);
+        }
+
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+        return (false, settledResults);
+
+    }
+    private static bool VerifyFinal(
+        IEnumerable<ResultDetail> settledResults,
+        IReadOnlyCollection<ResultDetail> setsResults,
+        ResultDetail finalResult,
+        int maxSetPlayed)
+            => VerifyFinalResultHelper.VerifyFakeResultSettled(settledResults, maxSetPlayed)
+               && VerifyFinalResultHelper.IsMatchResultsConsecutive(setsResults)
+               && VerifyFinalResultHelper.VerifyScoreSetWithFinalResult(setsResults, finalResult);
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match, bool isFinalInconsistentWithGameSession)
     {
@@ -65,33 +117,15 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
     }
 
 
-    private static string GetResourceToRefund(
-        IEnumerable<ResultDetail> resultSettled,
-        IReadOnlyList<ResourceIndex> resourceIndexes,
-        int maxSet,
-        int maxGamePlayed)
-    {
-        var resourceToRefund = new List<string>();
-        var resourceSettled = resultSettled.Select(x => x.ResourceId).ToList();
+    private static string GetResourceToRefund(IEnumerable<ResultDetail> resultSettled, IEnumerable<ResourceIndex> resourceIndexes, int maxSet, int maxGamePlayed) =>
+        string.Join(",", resourceIndexes
+            .Where(r => r.IntervalNo > maxGamePlayed && r.IntervalNo <= maxSet)
+            .Select(r => r.ResourceId)
+            .Except(resultSettled.Select(r => r.ResourceId)));
 
-        for (var i = maxGamePlayed + 1; i <= maxSet; i++)
-        {
-            var resource = resourceIndexes.FirstOrDefault(r => r.IntervalNo == i);
-            if (resource is not null && !resourceSettled.Contains(resource.ResourceId))
-            {
-                resourceToRefund.Add(resource.ResourceId);
-            }
-        }
-
-        return string.Join(",", resourceToRefund);
-    }
-
-    private bool ShouldSkipFinalResultCheck(Match match, ResultDetail finalResult)
-    {
-        return match.ResourceType != ResourceType.MainResource
+    private bool ShouldSkipFinalResultCheck(Match match, ResultDetail finalResult) => match.ResourceType != ResourceType.MainResource
                || finalResult is null
                || (match.SportType == SportType.BaseBall && (int)match.MatchDetail.SessionTime == 0);
-    }
 
     private async Task<bool> IsInvalidFinalResultForGameWinner(Match match, ResultDetail finalResult)
     {
@@ -112,19 +146,22 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : ICondi
     private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
     {
         await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
+
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+
+        match.ResultDetails.RemoveAll(r => r.ResourceId == ResourceIds.FullTime);
     }
 
+    private static int GetMaxSetPlayed(ResultDetail finalResult)
+        => int.TryParse(finalResult.HomeValue, out var homeScore) && int.TryParse(finalResult.AwayValue, out var awayScore)
+        ? homeScore + awayScore
+        : 0;
 
-    private bool IsChildMatch(Match match) => match.MatchDetail.ParentID != 0;
+    private static bool IsChildMatch(Match match) => match.MatchDetail.ParentID != 0;
 
-    private bool IsGameWinnerType(Match match)
-    {
-        int[] gameWinnerTypes = { 12, 14, 15, 16, 17 };
-        return match.SportType == SportType.Tennis
-            && gameWinnerTypes.Contains(match.MatchDetail.ChildMatchType);
-    }
+    private static bool IsGameWinnerType(Match match) =>
+           match.SportType == SportType.Tennis && new[] { 12, 14, 15, 16, 17 }.Contains(match.MatchDetail.ChildMatchType);
 
-    private bool IsZeroScore(ResultDetail finalResult) => finalResult.HomeValue == "0" && finalResult.AwayValue == "0";
+    private static bool IsZeroScore(ResultDetail finalResult) => finalResult.HomeValue == "0" && finalResult.AwayValue == "0";
+
 }
