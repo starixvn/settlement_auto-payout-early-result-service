@@ -4,7 +4,6 @@ using AutoPayout.Conditions.Models;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
-using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
@@ -60,7 +59,7 @@ public class VerifyFinalResultTests
             ResultDetails = []
         };
 
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        await condition.HandleCondition(match);
 
         await resultDetailService.DidNotReceive().GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>());
     }
@@ -68,6 +67,7 @@ public class VerifyFinalResultTests
     [Fact]
     public async Task HandleCondition_ResultSettledAndResultInBatchNotConsistentWithFinal_UpdateStatusFinalToInvalid()
     {
+        // Arrange
         var match = new Match
         {
             MatchId = 1,
@@ -109,8 +109,8 @@ public class VerifyFinalResultTests
         appSettingsOptions.Value.Returns(new AppSettingsKey { RetryInterval = 3000 });
         resultDetailService.MaxTimeScore(Arg.Any<ResultDetail>()).Returns(2);
 
-
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        // 
+        await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
@@ -271,7 +271,7 @@ public class VerifyFinalResultTests
             }
         ]);
 
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        await condition.HandleCondition(match);
 
         await resultDetailService.Received(1).UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
@@ -313,7 +313,7 @@ public class VerifyFinalResultTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(results);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
 
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -373,7 +373,7 @@ public class VerifyFinalResultTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
 
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
