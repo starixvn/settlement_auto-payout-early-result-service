@@ -160,7 +160,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
     private static bool IsChildMatch(Match match) => match.MatchDetail.ParentID != 0;
 
     private static bool IsGameWinnerType(Match match) =>
-           match.SportType == SportType.Tennis && new[] { 12, 14, 15, 16, 17 }.Contains(match.MatchDetail.ChildMatchType);
+           match.SportType is SportType.Tennis or SportType.BeachVolleyball && new[] { 12, 14, 15, 16, 17 }.Contains(match.MatchDetail.ChildMatchType);
 
     private static bool IsZeroScore(ResultDetail finalResult) => finalResult.HomeValue == "0" && finalResult.AwayValue == "0";
 
