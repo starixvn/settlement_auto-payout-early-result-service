@@ -7,8 +7,6 @@ public interface CreateExtraStepService
 {
     IExtraStepService Create(Match match);
 
-    IExtraStepService CreateStepAfterSettle(Match match);
-
     IEnumerable<IExtraStepService> CreateStepsServiceAfterSettle(Match match);
 }
 
@@ -17,31 +15,19 @@ public class CreateExtraStepServiceImp(
     BasketBallCashOut basketBallCashOut,
     BasketballExtraStep basketballExtraStep,
     TennisInsResourceResult tennisExtraStep,
-    AddResourceRefund eSportExtraStep) : CreateExtraStepService
+    AddResourceRefund addResourceRefund) : CreateExtraStepService
 {
     public IExtraStepService Create(Match match)
     {
         return match.SportType == SportType.BasketBall ? basketballExtraStep : extraStepService;
     }
 
-    public IExtraStepService CreateStepAfterSettle(Match match)
-    {
-        return match.SportType switch
-        {
-            SportType.ESports or SportType.BaseBall or SportType.VolleyBall or SportType.TableTennis or SportType.Badminton => eSportExtraStep,
-            SportType.Tennis when match.MatchDetail.ParentID == 0 => eSportExtraStep,
-            SportType.Tennis => tennisExtraStep,
-            SportType.BasketBall => basketBallCashOut,
-            _ => extraStepService
-        };
-    }
-
     public IEnumerable<IExtraStepService> CreateStepsServiceAfterSettle(Match match)
     {
         return match.SportType switch
         {
-            SportType.ESports or SportType.BaseBall or SportType.VolleyBall or SportType.TableTennis or SportType.Badminton => [eSportExtraStep],
-            SportType.Tennis when match.MatchDetail.ParentID == 0 => [eSportExtraStep, tennisExtraStep],
+            SportType.ESports or SportType.BaseBall or SportType.VolleyBall or SportType.TableTennis or SportType.Badminton or SportType.BeachVolleyball => [addResourceRefund],
+            SportType.Tennis when match.MatchDetail.ParentID == 0 => [addResourceRefund, tennisExtraStep],
             SportType.BasketBall => [basketBallCashOut],
             _ => [extraStepService]
         };

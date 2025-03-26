@@ -26,7 +26,7 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
 
     private static string GetRemarkInfo(Match match)
     {
-        var shorts = new[] { SportType.BaseBall, SportType.ESports, SportType.VolleyBall, SportType.TableTennis, SportType.Tennis, SportType.Badminton };
+        var shorts = new[] { SportType.BeachVolleyball, SportType.BaseBall, SportType.ESports, SportType.VolleyBall, SportType.TableTennis, SportType.Tennis, SportType.Badminton };
 
         if (shorts.Contains(match.SportType))
         {
