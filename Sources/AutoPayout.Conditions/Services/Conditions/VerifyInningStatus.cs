@@ -26,7 +26,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
     private bool ShouldValidateInning(Match match)
     {
         return match.ResourceType == ResourceType.MainResource &&
-               match.ResultDetails.Exists(r => r.ResourceId == ResourceIds.FullTime);
+               match.ResultDetails.Exists(r => r.ResourceId == ResourceIds.FullTime && match.MatchDetail.ParentID == 0);
     }
 
 

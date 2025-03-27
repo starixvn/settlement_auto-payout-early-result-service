@@ -52,7 +52,7 @@ public class VerifyBasketBallResult(
     {
         var fullTimeResult = match.ResultDetails.Find(r => r.ResourceId == ResourceIds.FullTime);
         var halfTime = results.Find(r => r.ResourceId == ResourceIds.Halftime);
-        if (fullTimeResult is null)
+        if (fullTimeResult is null || match.MatchDetail.ParentID != 0)
         {
             return;
         }

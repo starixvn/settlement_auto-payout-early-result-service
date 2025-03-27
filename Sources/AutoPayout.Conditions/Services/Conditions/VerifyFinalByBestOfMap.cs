@@ -10,10 +10,11 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : I
     public async Task HandleCondition(Match match)
     {
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
-        if (match.ResourceType != ResourceType.MainResource || finalResult is null)
+        if (match.ResourceType != ResourceType.MainResource || finalResult is null || match.MatchDetail.ParentID != 0)
         {
             return;
         }
+
         var matchDetail = match.MatchDetail;
 
         var settledResults = await resultDetailService.GetResultSettled(match.MatchId, match.SportType);
