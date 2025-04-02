@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Functions>
   <Function Name="AutoPayout">
-    <Setting Key="NAP_Set_AutoPayoutOS_ScheduleSel" SpName="NAP_Set_AutoPayoutOS_ScheduleSel" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="NAP_Set_AutoPayoutOS_ScheduleSel" SpName="NAP_Set_AutoPayoutOS_ScheduleSel_UAT2" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_MatchSelInfo" SpName="NAP_Set_MatchSelInfo" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Admin_Settlement_Validation_PrePush" SpName="NAP_Admin_Settlement_Validation_PrePush" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoPayout_MatchSelDetail" SpName="NAP_Set_AutoPayout_MatchSelDetail" DbName="DBPRO.bodb02.wsv_nap" />
@@ -22,6 +22,7 @@
     <Setting Key="NAP_Set_AutoPayoutPrepareOS_Insert" SpName="NAP_Set_AutoPayoutPrepareOS_Insert" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoPayout_LeagueSetting_Sel" SpName="NAP_Set_AutoPayout_LeagueSetting_Sel" DbName="DBPRO.bodb02.wsv_nap" />
 	  <Setting Key="NAP_Set_AutoPayout_ResultStatusSel" SpName="NAP_Set_AutoPayout_ResultStatusSel" DbName="DBPRO.bodb02.wsv_nap" />
+  	<Setting Key="NAP_Admin_ProviderExternalResultDetailOSIns" SpName="NAP_Admin_ProviderExternalResultDetailOSIns" DbName="DBPRO.bodb02.wsv_nap" />
   </Function>
   <Function Name="Scale Out TransDb">
     <Function Name="NAP_Admin_Settlement_Validation_Ticket">
