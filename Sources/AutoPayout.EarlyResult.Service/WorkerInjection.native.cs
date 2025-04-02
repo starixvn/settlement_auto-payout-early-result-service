@@ -30,7 +30,7 @@ public static class WorkerInjection
 
         service.AddSingleton<IAutoService, AutoService>();
         service.AddSingleton<ProcessService, ProcessServiceImp>();
-        service.AddSingleton<Creator, CreatorImp>();
+        service.AddTransient<Creator, CreatorImp>();
         service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         service.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
@@ -43,19 +43,19 @@ public static class WorkerInjection
         service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
         service.AddTransient<ExtraResultService, OverTimeServiceImp>();
         service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
-        service.AddSingleton<VerifyMatchStatus>();
-        service.AddSingleton<VerifyRunningOdds>();
-        service.AddSingleton<VerifyConfirmScore>();
-        service.AddSingleton<VerifyTimeResult>();
-        service.AddSingleton<VerifyBeforePushProfile>();
-        service.AddSingleton<VerifyInningStatus>();
-        service.AddSingleton<VerifyFinalResult>();
-        service.AddSingleton<VerifyFinalByBestOfMap>();
-        service.AddSingleton<VerifyFinalWithExtraResult>();
-        service.AddSingleton<IgnoreVerify>();
-        service.AddSingleton<VerifyBasketBallResult>();
-        service.AddSingleton<VerifySettledRelateResult>();
-        service.AddSingleton<VerifyResultWithResourceId>();
+        service.AddTransient<VerifyMatchStatus>();
+        service.AddTransient<VerifyRunningOdds>();
+        service.AddTransient<VerifyConfirmScore>();
+        service.AddTransient<VerifyTimeResult>();
+        service.AddTransient<VerifyBeforePushProfile>();
+        service.AddTransient<VerifyInningStatus>();
+        service.AddTransient<VerifyFinalResult>();
+        service.AddTransient<VerifyFinalByBestOfMap>();
+        service.AddTransient<VerifyFinalWithExtraResult>();
+        service.AddTransient<IgnoreVerify>();
+        service.AddTransient<VerifyBasketBallResult>();
+        service.AddTransient<VerifySettledRelateResult>();
+        service.AddTransient<VerifyResultWithResourceId>();
         service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
         service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
 

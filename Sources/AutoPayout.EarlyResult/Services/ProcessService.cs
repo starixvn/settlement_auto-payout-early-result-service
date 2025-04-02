@@ -27,6 +27,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
             match.ResultDetails = Filter(match);
 
             await PushAndWriteLog(match, conditions);
+
         }
         catch (ServiceException exception)
         {
