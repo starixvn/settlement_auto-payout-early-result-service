@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalResult(ResultDetailService resultDetailService) : AbstractCondition
+public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingOptions) : AbstractCondition
 {
     public override async Task HandleCondition(Match match)
     {
@@ -54,9 +54,9 @@ public class VerifyFinalResult(ResultDetailService resultDetailService) : Abstra
             match.ResourceRefund = GetResourceToRefund(settledResults, resourceIndexes, maxSet, maxSetPlayed);
         }
 
+        await HandleNextCondition(match);
     }
 
-        await HandleNextCondition(match);
 
     private bool VerifyValidRunningSetResults(List<ResultDetail> resultDetails, IEnumerable<ResourceIndex> resourceIndexes, int maxSetPlayed)
     {
