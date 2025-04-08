@@ -30,6 +30,7 @@ public class CreatorImp(IServiceProvider serviceProvider) : Creator
             ConditionId.VerifyFinalResultByBestOfMap => provider.GetRequiredService<VerifyFinalByBestOfMap>(),
             ConditionId.VerifyBasketBallFinalResult => provider.GetRequiredService<VerifyBasketBallResult>(),
             ConditionId.VerifyWithResourceId => provider.GetRequiredService<VerifyResultWithResourceId>(),
+            ConditionId.VerifyFinalBetStatus => provider.GetRequiredService<VerifyFinalWithBetStatus>(),
             _ => provider.GetRequiredService<IgnoreVerify>(),
         };
     }

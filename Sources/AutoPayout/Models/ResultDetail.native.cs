@@ -1,5 +1,5 @@
-﻿using AutoPayout.Constants;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
+using AutoPayout.Constants;
 
 namespace AutoPayout.Models;
 
@@ -54,7 +54,7 @@ public class ResultDetail
     public string RelatedInfo { get; set; }
 
     [XmlIgnore]
-    public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = new List<ExternalSourceInfo>();
+    public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = [];
 
     [XmlIgnore]
     public byte ResultType => ResourceIds.TimePattern.Any(ResourceId.StartsWith) ? ResultTypes.Time : default;

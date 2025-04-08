@@ -4,6 +4,7 @@ using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
 using Fanex.Data.Repository;
+using Fanex.Settlement.Converter.Services;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.EarlyResult.Services;
@@ -14,7 +15,12 @@ public interface MatchService
     Task<List<Match>> GetMatchDetails(List<Match> matches);
 }
 
-public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cache, IDynamicRepository repository)
+public class MatchServiceImp(
+    IOptions<AppSettingsKey> appSettingsKey,
+    ICache cache,
+    IDynamicRepository repository,
+    XmlConvertService xmlConvertService
+    )
         : MatchService
 {
     public async Task<List<Match>> GetMatches()
@@ -53,8 +59,10 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
                 : appSettingsKey.Value.AutoPayoutGroup,
         };
 
-        var (firstResultSet, secondResultSet) =
-            await repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(criteria);
+        var (firstResultSet, secondResultSet, thirdResults) =
+            await repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(criteria);
+
+        await InsertProviderExternal(thirdResults);
 
         return IgnoreResult(secondResultSet)
             .GroupBy(r => new { r.MatchId, r.LeagueId, r.SportType, r.ResourceType }).Select(g => new Match
@@ -71,6 +79,37 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
                 EarlyRetryTime = g.First().EarlyRetryTime,
                 MainRetryTime = g.First().MainRetryTime,
             }).Where(m => !string.IsNullOrEmpty(m.Conditions)).ToList();
+    }
+
+    private async Task InsertProviderExternal(IEnumerable<ResultDetail> resultDetails)
+    {
+        if (!resultDetails.Any())
+        {
+            return;
+        }
+
+        var matches = resultDetails.GroupBy(r => r.MatchId);
+
+        foreach (var match in matches)
+        {
+            var criteria = new InsertProviderExternalResultDetailCriteria
+            {
+                MatchId = match.Key,
+                Resources = CreateResources([.. match])
+            };
+
+            await repository.ExecuteAsync(criteria);
+        }
+    }
+
+    public string CreateResources(List<ResultDetail> selectedResources)
+    {
+        var resources = new Resources<ResultDetail>
+        {
+            ResourceItems = selectedResources
+        };
+
+        return xmlConvertService.Serialize(resources);
     }
 
     private static IEnumerable<ResultDetail> IgnoreResult(IEnumerable<ResultDetail> resultDetails)
@@ -91,7 +130,7 @@ public class MatchServiceImp(IOptions<AppSettingsKey> appSettingsKey, ICache cac
         var listMatch = matchDetails.ToList();
         foreach (var match in matches)
         {
-            match.MatchDetail = listMatch.FirstOrDefault(m => m.matchId == match.MatchId);
+            match.MatchDetail = listMatch.FirstOrDefault(m => m.MatchId == match.MatchId);
         }
 
         return matches.Where(m => m.MatchDetail != null).ToList();

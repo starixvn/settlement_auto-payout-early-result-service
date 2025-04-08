@@ -31,7 +31,13 @@ public class CreateCriteriaServiceTests
                         }
                     }
                 }
-            }
+            },
+            MatchDetail = new MatchDetail()
+            {
+                BetStatus = "1-2,3-4",
+                LeagueType = 1,
+                ParentID = 0
+            },
         };
 
         var criteria = service.QuerySettle(match);

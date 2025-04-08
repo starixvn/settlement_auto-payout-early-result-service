@@ -3,20 +3,72 @@ using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalWithBetStatus : ICondition
+public class VerifyFinalWithBetStatus : AbstractCondition
 {
     private const int numberOfSets = 3;
+    private const int numberOfSetsWithOt = 4;
     private readonly ResultDetailService resultDetailService;
-    private readonly WriteLogService writeLogService;
+    private readonly int[] ChildMatchTypeCheck = [18, 19, 20, 23, 24];
 
-    public VerifyFinalWithBetStatus(ResultDetailService resultDetailService, WriteLogService writeLogService)
+    public VerifyFinalWithBetStatus(ResultDetailService resultDetailService)
     {
         this.resultDetailService = resultDetailService;
-        this.writeLogService = writeLogService;
     }
-    public async Task HandleCondition(Match match)
+
+
+    private bool IsValidBetStatus(Match match)
     {
-        if (match.ResourceType != ResourceType.MainResource)
+        if (string.IsNullOrEmpty(match.MatchDetail.BetStatus))
+        {
+            return false;
+        }
+
+        var betStatusArray = match.MatchDetail.BetStatus.Split(',');
+        var numSets = GetNumberOfSets(match.MatchDetail);
+
+        return betStatusArray.Length >= numSets;
+    }
+
+    private static List<BetStatus> ParseBetStatusList(string betStatus)
+    {
+        var betStatusArray = betStatus.Split(',');
+        return [.. betStatusArray[..numberOfSets].Select(value => new BetStatus(value.Split('-')[0], value.Split('-')[1]))];
+    }
+
+    private static int GetNumberOfSets(MatchDetail matchDetail)
+    {
+        if (matchDetail.ParentID != 0 && matchDetail.LeagueType == 2)
+        {
+            return numberOfSetsWithOt;
+        }
+
+        return numberOfSets;
+    }
+
+    private static (int homeScore, int awayScore) CalculateScores(List<BetStatus> betStatusList)
+    {
+        var homeScore = betStatusList.Sum(value => int.Parse(value.Home));
+        var awayScore = betStatusList.Sum(value => int.Parse(value.Away));
+        return (homeScore, awayScore);
+    }
+
+    private static bool IsValidScores((int homeScore, int awayScore) scores, ResultDetail finalResult)
+        => scores.homeScore == int.Parse(finalResult.HomeValue) &&
+               scores.awayScore == int.Parse(finalResult.AwayValue);
+
+    private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
+    {
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, [finalResult], errorMessage);
+
+        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
+
+        match.ResultDetails.RemoveAll(r => r.ResourceId == ResourceIds.FullTime);
+    }
+
+    public override async Task HandleCondition(Match match)
+    {
+        if (match.ResourceType != ResourceType.MainResource
+            || (match.MatchDetail.ParentID != 0 && !ChildMatchTypeCheck.Contains(match.MatchDetail.ChildMatchType)))
         {
             return;
         }
@@ -24,7 +76,7 @@ public class VerifyFinalWithBetStatus : ICondition
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
         var betStatus = match.MatchDetail.BetStatus;
 
-        if (!IsValidBetStatus(betStatus))
+        if (!IsValidBetStatus(match))
         {
             await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
             return;
@@ -37,48 +89,6 @@ public class VerifyFinalWithBetStatus : ICondition
         {
             await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
         }
-    }
-
-
-    private bool IsValidBetStatus(string betStatus)
-    {
-        if (string.IsNullOrEmpty(betStatus))
-        {
-            return false;
-        }
-
-        var betStatusArray = betStatus.Split(',');
-        return betStatusArray.Length >= numberOfSets;
-    }
-
-    private List<BetStatus> ParseBetStatusList(string betStatus)
-    {
-        var betStatusArray = betStatus.Split(',');
-        return betStatusArray[..numberOfSets]
-            .Select(value => new BetStatus(value.Split('-')[0], value.Split('-')[1]))
-            .ToList();
-    }
-
-    private (int homeScore, int awayScore) CalculateScores(List<BetStatus> betStatusList)
-    {
-        var homeScore = betStatusList.Sum(value => int.Parse(value.Home));
-        var awayScore = betStatusList.Sum(value => int.Parse(value.Away));
-        return (homeScore, awayScore);
-    }
-
-    private bool IsValidScores((int homeScore, int awayScore) scores, ResultDetail finalResult)
-    {
-        return scores.homeScore == int.Parse(finalResult.HomeValue) &&
-               scores.awayScore == int.Parse(finalResult.AwayValue);
-    }
-
-    private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
-    {
-        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
-
-        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
-
-        match.ResultDetails.RemoveAll(r => r.ResourceId == ResourceIds.FullTime);
     }
 
     private sealed record BetStatus(string Home, string Away);

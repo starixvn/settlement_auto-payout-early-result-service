@@ -6,6 +6,8 @@ public class Match
 
     public int LeagueId { get; set; }
 
+    public int ChildLeagueType { get; set; }
+
     public string Conditions { get; set; }
 
     public int ResourceType { get; set; }
