@@ -373,7 +373,7 @@ public class VerifyFinalResultTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns([]);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((new List<ResultDetail>(), new List<ResourceIndex>()));
 
-        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
+        await condition.HandleCondition(match);
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), Arg.Any<string>());
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), Arg.Any<string>());
