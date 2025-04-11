@@ -30,7 +30,7 @@ public class VerifyFinalWithBetStatus : AbstractCondition
     private static List<BetStatus> ParseBetStatusList(string betStatus)
     {
         var betStatusArray = betStatus.Split(',');
-        return [.. betStatusArray[..numberOfSets].Select(value => value.Contains('-')
+        return [.. betStatusArray.Select(value => value.Contains('-')
             ? new BetStatus(value.Split('-')[0], value.Split('-')[1])
             : new BetStatus("0","0"))
         ];
@@ -38,7 +38,7 @@ public class VerifyFinalWithBetStatus : AbstractCondition
 
     private static int GetNumberOfSets(MatchDetail matchDetail, List<BetStatus> betStatusList)
     {
-        if (matchDetail.ParentID == 0 || matchDetail.ParentID != 0 && matchDetail.LeagueType == 1)
+        if (matchDetail.ParentID == 0 || IsChildMatchRegularTimeOnly(matchDetail)) // Regular Time Only
         {
             return numberOfSets;
         }
@@ -63,13 +63,19 @@ public class VerifyFinalWithBetStatus : AbstractCondition
             return false;
         }
 
-        if (matchDetail.ChildMatchType == 23 && finalHomeScore == finalAwayScore)
+        if (IsChildMatchIncludeOT(matchDetail) && finalHomeScore == finalAwayScore)
         {
             return false;
         }
 
         return true;
     }
+
+    private static bool IsChildMatchIncludeOT(MatchDetail matchDetail)
+        => matchDetail.ParentID != 0 && (matchDetail.LeagueType == 2 || matchDetail.ChildMatchType == 23);
+
+    private static bool IsChildMatchRegularTimeOnly(MatchDetail matchDetail)
+        => matchDetail.ParentID != 0 && (matchDetail.LeagueType == 1 || matchDetail.ChildMatchType == 24);
 
 
     private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
