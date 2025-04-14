@@ -28,5 +28,5 @@ public class MatchDetail
 
     public int ChildLeagueType { get; set; }
 
-    public int LeagueType { get; set; }
+    public int? LeagueType { get; set; }
 }
