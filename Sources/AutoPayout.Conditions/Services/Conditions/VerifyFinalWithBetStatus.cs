@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 
@@ -15,26 +16,27 @@ public class VerifyFinalWithBetStatus : AbstractCondition
         this.resultDetailService = resultDetailService;
     }
 
-
-    private static bool IsValidBetStatus(Match match)
+    private bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
     {
-        if (string.IsNullOrEmpty(match.MatchDetail.BetStatus))
+        try
         {
+            betStatusList = [];
+            if (string.IsNullOrEmpty(betStatus))
+            {
+                return false;
+            }
+
+            betStatusList = [.. betStatus.Split(',')
+                        .Select(v => v.Split('-') is [var home, var away]
+                                     ? new BetStatus(home, away)
+                                     : new BetStatus("0", "0"))];
+            return true;
+        }
+        catch
+        {
+            betStatusList = [];
             return false;
         }
-
-        var betStatusArray = match.MatchDetail.BetStatus.Split(',');
-
-        return betStatusArray.Length >= numberOfSets;
-    }
-
-    private static List<BetStatus> ParseBetStatusList(string betStatus)
-    {
-        var betStatusArray = betStatus.Split(',');
-        return [.. betStatusArray.Select(value => value.Contains('-')
-            ? new BetStatus(value.Split('-')[0], value.Split('-')[1])
-            : new BetStatus("0","0"))
-        ];
     }
 
     private static int GetNumberOfSets(MatchDetail matchDetail)
@@ -91,24 +93,26 @@ public class VerifyFinalWithBetStatus : AbstractCondition
     {
         var matchDetail = match.MatchDetail;
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
-        var betStatus = matchDetail.BetStatus;
 
         if (match.ResourceType != ResourceType.MainResource || finalResult == null)
         {
             return;
         }
 
+        var betStatus = matchDetail.BetStatus;
+        var isValidBetStatus = TryParseBetStatus(betStatus, out var betStatusList);
+
         // regular only or child match include OT
         if (IsMatchRegularTimeOnly(matchDetail) || IsChildMatchIncludeOT(matchDetail))
         {
-            if (!IsValidBetStatus(match))
+            if (!isValidBetStatus || betStatusList.Count < numberOfSets || (IsMatchRegularTimeOnly(matchDetail) && HasOt(betStatusList)))
             {
                 await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
                 return;
             }
 
             var sets = GetNumberOfSets(matchDetail);
-            await CheckScoreWithBetStatus(match, finalResult, betStatus, sets);
+            await CheckScoreWithBetStatus(match, finalResult, betStatusList, sets);
             return;
         }
 
@@ -123,14 +127,12 @@ public class VerifyFinalWithBetStatus : AbstractCondition
         }
 
         // 1p 2p 3p
-        await CheckScoreWithBetStatus(match, finalResult, betStatus);
+        await CheckScoreWithBetStatus(match, finalResult, betStatusList);
 
     }
 
-    private async Task CheckScoreWithBetStatus(Match match, ResultDetail finalResult, string betStatus, int? numberOfSets = null)
+    private async Task CheckScoreWithBetStatus(Match match, ResultDetail finalResult, List<BetStatus> betStatusList, int? numberOfSets = null)
     {
-        var betStatusList = ParseBetStatusList(betStatus);
-
         var validSets = betStatusList.Take(numberOfSets ?? betStatusList.Count).ToList();
         var scores = CalculateScores(validSets);
 
@@ -138,6 +140,15 @@ public class VerifyFinalWithBetStatus : AbstractCondition
         {
             await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
         }
+    }
+
+    private static bool HasOt(List<BetStatus> betStatusList)
+    {
+        return betStatusList.Count == numberOfSetsWithOt
+            && string.IsNullOrEmpty(betStatusList[3].Home)
+            && string.IsNullOrEmpty(betStatusList[3].Away)
+            && betStatusList[2].Home != "0"
+            && betStatusList[2].Away != "0";
     }
 
     private sealed record BetStatus(string Home, string Away);
