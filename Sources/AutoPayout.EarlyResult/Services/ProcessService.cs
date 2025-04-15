@@ -1,5 +1,4 @@
-﻿using AutoPayout.Conditions.Constants;
-using AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
 using Microsoft.Extensions.Options;
@@ -85,7 +84,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private List<ResultDetail> Filter(Match match)
     {
-        if (match.SportType == SportType.Tennis && match.MatchDetail.ParentID != 0)
+        if (match.MatchDetail.ParentID != 0)
         {
             return match.ResultDetails.Where(x => x.ResourceId == ResourceIds.FullTime).ToList();
         }
