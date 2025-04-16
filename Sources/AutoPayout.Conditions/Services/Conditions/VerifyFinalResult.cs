@@ -37,7 +37,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 
         if (!isSetSettled)
         {
-            await HandleNextCondition(match);
+            // Please do not add handle next condition
             return;
         }
 

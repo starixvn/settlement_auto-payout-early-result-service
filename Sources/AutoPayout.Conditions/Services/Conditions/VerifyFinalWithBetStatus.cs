@@ -90,6 +90,7 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
 
         if (match.ResourceType != ResourceType.MainResource || finalResult == null)
         {
+            await HandleNextCondition(match);
             return;
         }
 
@@ -102,11 +103,13 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
             if (!isValidBetStatus || betStatusList.Count < numberOfSets || (IsMatchRegularTimeOnly(matchDetail) && HasOt(betStatusList)))
             {
                 await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
+                await HandleNextCondition(match);
                 return;
             }
 
             var sets = GetNumberOfSets(matchDetail);
             await CheckScoreWithBetStatus(match, finalResult, betStatusList, sets);
+            await HandleNextCondition(match);
             return;
         }
 
@@ -117,11 +120,13 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
             {
                 await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
             }
+            await HandleNextCondition(match);
             return;
         }
 
         // 1p 2p 3p
         await CheckScoreWithBetStatus(match, finalResult, betStatusList);
+        await HandleNextCondition(match);
 
     }
 

@@ -19,6 +19,7 @@ public abstract class AbstractCondition : ICondition
         {
             throw new ServiceException { MarkFail = false };
         }
+
         if (condition != null)
         {
             await condition.HandleCondition(match);
