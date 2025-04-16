@@ -1,20 +1,13 @@
-using System.Security.Cryptography.X509Certificates;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalWithBetStatus : AbstractCondition
+public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) : AbstractCondition
 {
     private const int numberOfSets = 3;
     private const int numberOfSetsWithOt = 4;
-    private readonly ResultDetailService resultDetailService;
     private readonly int[] ChildMatchTypeCheck = [18, 19, 20, 22, 23, 24];
-
-    public VerifyFinalWithBetStatus(ResultDetailService resultDetailService)
-    {
-        this.resultDetailService = resultDetailService;
-    }
 
     private bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
     {
@@ -91,6 +84,7 @@ public class VerifyFinalWithBetStatus : AbstractCondition
 
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyFinalBetStatus} - {GetType().Name}");
         var matchDetail = match.MatchDetail;
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 

@@ -12,6 +12,7 @@ public class VerifyBasketBallResult(
 
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyBasketBallFinalResult} - {GetType().Name}");
         await HandleQuarter(match);
 
         await HandleFinal(match);

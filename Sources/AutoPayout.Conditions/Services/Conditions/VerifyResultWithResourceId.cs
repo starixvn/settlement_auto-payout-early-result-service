@@ -8,6 +8,7 @@ public class VerifyResultWithResourceId(ResultDetailService resultDetailService,
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyWithResourceId} - {GetType().Name}");
         foreach (var result in match.ResultDetails)
         {
             var resourceId = result.ResourceId;

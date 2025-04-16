@@ -1,10 +1,11 @@
 ﻿namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifySettledRelateResult(IDynamicRepository repository) :  AbstractCondition
+public class VerifySettledRelateResult(IDynamicRepository repository) : AbstractCondition
 
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyRelatedSettleResult} - {GetType().Name}");
         await CheckRelatedResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();

@@ -9,6 +9,7 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyEsTimeResult} - {GetType().Name}");
         var timeResults = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
 
         if (!timeResults.Any())

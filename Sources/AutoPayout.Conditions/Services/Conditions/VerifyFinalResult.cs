@@ -9,6 +9,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyFinalResultGameSession} - {GetType().Name}");
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
         if (ShouldSkipFinalResultCheck(match, finalResult) || await IsInvalidFinalResultForGameWinner(match, finalResult))

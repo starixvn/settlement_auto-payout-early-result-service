@@ -12,6 +12,7 @@ public class VerifyFinalWithExtraResult(
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyBaseballFinalResult} - {GetType().Name}");
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
         var notCheckFinalResult = match.ResourceType != ResourceType.MainResource

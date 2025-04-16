@@ -4,6 +4,7 @@ public class VerifyMatchStatus(IDynamicRepository repository) : AbstractConditio
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyMatchStatus} - {GetType().Name}");
         var criteria = new MatchRemarkCriteria { MatchId = match.MatchId };
         var (matchStatus, _) = await repository.FetchMultipleAsync<MatchRemark, object>(criteria);
 

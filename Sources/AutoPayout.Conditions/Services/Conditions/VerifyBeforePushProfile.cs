@@ -14,6 +14,7 @@ public class VerifyBeforePushProfile(ScaleOutSettleService scaleOutSettleService
 
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyBeforePush} - {GetType().Name}");
         var request = new EventTicketRequest
         {
             MatchId = match.MatchId,

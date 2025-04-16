@@ -9,6 +9,7 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyConfirmScore} - {GetType().Name}");
         var timeResult = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
         match.ResultDetails = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
 

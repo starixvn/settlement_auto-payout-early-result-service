@@ -16,6 +16,7 @@ public class VerifyInningStatus(IDynamicRepository repository, ResultDetailServi
 
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyInningStatus} - {GetType().Name}");
         if (ShouldValidateInning(match))
         {
             await ValidateInning(match);

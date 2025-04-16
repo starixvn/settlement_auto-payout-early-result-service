@@ -6,6 +6,7 @@ public class VerifyRunningOdds(IDynamicRepository repository) : AbstractConditio
 {
     public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyRunningOdds} - {GetType().Name}");
         var criteria = CreateCriteria(match);
 
         await repository.ExecuteAsync(criteria);
