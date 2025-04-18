@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Functions>
   <Function Name="AutoPayout">
-    <Setting Key="NAP_Set_AutoPayoutOS_ScheduleSel" SpName="NAP_Set_AutoPayoutOS_ScheduleSel_UAT2" DbName="DBPRO.bodb02.wsv_nap" />
-    <Setting Key="NAP_Set_MatchSelInfo" SpName="NAP_Set_MatchSelInfo_UAT2" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="NAP_Set_AutoPayoutOS_ScheduleSel" SpName="NAP_Set_AutoPayoutOS_ScheduleSel" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="NAP_Set_MatchSelInfo" SpName="NAP_Set_MatchSelInfo" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Admin_Settlement_Validation_PrePush" SpName="NAP_Admin_Settlement_Validation_PrePush" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_Set_AutoPayout_MatchSelDetail" SpName="NAP_Set_AutoPayout_MatchSelDetail" DbName="DBPRO.bodb02.wsv_nap" />
-    <Setting Key="NAP_Set_AutoPayoutOS_ResultSel" SpName="NAP_Set_AutoPayoutOS_ResultSel_UAT2" DbName="DBPRO.bodb02.wsv_nap" />
+    <Setting Key="NAP_Set_AutoPayoutOS_ResultSel" SpName="NAP_Set_AutoPayoutOS_ResultSel" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_SettlementLog_Ins" SpName="NAP_SettlementLog_Ins" DbName="DBLOG.bodb_CustomerLog.wsv_nap" />
     <Setting Key="NAP_Set_SettlementStatusUpd" SpName="NAP_Set_SettlementStatusUpd" DbName="DBPRO.bodb02.wsv_nap" />
     <Setting Key="NAP_UserLog_WriteLogPreSettlement" SpName="NAP_UserLog_WriteLogPreSettlement" DbName="DBUserLog.LogTDB.wsv_nap" />
