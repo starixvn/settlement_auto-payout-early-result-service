@@ -8,10 +8,11 @@ namespace AutoPayout.Conditions.Services.Conditions;
 public class VerifyFinalWithExtraResult(
     ResultDetailService resultDetailService,
     IOptions<AppSettingsKey> options,
-    ExtraResultService extraResultService) : ICondition
+    ExtraResultService extraResultService) : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyBaseballFinalResult} - {GetType().Name}");
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
         var notCheckFinalResult = match.ResourceType != ResourceType.MainResource
@@ -20,6 +21,7 @@ public class VerifyFinalWithExtraResult(
 
         if (notCheckFinalResult)
         {
+            await HandleNextCondition(match);
             return;
         }
 
@@ -31,6 +33,9 @@ public class VerifyFinalWithExtraResult(
         {
             await HandleInValidFinalResult(match, finalResult, errorMessage);
         }
+
+        await HandleNextCondition(match);
+
     }
 
     public async Task<string> VerifyFinalResult(Match match, ResultDetail finalResult, List<ResultDetail> settledResults)

@@ -1,19 +1,16 @@
-﻿using AutoPayout.Exceptions;
+﻿namespace AutoPayout.Conditions.Services.Conditions;
 
-namespace AutoPayout.Conditions.Services.Conditions;
+public class VerifySettledRelateResult(IDynamicRepository repository) : AbstractCondition
 
-public class VerifySettledRelateResult(IDynamicRepository repository) : ICondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyRelatedSettleResult} - {GetType().Name}");
         await CheckRelatedResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
-        if (match.ResultDetails.Count == 0)
-        {
-            throw new ServiceException { MarkFail = false };
-        }
+        await HandleNextCondition(match);
     }
 
     private async Task CheckRelatedResults(Match match)

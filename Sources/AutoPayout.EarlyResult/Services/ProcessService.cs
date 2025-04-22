@@ -15,7 +15,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         CreateConditionChainService createConditionChainService,
         SettlementService settlementService,
         MatchPoolService matchPoolService,
-        MatchService matchService,
         UpdateResultStatusService updateResultStatusService)
     : ProcessService
 {
@@ -25,12 +24,10 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             var conditions = createConditionChainService.CreateConditionChain(match.Conditions.Split(','));
 
-            var matchDetail = await matchService.GetMatchDetail(match.MatchId);
-            match.MatchDetail = matchDetail;
-
             match.ResultDetails = Filter(match);
 
             await PushAndWriteLog(match, conditions);
+
         }
         catch (ServiceException exception)
         {
@@ -42,6 +39,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
         finally
         {
+            await Fanex.Logging.LogService.InfoAsync($"Match({match.MatchId}) - Sport({match.SportType}) has run through: {string.Join(", ", match.LogCondition)}");
             matchPoolService.RemoveMatch(match);
         }
     }
@@ -76,10 +74,12 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
     {
-        foreach (var condition in conditions)
+        for (var i = 0; i < conditions.Count - 1; i++)
         {
-            await condition.HandleCondition(match);
+            conditions[i].SetNext(conditions[i + 1]);
         }
+
+        await conditions[0].HandleCondition(match);
     }
 
     private List<ResultDetail> Filter(Match match)

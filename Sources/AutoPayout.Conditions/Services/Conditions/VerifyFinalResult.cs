@@ -5,14 +5,16 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingOptions) : ICondition
+public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingOptions) : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyFinalResultGameSession} - {GetType().Name}");
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
         if (ShouldSkipFinalResultCheck(match, finalResult) || await IsInvalidFinalResultForGameWinner(match, finalResult))
         {
+            await HandleNextCondition(match);
             return;
         }
 
@@ -21,6 +23,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
         if (!VerifyFinalResultHelper.IsValidFinalResultSetWin(finalResult, minSet, maxSet))
         {
             await HandleFinalResult(finalResult, match, true);
+            await HandleNextCondition(match);
             return;
         }
 
@@ -34,6 +37,7 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 
         if (!isSetSettled)
         {
+            // Please do not add handle next condition
             return;
         }
 
@@ -52,8 +56,9 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
             match.ResourceRefund = GetResourceToRefund(settledResults, resourceIndexes, maxSet, maxSetPlayed);
         }
 
-
+        await HandleNextCondition(match);
     }
+
 
     private bool VerifyValidRunningSetResults(List<ResultDetail> resultDetails, IEnumerable<ResourceIndex> resourceIndexes, int maxSetPlayed)
     {

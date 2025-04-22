@@ -5,10 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : ICondition
+public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyFinalResultByBestOfMap} - {GetType().Name}");
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
         if (match.ResourceType != ResourceType.MainResource || finalResult is null || match.MatchDetail.ParentID != 0)
         {
@@ -33,6 +34,8 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : I
         {
             await HandleFinalResult(finalResult, match);
         }
+
+        await HandleNextCondition(match);
     }
 
     private static int GetMaxGamePlayed(MatchDetail matchDetail, ResultDetail finalResult)

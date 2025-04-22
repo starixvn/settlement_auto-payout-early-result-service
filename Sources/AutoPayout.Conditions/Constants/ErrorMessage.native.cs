@@ -48,4 +48,6 @@ public static class ErrorMessage
 
     public const string InvalidScoreGameWinner = "Failed Auto Payout: should not have FT＝'0:0' on Xth Set Game Winner League";
 
+    public const string InconsistentInterval = "Failed Direct Payout: FT is inconsistent with intervals or OT";
+
 }

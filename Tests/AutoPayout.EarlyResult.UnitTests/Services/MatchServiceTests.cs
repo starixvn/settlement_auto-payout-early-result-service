@@ -6,6 +6,7 @@ using AutoPayout.EarlyResult.Services;
 using AutoPayout.Models;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
+using Fanex.Settlement.Converter.Services;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -16,10 +17,12 @@ public class MatchServiceTests
     private readonly IDynamicRepository repository;
     private readonly MatchServiceImp matchService;
     private readonly ICache cache;
+    private readonly XmlConvertService xmlConvertService;
 
     public MatchServiceTests()
     {
         repository = Substitute.For<IDynamicRepository>();
+        xmlConvertService = Substitute.For<XmlConvertService>();
         cache = new RedisCache(new RedisCacheOptions
         {
             ConnectionString = "10.18.200.131:16379,password=foo1@bared,defaultDatabase=11",
@@ -36,7 +39,7 @@ public class MatchServiceTests
 
         var appSettingsOptions = Options.Create(settings);
 
-        matchService = new MatchServiceImp(appSettingsOptions, cache, repository);
+        matchService = new MatchServiceImp(appSettingsOptions, cache, repository, xmlConvertService);
     }
 
     [Fact]
@@ -56,7 +59,7 @@ public class MatchServiceTests
                 MainCheckList = "4,5,6"
             },
         };
-        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results, []));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync(CacheKey.LeagueId, "111123,456", cachePolicy);
 
@@ -82,7 +85,7 @@ public class MatchServiceTests
                 MainCheckList = "4,5,6"
             }
         };
-        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results, []));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync(CacheKey.LeagueId, "", cachePolicy);
 
@@ -122,7 +125,7 @@ public class MatchServiceTests
                 MainCheckList = "4,5,6"
             },
         };
-        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results, []));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync(CacheKey.LeagueId, "456", cachePolicy);
 
@@ -161,7 +164,7 @@ public class MatchServiceTests
                 MainCheckList = "4,5,6"
             },
         };
-        repository.FetchMultipleAsync<ConditionSetting, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results));
+        repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(Arg.Any<GetResultCriteria>()).Returns((conditions, results, []));
         var cachePolicy = new CacheItemOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
         await cache.SetAsync(CacheKey.LeagueId, "456", cachePolicy);
 

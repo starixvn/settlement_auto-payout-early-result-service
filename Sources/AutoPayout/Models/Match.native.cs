@@ -1,10 +1,14 @@
-﻿namespace AutoPayout.Models;
+﻿using Newtonsoft.Json;
+
+namespace AutoPayout.Models;
 
 public class Match
 {
     public int MatchId { get; set; }
 
     public int LeagueId { get; set; }
+
+    public int ChildLeagueType { get; set; }
 
     public string Conditions { get; set; }
 
@@ -23,6 +27,8 @@ public class Match
     public MatchDetail MatchDetail { get; set; }
 
     public string UId => Guid.NewGuid().ToString();
+
+    [JsonIgnore] public List<string> LogCondition { get; set; } = [];
 
     public override bool Equals(object obj)
     {

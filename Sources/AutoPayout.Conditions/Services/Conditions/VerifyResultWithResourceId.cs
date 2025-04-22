@@ -1,14 +1,14 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Criteria;
-using AutoPayout.Exceptions;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifyResultWithResourceId(ResultDetailService resultDetailService, IDynamicRepository repository)
-    : ICondition
+    : AbstractCondition
 {
-    public async Task HandleCondition(Match match)
+    public override async Task HandleCondition(Match match)
     {
+        match.LogCondition.Add($"{ConditionId.VerifyWithResourceId} - {GetType().Name}");
         foreach (var result in match.ResultDetails)
         {
             var resourceId = result.ResourceId;
@@ -30,10 +30,7 @@ public class VerifyResultWithResourceId(ResultDetailService resultDetailService,
 
         match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
 
-        if (match.ResultDetails.Count == 0)
-        {
-            throw new ServiceException { MarkFail = false };
-        }
+        await HandleNextCondition(match);
     }
 
     private async Task HandleInvalidResults(Match match)

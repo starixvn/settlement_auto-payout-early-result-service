@@ -9,7 +9,7 @@ public interface MatchPoolService
 
 public class MatchPoolServiceImp(MatchService matchService) : MatchPoolService
 {
-    public List<Match> PoolOfMatches { get; } = new();
+    public List<Match> PoolOfMatches { get; } = [];
 
     private readonly Lock lockObject = new();
 
@@ -24,13 +24,17 @@ public class MatchPoolServiceImp(MatchService matchService) : MatchPoolService
     public async Task<List<Match>> GetNewMatches()
     {
         var matches = await matchService.GetMatches();
+        var newMatches = matches.Except(PoolOfMatches).ToList();
+        var newValidMatches = await matchService.GetMatchDetails(newMatches);
 
-        lock (lockObject)
+        if (newValidMatches.Any())
         {
-            var newMatches = matches.Except(PoolOfMatches).ToList();
-            PoolOfMatches.AddRange(newMatches);
-
-            return newMatches;
+            lock (lockObject)
+            {
+                PoolOfMatches.AddRange(newValidMatches);
+            }
         }
+
+        return newValidMatches;
     }
 }

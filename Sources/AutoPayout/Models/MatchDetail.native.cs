@@ -2,6 +2,8 @@
 
 public class MatchDetail
 {
+    public int MatchId { get; set; }
+
     public int GameSession { get; set; }
 
     public int BestOfMap { get; set; }
@@ -23,4 +25,8 @@ public class MatchDetail
     public short ChildMatchType { get; set; }
 
     public short SportType { get; set; }
+
+    public int ChildLeagueType { get; set; }
+
+    public int? LeagueType { get; set; }
 }

@@ -4,6 +4,7 @@ using AutoPayout.Conditions.Models;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
+using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Fanex.Data.Repository;
 
@@ -176,7 +177,7 @@ public class VerifyFinalByBestOfMatchTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -230,7 +231,7 @@ public class VerifyFinalByBestOfMatchTests
         resultDetailService.GetResultSettled(1, Arg.Any<int>()).Returns(resultsCalculated);
         resultDetailService.GetResultsChecking(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<List<ResultDetail>>()).Returns((results, new List<ResourceIndex>()));
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -260,7 +261,7 @@ public class VerifyFinalByBestOfMatchTests
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -301,7 +302,7 @@ public class VerifyFinalByBestOfMatchTests
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -349,7 +350,7 @@ public class VerifyFinalByBestOfMatchTests
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(results);
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);
@@ -379,7 +380,7 @@ public class VerifyFinalByBestOfMatchTests
 
         repository.FetchAsync<ResultDetail>(Arg.Any<GetResultDetailCriteria>()).Returns(new List<ResultDetail>());
 
-        await condition.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>(), errorMessage);
         resultDetailService.Received().WriteLogResult(1, Arg.Is<ResultDetail>(r => r.ResourceId == ResourceIds.FullTime), errorMessage);

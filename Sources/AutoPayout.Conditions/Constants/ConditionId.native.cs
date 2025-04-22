@@ -25,4 +25,6 @@ public static class ConditionId
     public const string VerifyRelatedSettleResult = "4";
 
     public const string VerifyWithResourceId = "93"; // for volleyball
+
+    public const string VerifyFinalBetStatus = "91"; // for ice hockey
 }

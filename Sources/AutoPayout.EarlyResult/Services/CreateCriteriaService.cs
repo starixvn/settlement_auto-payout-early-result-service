@@ -18,7 +18,8 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
             MatchId = match.MatchId,
             SelectedResources = resourcesResult,
             AutoSourceInfo = GetExternalInfo(match.ResultDetails.ToList()),
-            RemarkInfo = GetRemarkInfo(match)
+            RemarkInfo = GetRemarkInfo(match),
+            BetStatus = match.MatchDetail.BetStatus,
         };
 
         return criteria;

@@ -2,9 +2,9 @@
 
 namespace AutoPayout.Conditions.Services;
 
-public class IgnoreVerify : ICondition
+public class IgnoreVerify : AbstractCondition
 {
-    public Task HandleCondition(Match match)
+    public override Task HandleCondition(Match match)
     {
         return Task.CompletedTask;
     }

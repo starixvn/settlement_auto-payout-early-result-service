@@ -22,52 +22,55 @@ namespace AutoPayout.EarlyResult.Service;
 
 public static class WorkerInjection
 {
-    public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
+    public static void InitializeServices(this IServiceCollection services, IConfiguration configuration)
     {
-        service.AddSingleton<ICacheService, CacheService>();
-        service.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
-        service.AddTransient<GeneralService, GeneralServiceImp>();
+        services.AddSingleton<ICacheService, CacheService>();
+        services.AddTransient<ScaleOutSettleService, ScaleOutSettleServiceImp>();
+        services.AddTransient<GeneralService, GeneralServiceImp>();
 
-        service.AddSingleton<IAutoService, AutoService>();
-        service.AddSingleton<ProcessService, ProcessServiceImp>();
-        service.AddSingleton<Creator, CreatorImp>();
-        service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddSingleton<IAutoService, AutoService>();
+        services.AddSingleton<ProcessService, ProcessServiceImp>();
+        services.AddTransient<Creator, CreatorImp>();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-        service.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
-        service.AddSingleton<SettlementService, SettlementServiceImp>();
-        service.AddSingleton<CreateQueryService, CreateQueryServiceImp>();
-        service.AddSingleton<WriteLogService, WriteLogServiceImp>();
-        service.AddSingleton<MatchPoolService, MatchPoolServiceImp>();
-        service.AddSingleton<MatchService, MatchServiceImp>();
-        service.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
-        service.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
-        service.AddTransient<ExtraResultService, OverTimeServiceImp>();
-        service.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
-        service.AddSingleton<VerifyMatchStatus>();
-        service.AddSingleton<VerifyRunningOdds>();
-        service.AddSingleton<VerifyConfirmScore>();
-        service.AddSingleton<VerifyTimeResult>();
-        service.AddSingleton<VerifyBeforePushProfile>();
-        service.AddSingleton<VerifyInningStatus>();
-        service.AddSingleton<VerifyFinalResult>();
-        service.AddSingleton<VerifyFinalByBestOfMap>();
-        service.AddSingleton<VerifyFinalWithExtraResult>();
-        service.AddSingleton<IgnoreVerify>();
-        service.AddSingleton<VerifyBasketBallResult>();
-        service.AddSingleton<VerifySettledRelateResult>();
-        service.AddSingleton<VerifyResultWithResourceId>();
-        service.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
-        service.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
+        services.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
+        services.AddSingleton<SettlementService, SettlementServiceImp>();
+        services.AddSingleton<CreateQueryService, CreateQueryServiceImp>();
+        services.AddSingleton<WriteLogService, WriteLogServiceImp>();
+        services.AddSingleton<MatchPoolService, MatchPoolServiceImp>();
+        services.AddSingleton<MatchService, MatchServiceImp>();
+        services.AddSingleton<UpdateResultStatusService, UpdateResultStatusServiceImp>();
+        services.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
+        services.AddTransient<ExtraResultService, OverTimeServiceImp>();
+        services.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
 
-        service.AddSingleton<BasketBallCashOut>();
-        service.AddSingleton<BasketballExtraStep>();
-        service.AddSingleton<AddResourceRefund>();
-        service.AddSingleton<TennisInsResourceResult>();
-        service.AddSingleton<InitExtraStepService>();
-        service.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
+        services.AddTransient<VerifyMatchStatus>();
+        services.AddTransient<VerifyRunningOdds>();
+        services.AddTransient<VerifyConfirmScore>();
+        services.AddTransient<VerifyTimeResult>();
+        services.AddTransient<VerifyBeforePushProfile>();
+        services.AddTransient<VerifyInningStatus>();
+        services.AddTransient<VerifyFinalResult>();
+        services.AddTransient<VerifyFinalByBestOfMap>();
+        services.AddTransient<VerifyFinalWithExtraResult>();
+        services.AddTransient<IgnoreVerify>();
+        services.AddTransient<VerifyBasketBallResult>();
+        services.AddTransient<VerifySettledRelateResult>();
+        services.AddTransient<VerifyResultWithResourceId>();
+        services.AddTransient<VerifyFinalWithBetStatus>();
 
-        service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
-        service.AddSingleton<IDynamicRepository, DynamicRepository>();
+        services.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
+        services.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
+
+        services.AddSingleton<BasketBallCashOut>();
+        services.AddSingleton<BasketballExtraStep>();
+        services.AddSingleton<AddResourceRefund>();
+        services.AddSingleton<TennisInsResourceResult>();
+        services.AddSingleton<InitExtraStepService>();
+        services.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();
+
+        services.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
+        services.AddSingleton<IDynamicRepository, DynamicRepository>();
     }
 
     public static void AddAutoMapper(this IServiceCollection service)

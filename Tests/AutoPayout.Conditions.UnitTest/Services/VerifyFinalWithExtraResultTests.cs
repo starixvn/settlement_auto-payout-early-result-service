@@ -3,6 +3,7 @@ using AutoPayout.Conditions.Models;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
+using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +13,7 @@ public class VerifyFinalWithExtraResultTests
 {
     private readonly ResultDetailService mockResultDetailService;
     private readonly ExtraResultService mockExtraResultService;
-    private readonly VerifyFinalWithExtraResult verifyFinalWithExtraResult;
+    private readonly VerifyFinalWithExtraResult condition;
 
     public VerifyFinalWithExtraResultTests()
     {
@@ -23,7 +24,7 @@ public class VerifyFinalWithExtraResultTests
         var appSettings = new AppSettingsKey { RetryProcessScore = 1000 };
         mockOptions.Value.Returns(appSettings);
 
-        verifyFinalWithExtraResult = new VerifyFinalWithExtraResult(
+        condition = new VerifyFinalWithExtraResult(
             mockResultDetailService,
             mockOptions,
             mockExtraResultService
@@ -45,7 +46,7 @@ public class VerifyFinalWithExtraResultTests
         };
 
         // Act
-        await verifyFinalWithExtraResult.HandleCondition(match);
+        await condition.HandleCondition(match);
 
         // Assert
         await mockResultDetailService.DidNotReceiveWithAnyArgs().GetResultSettled(Arg.Any<int>(), Arg.Any<int>());
@@ -81,7 +82,7 @@ public class VerifyFinalWithExtraResultTests
                                .Returns(1500);
 
         // Act
-        await verifyFinalWithExtraResult.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         // Assert
         await mockResultDetailService.Received(1)
@@ -120,7 +121,7 @@ public class VerifyFinalWithExtraResultTests
                                .Returns(1500);
 
         // Act
-        await verifyFinalWithExtraResult.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         // Assert
         await mockResultDetailService.Received(1)
@@ -161,7 +162,7 @@ public class VerifyFinalWithExtraResultTests
                                .Returns(1500);
 
         // Act
-        await verifyFinalWithExtraResult.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await condition.HandleCondition(match));
 
         // Assert
         await mockResultDetailService.DidNotReceive()
