@@ -27,7 +27,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
             match.ResultDetails = Filter(match);
 
             await PushAndWriteLog(match, conditions);
-
         }
         catch (ServiceException exception)
         {
@@ -39,7 +38,6 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
         finally
         {
-            await Fanex.Logging.LogService.InfoAsync($"Match({match.MatchId}) - Sport({match.SportType}) has run through: {string.Join(", ", match.LogCondition)}");
             matchPoolService.RemoveMatch(match);
         }
     }

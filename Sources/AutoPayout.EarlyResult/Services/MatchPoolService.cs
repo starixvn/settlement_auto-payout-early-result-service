@@ -24,17 +24,17 @@ public class MatchPoolServiceImp(MatchService matchService) : MatchPoolService
     public async Task<List<Match>> GetNewMatches()
     {
         var matches = await matchService.GetMatches();
-        var newMatches = matches.Except(PoolOfMatches).ToList();
-        var newValidMatches = await matchService.GetMatchDetails(newMatches);
+        var validatedMatches = await matchService.GetMatchDetails(matches);
 
-        if (newValidMatches.Any())
+        lock (lockObject)
         {
-            lock (lockObject)
+            var newMatches = validatedMatches.Except(PoolOfMatches).ToList();
+            if (newMatches.Count != 0)
             {
-                PoolOfMatches.AddRange(newValidMatches);
+                PoolOfMatches.AddRange(newMatches);
             }
-        }
 
-        return newValidMatches;
+            return newMatches;
+        }
     }
 }

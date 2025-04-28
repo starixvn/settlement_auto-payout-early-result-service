@@ -5,10 +5,12 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fanex.Data" Version="4.3.0.2" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.3.0.2" />
+    <PackageReference Include="Fanex.Data" Version="4.3.3" />
+    <PackageReference Include="Fanex.Data.Repository" Version="4.3.3" />
+    <PackageReference Include="Fanex.Logging" Version="2.0.2" />
+    <PackageReference Include="Fanex.Logging.Extensions" Version="2.0.2.1" />
     <PackageReference Include="Fanex.Settlement.Converter" Version="1.0.0.1" />
-    <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.4.6.1" />
+    <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.4.6.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoPayout\AutoPayout.csproj" />

@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRedisCache(builder.Configuration.GetSection("Fanex.Caching.Redis"));
 
-builder.Services.AddOneBookUm(builder.Configuration);
+builder.Services.AddOneBookUmForService(builder.Configuration);
 
 builder.Services.AddFanexLogSentry(builder.Configuration);
 
