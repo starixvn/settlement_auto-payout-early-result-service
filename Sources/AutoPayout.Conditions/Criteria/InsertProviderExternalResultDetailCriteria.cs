@@ -1,5 +1,3 @@
-using System;
-
 namespace AutoPayout.Conditions.Criteria;
 
 public class InsertProviderExternalResultDetailCriteria : NonQueryCommand

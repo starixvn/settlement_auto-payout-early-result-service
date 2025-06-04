@@ -17,15 +17,14 @@ public class MatchServiceTests
     private readonly IDynamicRepository repository;
     private readonly MatchServiceImp matchService;
     private readonly ICache cache;
-    private readonly XmlConvertService xmlConvertService;
 
     public MatchServiceTests()
     {
         repository = Substitute.For<IDynamicRepository>();
-        xmlConvertService = Substitute.For<XmlConvertService>();
+        var xmlConvertService1 = Substitute.For<XmlConvertService>();
         cache = new RedisCache(new RedisCacheOptions
         {
-            ConnectionString = "10.18.200.131:16379,password=foo1@bared,defaultDatabase=11",
+            ConnectionString = "10.18.200.195:16379,password=foo1@bared,defaultDatabase=11",
             ApplicationName = "Settlement-LOCAL"
         });
 
@@ -39,7 +38,7 @@ public class MatchServiceTests
 
         var appSettingsOptions = Options.Create(settings);
 
-        matchService = new MatchServiceImp(appSettingsOptions, cache, repository, xmlConvertService);
+        matchService = new MatchServiceImp(appSettingsOptions, cache, repository, xmlConvertService1);
     }
 
     [Fact]

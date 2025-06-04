@@ -4,7 +4,7 @@ using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Models;
 
-namespace AutoPayout.Conditions.UnitTest.Services.Conditions;
+namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyFinalWithBetStatusTests
 {
