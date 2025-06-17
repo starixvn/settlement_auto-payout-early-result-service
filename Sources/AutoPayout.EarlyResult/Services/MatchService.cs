@@ -12,6 +12,7 @@ namespace AutoPayout.EarlyResult.Services;
 public interface MatchService
 {
     Task<List<Match>> GetMatches();
+
     Task<List<Match>> GetMatchDetails(List<Match> matches);
 }
 
@@ -102,7 +103,7 @@ public class MatchServiceImp(
         }
     }
 
-    public string CreateResources(List<ResultDetail> selectedResources)
+    private string CreateResources(List<ResultDetail> selectedResources)
     {
         var resources = new Resources<ResultDetail>
         {
@@ -123,14 +124,14 @@ public class MatchServiceImp(
         var matchIds = matches.Select(m => m.MatchId).Distinct().ToList();
         if (!matchIds.Any())
         {
-            return new List<Match>();
+            return [];
         }
 
         var matchDetails = await repository.FetchAsync<MatchDetail>(new GetMatchDetailCriteria { MatchIds = string.Join(',', matchIds) });
         var listMatch = matchDetails.ToList();
         foreach (var match in matches)
         {
-            match.MatchDetail = listMatch.FirstOrDefault(m => m.MatchId == match.MatchId);
+            match.MatchDetail = listMatch.Find(m => m.MatchId == match.MatchId);
         }
 
         return matches.Where(m => m.MatchDetail != null).ToList();

@@ -175,8 +175,11 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var results = resultSettled.Concat(resultInBatch).ToList();
 
         var indexes = (await GetResourceIndex(match.SportType)).ToList();
-
-        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
+        results.ForEach(s =>
+        {
+            var matchIndex = indexes.FirstOrDefault(i => i.ResourceId == s.ResourceId);
+            s.IntervalNo = matchIndex?.IntervalNo ?? 99;
+        });
 
         var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
@@ -200,8 +203,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
-
-        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId).IntervalNo);
+        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId)?.IntervalNo ?? 99);
 
         var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
