@@ -9,7 +9,7 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
     private const int numberOfSetsWithOt = 4;
     private readonly int[] ChildMatchTypeCheck = [18, 19, 20, 22, 23, 24];
 
-    private bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
+    private static bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
     {
         try
         {
@@ -72,7 +72,6 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
 
     private static bool IsMatchRegularTimeOnly(MatchDetail matchDetail) => matchDetail.LeagueType == 1;
 
-
     private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
     {
         await resultDetailService.UpdateInvalidResultStatus(match.MatchId, [finalResult], errorMessage);
@@ -85,7 +84,6 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
     public override async Task HandleCondition(Match match)
     {
         match.LogCondition.Add($"{ConditionId.VerifyFinalBetStatus} - {GetType().Name}");
-        var matchDetail = match.MatchDetail;
         var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
 
         if (match.ResourceType != ResourceType.MainResource || finalResult == null)
@@ -94,40 +92,50 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
             return;
         }
 
-        var betStatus = matchDetail.BetStatus;
-        var isValidBetStatus = TryParseBetStatus(betStatus, out var betStatusList);
+        var matchDetail = match.MatchDetail;
 
-        // regular only or child match include OT
         if (IsMatchRegularTimeOnly(matchDetail) || IsChildMatchIncludeOT(matchDetail))
         {
-            if (!isValidBetStatus || betStatusList.Count < numberOfSets || (IsMatchRegularTimeOnly(matchDetail) && HasOt(betStatusList)))
-            {
-                await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
-                await HandleNextCondition(match);
-                return;
-            }
+            await HandleRegularOrChildMatchWithOT(match, finalResult);
+        }
+        else if (IsOtherChildMatch(matchDetail))
+        {
+            await HandleOtherChildMatch(match, finalResult);
+        }
+        else
+        {
+            _ = TryParseBetStatus(matchDetail.BetStatus, out var betStatusList);
+            await CheckScoreWithBetStatus(match, finalResult, betStatusList);
+        }
 
+        await HandleNextCondition(match);
+    }
+
+    private bool IsOtherChildMatch(MatchDetail matchDetail)
+        => matchDetail.ParentID != 0 && !ChildMatchTypeCheck.Contains(matchDetail.ChildMatchType);
+
+    private async Task HandleRegularOrChildMatchWithOT(Match match, ResultDetail finalResult)
+    {
+        var matchDetail = match.MatchDetail;
+        var isValidBetStatus = TryParseBetStatus(matchDetail.BetStatus, out var betStatusList);
+
+        if (!isValidBetStatus || betStatusList.Count < numberOfSets || (IsMatchRegularTimeOnly(matchDetail) && HasOt(betStatusList)))
+        {
+            await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
+        }
+        else
+        {
             var sets = GetNumberOfSets(matchDetail);
             await CheckScoreWithBetStatus(match, finalResult, betStatusList, sets);
-            await HandleNextCondition(match);
-            return;
         }
+    }
 
-        // other matches
-        if (matchDetail.ParentID != 0 && !ChildMatchTypeCheck.Contains(matchDetail.ChildMatchType))
+    private async Task HandleOtherChildMatch(Match match, ResultDetail finalResult)
+    {
+        if (!string.IsNullOrEmpty(match.MatchDetail.BetStatus))
         {
-            if (!string.IsNullOrEmpty(matchDetail.BetStatus))
-            {
-                await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
-            }
-            await HandleNextCondition(match);
-            return;
+            await HandleInvalidResult(match, finalResult, ErrorMessage.InconsistentInterval);
         }
-
-        // 1p 2p 3p
-        await CheckScoreWithBetStatus(match, finalResult, betStatusList);
-        await HandleNextCondition(match);
-
     }
 
     private async Task CheckScoreWithBetStatus(Match match, ResultDetail finalResult, List<BetStatus> betStatusList, int? numberOfSets = null)
@@ -143,13 +151,16 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
 
     private static bool HasOt(List<BetStatus> betStatusList)
     {
-        return betStatusList.Count == numberOfSetsWithOt
-            && string.IsNullOrEmpty(betStatusList[3].Home)
-            && string.IsNullOrEmpty(betStatusList[3].Away)
-            && betStatusList[2].Home != "0"
-            && betStatusList[2].Away != "0";
+        if (betStatusList.Count != numberOfSetsWithOt)
+        {
+            return false;
+        }
+
+        var otSetIsEmpty = string.IsNullOrEmpty(betStatusList[3].Home) && string.IsNullOrEmpty(betStatusList[3].Away);
+        var thirdSetIsScored = betStatusList[2].Home != "0" && betStatusList[2].Away != "0";
+
+        return otSetIsEmpty && thirdSetIsScored;
     }
 
     private sealed record BetStatus(string Home, string Away);
 }
-
