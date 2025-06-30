@@ -86,10 +86,7 @@ public class VerifyFinalWithBetStatusTests
                 ChildMatchType = 99, // Invalid ChildMatchType
                 BetStatus = "1-0,2-1,3-2" // Has BetStatus
             },
-            ResultDetails = new List<ResultDetail>
-            {
-                new() { ResourceId = ResourceIds.FullTime, HomeValue = "6", AwayValue = "3" }
-            }
+            ResultDetails = [new() { ResourceId = ResourceIds.FullTime, HomeValue = "6", AwayValue = "3" }]
         };
 
         // Act
