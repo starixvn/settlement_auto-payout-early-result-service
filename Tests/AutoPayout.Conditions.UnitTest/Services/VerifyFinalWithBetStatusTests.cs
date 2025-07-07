@@ -2,6 +2,7 @@
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
+using AutoPayout.Exceptions;
 using AutoPayout.Models;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
@@ -32,7 +33,8 @@ public class VerifyFinalWithBetStatusTests
         };
 
         // Act
-        await sut.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
+
 
         // Assert
         await resultDetailServiceSub.DidNotReceive().UpdateInvalidResultStatus(
@@ -97,7 +99,7 @@ public class VerifyFinalWithBetStatusTests
         };
 
         // Act
-        await sut.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
 
         // Assert
         await resultDetailServiceSub.Received(1).UpdateInvalidResultStatus(
@@ -212,7 +214,7 @@ public class VerifyFinalWithBetStatusTests
         };
 
         // Act
-        await sut.HandleCondition(match);
+        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
 
         // Assert
         await resultDetailServiceSub.Received(1).UpdateInvalidResultStatus(
