@@ -27,4 +27,5 @@ public static class ConditionId
     public const string VerifyWithResourceId = "93"; // for volleyball
 
     public const string VerifyFinalBetStatus = "91"; // for ice hockey
+    public const string VerifyFinalKabaddi = "90"; // for football, basketball, tennis, etc.
 }

@@ -15,11 +15,17 @@ public class CreateExtraStepServiceImp(
     BasketBallCashOut basketBallCashOut,
     BasketballExtraStep basketballExtraStep,
     TennisInsResourceResult tennisExtraStep,
+    CheckTicketHtSettled checkTicketHtSettled,
     AddResourceRefund addResourceRefund) : CreateExtraStepService
 {
     public IExtraStepService Create(Match match)
     {
-        return match.SportType == SportType.BasketBall ? basketballExtraStep : extraStepService;
+        return match.SportType switch
+        {
+            SportType.BasketBall => basketballExtraStep,
+            SportType.Kabaddi => checkTicketHtSettled,
+            _ => extraStepService
+        };
     }
 
     public IEnumerable<IExtraStepService> CreateStepsServiceAfterSettle(Match match)

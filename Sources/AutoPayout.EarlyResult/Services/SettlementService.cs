@@ -81,7 +81,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
         await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Waiting);
 
-        await UpdateMatchInfo(criteria);
+        await UpdateMatchInfo(match, criteria);
 
         await writeLogService.WriteLogDirectly(criteria.MatchId, GenerateLogMessage(criteria));
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
@@ -140,7 +140,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     private static string GenerateLogMessage(SettleCriteria criteria)
         => $"NAP: Auto Payout Calculate {criteria.Action} for matchId: {criteria.MatchId} Result: {criteria.SelectedResources}";
 
-    private async Task UpdateMatchInfo(SettleCriteria criteria)
+    private async Task UpdateMatchInfo(Match match, SettleCriteria criteria)
     {
         var requestUpdateInfo = new UpdateMatchInfoRequest
         {
@@ -149,8 +149,20 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
             MatchId = criteria.MatchId,
             BetStatus = criteria.BetStatus,
             SelectedResources = criteria.SelectedResources,
-            IsAuto = true
+            IsAuto = true,
         };
+
+        if (match.SportType == SportType.Kabaddi)
+        {
+            var ftResult = match.ResultDetails.Find(x => x.ResourceId == ResourceIds.FullTime);
+
+            requestUpdateInfo.HalfTimeAway = match.MatchDetail.HalfTimeAwayScore;
+            requestUpdateInfo.HalfTimeHome = match.MatchDetail.HalfTimeHomeScore;
+            requestUpdateInfo.FullTimeHome = int.Parse(ftResult.HomeValue);
+            requestUpdateInfo.FullTimeAway = int.Parse(ftResult.AwayValue);
+            requestUpdateInfo.IsHtTicketSettled = match.IsHtTicketSettled; // true
+
+        }
 
         await scaleOutSettleService.UpdateMatchInfo(requestUpdateInfo);
     }

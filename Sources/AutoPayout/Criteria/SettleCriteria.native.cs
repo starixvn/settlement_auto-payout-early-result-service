@@ -11,8 +11,7 @@ public class SettleCriteria : NonQueryCommand
 
     public string SelectedResources { get; set; }
 
-    public string Action { get; } = ActionName.Calculate;
-
+    public string Action { get; set; } = ActionName.Calculate; // FT
     public bool IsLeader { get; } = true;
 
     public bool IsAuto { get; } = true;

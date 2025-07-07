@@ -28,7 +28,10 @@ public class Match
 
     public string UId => Guid.NewGuid().ToString();
 
-    [JsonIgnore] public List<string> LogCondition { get; set; } = [];
+    [JsonIgnore]
+    public List<string> LogCondition { get; set; } = [];
+
+    public bool IsHtTicketSettled { get; set; }
 
     public override bool Equals(object obj)
     {
