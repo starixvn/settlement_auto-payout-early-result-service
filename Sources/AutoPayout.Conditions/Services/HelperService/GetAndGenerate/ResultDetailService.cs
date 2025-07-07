@@ -132,9 +132,9 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
             : new List<string>();
     }
 
-    private static string TraderScore(IEnumerable<Score> scores)
+    private static string TraderScore(List<Score> scores)
     {
-        var trader = scores.FirstOrDefault(r => r.SourceId == SourceId.Trader);
+        var trader = scores.Find(r => r.SourceId == SourceId.Trader);
 
         return trader is not null ? ScoreMessage(trader, "Trader") : string.Empty;
     }

@@ -12,15 +12,10 @@ public class AutoService(ProcessService processService, MatchPoolService matchPo
     {
         var matches = await matchPoolService.GetNewMatches();
 
-        //matches.ForEach(m =>
-        // {
-        //     Task.Run(() => processService.Process(m))
-        //         .ConfigureAwait(false);
-        // });
-
-        foreach (var item in matches)
-        {
-            await processService.Process(item);
-        }
+        matches.ForEach(m =>
+         {
+             Task.Run(() => processService.Process(m))
+                 .ConfigureAwait(false);
+         });
     }
 }
