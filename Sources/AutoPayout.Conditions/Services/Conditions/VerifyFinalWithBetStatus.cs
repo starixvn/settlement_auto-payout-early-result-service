@@ -9,7 +9,7 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
     private const int numberOfSetsWithOt = 4;
     private readonly int[] ChildMatchTypeCheck = [18, 19, 20, 22, 23, 24];
 
-    private bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
+    private static bool TryParseBetStatus(string betStatus, out List<BetStatus> betStatusList)
     {
         try
         {
