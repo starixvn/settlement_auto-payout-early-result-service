@@ -36,4 +36,7 @@ public class MatchDetail
     public int? FinalHomeScore { get; set; }
 
     public int? FinalAwayScore { get; set; }
+    public int HomeId { get; set; }
+
+    public int AwayId { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+using AutoPayout.Constants;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
@@ -14,6 +15,8 @@ public class VerifyFinalKabaddi(ResultDetailService resultDetailService, IOption
     public override async Task HandleCondition(Match match)
     {
         var matchDetail = match.MatchDetail;
+        var finalResult = match.ResultDetails.Find(i => i.ResourceId == ResourceIds.FullTime);
+
         if (matchDetail.ChildMatchType == TossWinner)
         {
             // TODO
@@ -25,6 +28,22 @@ public class VerifyFinalKabaddi(ResultDetailService resultDetailService, IOption
             // TODO
         }
 
+        if (!finalResult.IsValid)
+        {
+            await HandleFinalResult(finalResult, match);
+        }
+
         await HandleNextCondition(match);
+    }
+
+    private async Task HandleFinalResult(ResultDetail finalResult, Match match)
+    {
+        var errorMessage = ErrorMessage.InvalidInput.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
+
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
+
+        resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
+
+        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 }
