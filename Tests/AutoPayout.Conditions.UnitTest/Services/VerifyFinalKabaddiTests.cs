@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
 
-public class VerifyFinalKabaddiHelperTests
+public class VerifyFinalKabaddiTests
 {
     [Theory]
     [InlineData("1", "0", true)]

@@ -23,7 +23,8 @@ public class VerifyFinalKabaddi(ResultDetailService resultDetailService, IOption
         {
             ValidateTossWinner(finalResult, homeFtScore, awayFtScore);
         }
-        else if (IsTeamTotalOrRaidPoints(matchDetail.ChildMatchType))
+
+        if (IsTeamTotalOrRaidPoints(matchDetail.ChildMatchType))
         {
             ValidateTeamTotalOrRaidPoints(matchDetail, finalResult, homeFtScore, awayFtScore);
         }
@@ -64,12 +65,12 @@ public class VerifyFinalKabaddi(ResultDetailService resultDetailService, IOption
 
     private async Task HandleFinalResult(ResultDetail finalResult, Match match)
     {
-        var errorMessage = ErrorMessage.InvalidInput.Replace("@score", $"{finalResult.HomeValue}-{finalResult.AwayValue}");
+        var errorMessage = string.Format(ErrorMessage.InvalidInput, $"{finalResult.HomeValue}-{finalResult.AwayValue}");
 
-        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { finalResult }, errorMessage);
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, [finalResult], errorMessage);
 
         resultDetailService.WriteLogResult(match.MatchId, finalResult, errorMessage);
 
-        match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
+        match.ResultDetails = [.. match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime)];
     }
 }
