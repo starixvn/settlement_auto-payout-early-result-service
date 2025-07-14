@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using AutoPayout.Conditions;
+﻿using AutoPayout.Conditions;
 using AutoPayout.Conditions.Services;
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
@@ -73,14 +72,8 @@ public static class WorkerInjection
         services.AddSingleton<IDynamicRepository, DynamicRepository>();
     }
 
-    public static void AddAutoMapper(this IServiceCollection service)
+    public static void AddAutoMapper(this IServiceCollection services)
     {
-        var mapperConfig = new MapperConfiguration(mc =>
-        {
-            mc.AddProfile(typeof(ScaleOutMappingProfile));
-        });
-
-        var mapper = mapperConfig.CreateMapper();
-        service.AddSingleton(mapper);
+        services.AddAutoMapper(cfg => cfg.AddProfile<ScaleOutMappingProfile>());
     }
 }
