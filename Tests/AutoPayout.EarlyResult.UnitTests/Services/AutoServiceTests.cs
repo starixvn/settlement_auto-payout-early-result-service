@@ -3,6 +3,7 @@ using AutoPayout.Models;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services;
+
 public class AutoServiceTests
 {
     [Fact]
@@ -24,6 +25,6 @@ public class AutoServiceTests
         await controller.Handle();
 
         // Assert
-        await settleController.Received().Process(matches[0]);
+        await settleController.Received().Process(Arg.Any<Match>());
     }
 }

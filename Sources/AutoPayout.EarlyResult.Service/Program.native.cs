@@ -4,35 +4,33 @@ using Fanex.Caching.Redis;
 using Fanex.Data.SqlServer;
 using Fanex.Logging.Sentry.RavenClient;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using ONEbook.UM.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
 
-builder.Services.AddRedisCache(builder.Configuration.GetSection("Fanex.Caching.Redis"));
+services.AddRedisCache(builder.Configuration.GetSection("Fanex.Caching.Redis"));
 
-builder.Services.AddOneBookUmForService(builder.Configuration);
+services.AddOneBookUmForService(builder.Configuration);
 
-builder.Services.AddFanexLogSentry(builder.Configuration);
+services.AddFanexLogSentry(builder.Configuration);
 
-builder.Services.AddFanexSql(builder.Configuration);
+services.AddFanexSql(builder.Configuration);
 
-builder.Services.InitializeServices(builder.Configuration);
+services.InitializeServices(builder.Configuration);
 
-builder.Services.AddAutoMapper();
+services.AddAutoMapper();
 
-builder.Services.Configure<AppSettingsKey>(builder.Configuration);
+services.Configure<AppSettingsKey>(builder.Configuration);
 
-builder.Services.AddHostedService<Worker>();
+services.AddHostedService<Worker>();
 
-builder.Services.AddHttpClient();
+services.AddHttpClient();
+
+services.AddHealthChecks();
 
 var app = builder.Build();
-
-app.Run(async context =>
-{
-    await context.Response.WriteAsync("OK");
-});
+app.MapHealthChecks("/healthz");
 
 await app.RunAsync();

@@ -24,7 +24,7 @@ public class ProcessServiceTests
 
     private readonly ICondition condition;
 
-    private readonly ProcessService service;
+    private readonly ProcessServiceImp service;
 
     public ProcessServiceTests()
     {
@@ -51,15 +51,23 @@ public class ProcessServiceTests
         var match = new Match()
         {
             Conditions = "1,2,3",
-            ResultDetails = new List<ResultDetail>()
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = "00",
                     ResourceStatus = 1
                 }
+            ],
+            MatchDetail = new MatchDetail
+            {
+                MatchId = 1,
+                ChildLeagueType = 1,
+                SportType = 1,
             }
         };
+
+        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns([condition]);
 
         await service.Process(match);
 
@@ -73,17 +81,23 @@ public class ProcessServiceTests
         var match = new Match()
         {
             Conditions = "1",
-            ResultDetails = new List<ResultDetail>()
-            {
-                new ()
+            ResultDetails =
+            [
+                new ResultDetail
                 {
                     ResourceId = "00",
                     ResourceStatus = 1
                 }
+            ],
+            MatchDetail = new MatchDetail
+            {
+                MatchId = 1,
+                ChildLeagueType = 1,
+                SportType = 1,
             }
         };
 
-        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns(new List<ICondition> { condition });
+        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns([condition]);
         condition.HandleCondition(Arg.Any<Match>()).ThrowsAsyncForAnyArgs(new ServiceException() { Description = "Message" });
 
         await service.Process(match);
@@ -96,7 +110,6 @@ public class ProcessServiceTests
         matchPoolService.Received().RemoveMatch(match);
     }
 
-
     [Fact]
     public async Task Process_UnHandledException_WriteSystemLog()
     {
@@ -105,7 +118,7 @@ public class ProcessServiceTests
             Conditions = "1"
         };
 
-        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns(new List<ICondition> { condition });
+        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns([condition]);
         condition.HandleCondition(Arg.Any<Match>()).ThrowsAsyncForAnyArgs(new Exception());
 
         await service.Process(match);

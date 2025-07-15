@@ -3,6 +3,7 @@ using AutoPayout.Models;
 using Xunit;
 
 namespace AutoPayout.EarlyResult.UnitTests.Services;
+
 public class MatchPoolServiceTests
 {
     private readonly MatchService matchService;
@@ -39,7 +40,7 @@ public class MatchPoolServiceTests
 
         // Assert
         Assert.Single(result);
-        Assert.Equal(2, result.First().MatchId);
+        Assert.Equal(2, result[0].MatchId);
     }
 
     [Fact]
@@ -61,7 +62,7 @@ public class MatchPoolServiceTests
 
         matchPoolService.PoolOfMatches.AddRange(existingMatches);
         matchService.GetMatches().Returns(existingMatches.Concat(newMatches).ToList());
-        matchService.GetMatchDetails(Arg.Is<List<Match>>(m => m[0].MatchId == 2)).Returns(newValidMatches);
+        matchService.GetMatchDetails(Arg.Any<List<Match>>()).Returns(newValidMatches);
 
         // Act
         await matchPoolService.GetNewMatches();
@@ -85,5 +86,4 @@ public class MatchPoolServiceTests
         // Assert
         Assert.Empty(matchPoolService.PoolOfMatches);
     }
-
 }

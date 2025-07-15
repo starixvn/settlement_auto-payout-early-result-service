@@ -70,7 +70,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
     }
 
-    private async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
+    private static async Task HandleAndRetryCondition(Match match, List<ICondition> conditions)
     {
         for (var i = 0; i < conditions.Count - 1; i++)
         {
@@ -80,7 +80,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         await conditions[0].HandleCondition(match);
     }
 
-    private List<ResultDetail> Filter(Match match)
+    private static List<ResultDetail> Filter(Match match)
     {
         if (match.MatchDetail.ParentID != 0)
         {
