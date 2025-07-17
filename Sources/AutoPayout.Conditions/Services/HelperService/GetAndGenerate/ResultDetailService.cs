@@ -34,7 +34,6 @@ public interface ResultDetailService
         int maxResultIndex);
 
     Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
-
 }
 
 public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
@@ -71,7 +70,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     public string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = [result] };
         var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
         var traderScore = TraderScore(scores);
         var sourceScore = ProviderScore(scores);
@@ -89,7 +88,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
     public string WriteLogResultNotTrader(int matchId, ResultDetail result)
     {
-        var cloneMatch = new Match { MatchId = matchId, ResultDetails = new List<ResultDetail> { result } };
+        var cloneMatch = new Match { MatchId = matchId, ResultDetails = [result] };
         var message = string.Format(ErrorMessage.NotTrader, result.ResourceId);
 
         writeLogService.WriteLog(cloneMatch, message);
@@ -177,7 +176,7 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         var indexes = (await GetResourceIndex(match.SportType)).ToList();
         results.ForEach(s =>
         {
-            var matchIndex = indexes.FirstOrDefault(i => i.ResourceId == s.ResourceId);
+            var matchIndex = indexes.Find(i => i.ResourceId == s.ResourceId);
             s.IntervalNo = matchIndex?.IntervalNo ?? 99;
         });
 
@@ -203,11 +202,10 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
 
         var results = resultSettled.Concat(resultInBatch).ToList();
 
-        results.ForEach(s => s.IntervalNo = indexes.First(i => i.ResourceId == s.ResourceId)?.IntervalNo ?? 99);
+        results.ForEach(s => s.IntervalNo = indexes.FirstOrDefault(i => i.ResourceId == s.ResourceId)?.IntervalNo ?? 99);
 
         var resultsChecking = results.Where(r => r.IntervalNo <= maxResultIndex).OrderBy(s => s.IntervalNo).ToList();
 
         return resultsChecking;
     }
-
 }

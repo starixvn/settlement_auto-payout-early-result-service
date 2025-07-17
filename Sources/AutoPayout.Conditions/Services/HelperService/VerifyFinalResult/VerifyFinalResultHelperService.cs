@@ -56,7 +56,6 @@ public static class VerifyFinalResultHelper
             (0, SportType.Tennis) => GamePlay.Five,
             (0, SportType.VolleyBall) => GamePlay.Five,
             (0, SportType.BaseBall) => GamePlay.Nine,
-            (_, SportType.TableTennis) => match.GameSession,
             _ => match.GameSession
         };
     }

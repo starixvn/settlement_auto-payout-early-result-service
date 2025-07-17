@@ -59,7 +59,6 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
         await HandleNextCondition(match);
     }
 
-
     private bool VerifyValidRunningSetResults(List<ResultDetail> resultDetails, IEnumerable<ResourceIndex> resourceIndexes, int maxSetPlayed)
     {
         var inValidResources = resourceIndexes.Where(x => x.IntervalNo > maxSetPlayed)
@@ -100,8 +99,8 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
 
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
         return (false, settledResults);
-
     }
+
     private static bool VerifyFinal(
         IEnumerable<ResultDetail> settledResults,
         IReadOnlyCollection<ResultDetail> setsResults,
@@ -121,16 +120,15 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
         match.ResultDetails = match.ResultDetails.Where(r => r.ResourceId != ResourceIds.FullTime).ToList();
     }
 
-
     private static string GetResourceToRefund(IEnumerable<ResultDetail> resultSettled, IEnumerable<ResourceIndex> resourceIndexes, int maxSet, int maxGamePlayed) =>
         string.Join(",", resourceIndexes
             .Where(r => r.IntervalNo > maxGamePlayed && r.IntervalNo <= maxSet)
             .Select(r => r.ResourceId)
             .Except(resultSettled.Select(r => r.ResourceId)));
 
-    private bool ShouldSkipFinalResultCheck(Match match, ResultDetail finalResult) => match.ResourceType != ResourceType.MainResource
-               || finalResult is null
-               || (match.SportType == SportType.BaseBall && (int)match.MatchDetail.SessionTime == 0);
+    private static bool ShouldSkipFinalResultCheck(Match match, ResultDetail finalResult) => match.ResourceType != ResourceType.MainResource
+                                                                                             || finalResult is null
+                                                                                             || (match.SportType == SportType.BaseBall && (int)match.MatchDetail.SessionTime == 0);
 
     private async Task<bool> IsInvalidFinalResultForGameWinner(Match match, ResultDetail finalResult)
     {
@@ -142,7 +140,6 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
         if (IsGameWinnerType(match) && IsZeroScore(finalResult))
         {
             await HandleInvalidResult(match, finalResult, ErrorMessage.InvalidScoreGameWinner);
-            return true;
         }
 
         return true;
@@ -168,5 +165,4 @@ public class VerifyFinalResult(ResultDetailService resultDetailService, IOptions
            match.SportType is SportType.Tennis or SportType.BeachVolleyball && new[] { 12, 14, 15, 16, 17 }.Contains(match.MatchDetail.ChildMatchType);
 
     private static bool IsZeroScore(ResultDetail finalResult) => finalResult.HomeValue == "0" && finalResult.AwayValue == "0";
-
 }
