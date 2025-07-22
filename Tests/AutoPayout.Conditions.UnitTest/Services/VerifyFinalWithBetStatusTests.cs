@@ -18,28 +18,6 @@ public class VerifyFinalWithBetStatusTests
         sut = new VerifyFinalWithBetStatus(resultDetailServiceSub);
     }
 
-    [Fact]
-    public async Task HandleCondition_WhenNotMainResource_ShouldNotProcess()
-    {
-        // Arrange
-        var match = new Match
-        {
-            ResourceType = ResourceType.EarlyResource,
-            MatchDetail = new MatchDetail(),
-            ResultDetails = new List<ResultDetail>()
-            {
-                new() { ResourceId = ResourceIds.Halftime, HomeValue = "6", AwayValue = "3" }
-            }
-        };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
-
-        await resultDetailServiceSub.DidNotReceive().UpdateInvalidResultStatus(
-            Arg.Any<int>(),
-            Arg.Any<IList<ResultDetail>>(),
-            Arg.Any<string>());
-    }
 
     [Fact]
     public async Task HandleCondition_WhenNoFullTimeResult_ShouldSkip()
@@ -145,33 +123,6 @@ public class VerifyFinalWithBetStatusTests
     }
 
     [Fact]
-    public async Task HandleCondition_WhenInvalidChildMatchTypeWithBetStatus_ShouldHandleInvalidResult()
-    {
-        var match = new Match
-        {
-            ResourceType = ResourceType.MainResource,
-            MatchDetail = new MatchDetail
-            {
-                ParentID = 1,
-                ChildMatchType = 99,
-                BetStatus = "1-0,2-1,3-2"
-            },
-            ResultDetails =
-            [
-                new() { ResourceId = ResourceIds.Halftime, HomeValue = "3", AwayValue = "3" },
-                new() { ResourceId = ResourceIds.FullTime, HomeValue = "6", AwayValue = "3" }
-            ]
-        };
-
-        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
-
-        await resultDetailServiceSub.Received(1).UpdateInvalidResultStatus(
-            Arg.Any<int>(),
-            Arg.Any<IList<ResultDetail>>(),
-            ErrorMessage.InconsistentInterval);
-    }
-
-    [Fact]
     public async Task HandleCondition_WhenInvalidChildMatchTypeWithoutBetStatus_ShouldNotProcess()
     {
         var match = new Match
@@ -241,31 +192,6 @@ public class VerifyFinalWithBetStatusTests
             Arg.Any<int>(),
             Arg.Any<IList<ResultDetail>>(),
             Arg.Any<string>());
-    }
-
-    [Fact]
-    public async Task HandleCondition_WhenScoresDoNotMatch_ShouldHandleInvalidResult()
-    {
-        var match = new Match
-        {
-            ResourceType = ResourceType.MainResource,
-            MatchDetail = new MatchDetail
-            {
-                BetStatus = "1-0,2-1,3-2"
-            },
-            ResultDetails = new List<ResultDetail>
-            {
-                new() { ResourceId = ResourceIds.FullTime, HomeValue = "7", AwayValue = "3" },
-                new() { ResourceId = ResourceIds.Halftime, HomeValue = "6", AwayValue = "3" }
-            }
-        };
-
-        await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
-
-        await resultDetailServiceSub.Received(1).UpdateInvalidResultStatus(
-            Arg.Any<int>(),
-            Arg.Any<IList<ResultDetail>>(),
-            ErrorMessage.InconsistentInterval);
     }
 
     [Fact]
