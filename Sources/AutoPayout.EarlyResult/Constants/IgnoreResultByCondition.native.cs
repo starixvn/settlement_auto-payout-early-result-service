@@ -11,9 +11,6 @@ public class IgnoreResultByCondition
         },
         {
             SportType.BaseBall, input => input.ResourceId != ResourceIds.ExtraInning
-        },
-        {
-            SportType.Kabaddi, input => input.ResourceId != ResourceIds.Halftime
         }
     };
 }
