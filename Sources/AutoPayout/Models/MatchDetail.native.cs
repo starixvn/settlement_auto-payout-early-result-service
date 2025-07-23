@@ -29,4 +29,14 @@ public class MatchDetail
     public int ChildLeagueType { get; set; }
 
     public int? LeagueType { get; set; }
+    public int? HalfTimeHomeScore { get; set; }
+
+    public int? HalfTimeAwayScore { get; set; }
+
+    public int? FinalHomeScore { get; set; }
+
+    public int? FinalAwayScore { get; set; }
+    public int HomeId { get; set; }
+
+    public int AwayId { get; set; }
 }

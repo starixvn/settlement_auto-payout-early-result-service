@@ -49,15 +49,27 @@ public class MatchPoolServiceTests
         // Arrange
         var existingMatches = new List<Match>
         {
-            new Match { MatchId = 1}
+            new Match
+            {
+                MatchId = 1,
+                ResourceType = 1
+            }
         };
         var newMatches = new List<Match>
         {
-            new Match { MatchId = 2}
+            new Match
+            {
+                MatchId = 2,
+                ResourceType = 1
+            }
         };
         var newValidMatches = new List<Match>
         {
-            new Match { MatchId = 2 }
+            new Match
+            {
+                MatchId = 2,
+                ResourceType = 1
+            }
         };
 
         matchPoolService.PoolOfMatches.AddRange(existingMatches);

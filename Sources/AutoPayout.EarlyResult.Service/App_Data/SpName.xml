@@ -44,4 +44,11 @@
       <Setting Key="NAP_Set_CashoutSel_DBSITE03" SpName="NAP_Set_CashoutSel" DbName="DBSITE03.bodb02.wsv_nap" />
     </Function>
   </Function>
+	
+	<Function Name="NAP_Set_MatchSelDetail_Ticket">
+		<Setting Key="NAP_Set_MatchSelDetail_Ticket_DBTXN" SpName="NAP_Set_MatchSelDetail_Ticket" DbName="DBTXN.bodb02.wsv_nap" />
+		<Setting Key="NAP_Set_MatchSelDetail_Ticket_DBSITE01" SpName="NAP_Set_MatchSelDetail_Ticket" DbName="DBSITE01.bodb02.wsv_nap" />
+		<Setting Key="NAP_Set_MatchSelDetail_Ticket_DBSITE02" SpName="NAP_Set_MatchSelDetail_Ticket" DbName="DBSITE02.bodb02.wsv_nap" />
+		<Setting Key="NAP_Set_MatchSelDetail_Ticket_DBSITE03" SpName="NAP_Set_MatchSelDetail_Ticket" DbName="DBSITE03.bodb02.wsv_nap" />
+	</Function>
 </Functions>

@@ -57,6 +57,7 @@ public static class WorkerInjection
         services.AddTransient<VerifySettledRelateResult>();
         services.AddTransient<VerifyResultWithResourceId>();
         services.AddTransient<VerifyFinalWithBetStatus>();
+        services.AddTransient<VerifyFinalKabaddi>();
 
         services.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
         services.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();
@@ -64,6 +65,7 @@ public static class WorkerInjection
         services.AddSingleton<BasketBallCashOut>();
         services.AddSingleton<BasketballExtraStep>();
         services.AddSingleton<AddResourceRefund>();
+        services.AddSingleton<CheckTicketHtSettled>();
         services.AddSingleton<TennisInsResourceResult>();
         services.AddSingleton<InitExtraStepService>();
         services.AddSingleton<CreateExtraStepService, CreateExtraStepServiceImp>();

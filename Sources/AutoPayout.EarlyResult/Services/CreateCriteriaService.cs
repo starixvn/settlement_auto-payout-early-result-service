@@ -20,6 +20,9 @@ public class CreateQueryServiceImp(XmlConvertService xmlConvertService) : Create
             AutoSourceInfo = GetExternalInfo(match.ResultDetails.ToList()),
             RemarkInfo = GetRemarkInfo(match),
             BetStatus = match.MatchDetail.BetStatus,
+            Action = match.SportType == SportType.Kabaddi
+                ? ActionName.CalculateFt
+                : ActionName.Calculate
         };
 
         return criteria;
