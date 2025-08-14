@@ -21,14 +21,14 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_ScoresAreEqual_AttachValueToResult()
+    public async Task HandleCondition_ScoresAreEqual_AttachValueToResult()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+            ResultDetails = [firstResultDetail, secondResultDetail]
         };
 
         var scores = new List<Score>
@@ -71,13 +71,13 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_AwayNullAndBlank_ComparePassed()
+    public async Task HandleCondition_AwayNullAndBlank_ComparePassed()
     {
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { secondResultDetail }
+            ResultDetails = [secondResultDetail]
         };
 
         var scores = new List<Score>
@@ -110,13 +110,13 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_ScoreNotEqualAndTimeOverCurrentTime_MarkFail()
+    public async Task HandleCondition_ScoreNotEqualAndTimeOverCurrentTime_MarkFail()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail }
+            ResultDetails = [firstResultDetail]
         };
 
         var scores = new List<Score>
@@ -148,13 +148,13 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_TwoProviderDifferentTimes_CheckWithMaxDate()
+    public async Task HandleCondition_TwoProviderDifferentTimes_CheckWithMaxDate()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail }
+            ResultDetails = [firstResultDetail]
         };
 
         var scores = new List<Score>
@@ -186,14 +186,14 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_SomeEqualAndSomeNot_AttachValueToResultForResultConfirmOnly()
+    public async Task HandleCondition_SomeEqualAndSomeNot_AttachValueToResultForResultConfirmOnly()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+            ResultDetails = [firstResultDetail, secondResultDetail]
         };
 
         var scores = new List<Score>
@@ -239,14 +239,14 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_AllScoresNotEqual_ThrowException()
+    public async Task HandleCondition_AllScoresNotEqual_ThrowException()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+            ResultDetails = [firstResultDetail, secondResultDetail]
         };
 
         var scores = new List<Score>
@@ -285,7 +285,7 @@ public class VerifyConfirmScoreTests
         };
 
         resultDetailService.GetScores(match).Returns(scores);
-        var errorMessage = "Failed Auto Payout: Result(01,02) values inconsistent between ";
+        const string errorMessage = "Failed Auto Payout: Result(01,02) values inconsistent between ";
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
@@ -294,14 +294,14 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_IgnoreCase_PassCompareScore()
+    public async Task HandleCondition_IgnoreCase_PassCompareScore()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var secondResultDetail = new ResultDetail { ResourceId = "02" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail, secondResultDetail }
+            ResultDetails = [firstResultDetail, secondResultDetail]
         };
 
         var scores = new List<Score>
@@ -346,13 +346,13 @@ public class VerifyConfirmScoreTests
     }
 
     [Fact]
-    public async void HandleCondition_AwayValueNotValid_MarkFail()
+    public async Task HandleCondition_AwayValueNotValid_MarkFail()
     {
         var firstResultDetail = new ResultDetail { ResourceId = "01" };
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail> { firstResultDetail }
+            ResultDetails = [firstResultDetail]
         };
 
         var scores = new List<Score>

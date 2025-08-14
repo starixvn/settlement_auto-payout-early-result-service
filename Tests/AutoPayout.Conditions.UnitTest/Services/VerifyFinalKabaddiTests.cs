@@ -4,21 +4,18 @@ using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
 using AutoPayout.Exceptions;
 using AutoPayout.Models;
-using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.UnitTests.Services;
 
 public class VerifyFinalKabaddiTests
 {
     private readonly ResultDetailService resultDetailService = Substitute.For<ResultDetailService>();
-    private readonly IOptions<AppSettingsKey> options = Substitute.For<IOptions<AppSettingsKey>>();
     private readonly VerifyFinalKabaddi sut;
 
     public VerifyFinalKabaddiTests()
     {
-        sut = new VerifyFinalKabaddi(resultDetailService, options);
+        sut = new VerifyFinalKabaddi(resultDetailService);
     }
-
 
     [Theory]
     [InlineData("1", "0", true)]

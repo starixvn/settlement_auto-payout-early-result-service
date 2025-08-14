@@ -21,6 +21,7 @@ public class CreatorImp(IServiceProvider serviceProvider) : Creator
             ConditionId.VerifyMatchStatus => provider.GetRequiredService<VerifyMatchStatus>(),
             ConditionId.VerifyRunningOdds => provider.GetRequiredService<VerifyRunningOdds>(),
             ConditionId.VerifyConfirmScore => provider.GetRequiredService<VerifyConfirmScore>(),
+            ConditionId.VerifyMuayThaiFinalResult => provider.GetRequiredService<VerifyFinalMuayThai>(),
             ConditionId.VerifyRelatedSettleResult => provider.GetRequiredService<VerifySettledRelateResult>(),
             ConditionId.VerifyEsTimeResult => provider.GetRequiredService<VerifyTimeResult>(),
             ConditionId.VerifyBeforePush => provider.GetRequiredService<VerifyBeforePushProfile>(),

@@ -59,19 +59,13 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
             return false;
         }
 
-        if (IsChildMatchIncludeOT(matchDetail) && finalHomeScore == finalAwayScore)
-        {
-            return false;
-        }
-
-        return true;
+        return !IsChildMatchIncludeOT(matchDetail) || finalHomeScore != finalAwayScore;
     }
 
     private static bool IsChildMatchIncludeOT(MatchDetail matchDetail)
         => matchDetail.ParentID != 0 && matchDetail.LeagueType == 2;
 
     private static bool IsMatchRegularTimeOnly(MatchDetail matchDetail) => matchDetail.LeagueType == 1;
-
 
     private async Task HandleInvalidResult(Match match, ResultDetail finalResult, string errorMessage)
     {
@@ -125,7 +119,6 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
         // 1p 2p 3p
         await CheckScoreWithBetStatus(match, finalResult, betStatusList);
         await HandleNextCondition(match);
-
     }
 
     private static bool ShouldSkip(Match match, ResultDetail resultDetail)
@@ -134,10 +127,9 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
     private static bool IsRegularOrChildWithOt(MatchDetail detail)
         => IsMatchRegularTimeOnly(detail) || IsChildMatchIncludeOT(detail);
 
-    static bool IsInvalidRegularOrChildWithOt(List<BetStatus> betStatusList, MatchDetail detail)
+    private static bool IsInvalidRegularOrChildWithOt(List<BetStatus> betStatusList, MatchDetail detail)
         => betStatusList.Count < numberOfSets
            || (IsMatchRegularTimeOnly(detail) && HasOt(betStatusList));
-
 
     private async Task HandleInvalidAndNext(Match m, ResultDetail r, string msg)
     {
@@ -171,4 +163,3 @@ public class VerifyFinalWithBetStatus(ResultDetailService resultDetailService) :
 
     private sealed record BetStatus(string Home, string Away);
 }
-

@@ -17,16 +17,21 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 
         CompareScore(match, scores);
 
-        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
-        var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
-        var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
-
-        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, errorMessage);
+        await ProcessFailureResults(match);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
         match.ResultDetails = [.. match.ResultDetails, .. timeResult];
 
         await HandleNextCondition(match);
+    }
+
+    private async Task ProcessFailureResults(Match match)
+    {
+        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
+        var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
+        var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
+
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, errorMessage);
     }
 
     private void CompareScore(Match match, IEnumerable<Score> scores)

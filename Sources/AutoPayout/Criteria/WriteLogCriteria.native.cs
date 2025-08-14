@@ -1,18 +1,12 @@
 ﻿namespace AutoPayout.Criteria;
 
-public class WriteLogCriteria : NonQueryCommand
+public class WriteLogCriteria(int matchId, string errorMessage) : NonQueryCommand
 {
-    public WriteLogCriteria(int matchId, string errorMessage)
-    {
-        MatchId = matchId;
-        Remark = errorMessage;
-    }
-
     public int UserId { get; set; }
 
-    public int MatchId { get; set; }
+    public int MatchId { get; set; } = matchId;
 
-    public string Remark { get; set; }
+    public string Remark { get; set; } = errorMessage;
 
     public string Ip { get; } = string.Empty;
 

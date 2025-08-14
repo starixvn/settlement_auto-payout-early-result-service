@@ -26,7 +26,7 @@ public class ResultDetailServiceTests
     [Fact]
     public async Task GetScores_ReturnsScoresFromRepository()
     {
-        var match = new Match { MatchId = 1, SportType = 2, ResultDetails = new List<ResultDetail> { new() { ResourceId = "01" } } };
+        var match = new Match { MatchId = 1, SportType = 2, ResultDetails = [new() { ResourceId = "01" }] };
         var expectedScores = new List<Score> { new() { MatchId = 1, ResourceId = "01" } };
         repository.FetchAsync<Score>(Arg.Any<GetConfirmScoreCriteria>()).Returns(expectedScores);
 
@@ -100,8 +100,6 @@ public class ResultDetailServiceTests
         await updateResultStatusService.DidNotReceive().UpdateResultStatus(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<string>());
     }
 
-
-
     [Fact]
     public async Task GetResourceIndex_ReturnsFilteredIndexes()
     {
@@ -130,7 +128,6 @@ public class ResultDetailServiceTests
         Assert.Equal(2, results.Count);
         Assert.Equal(2, idxs.Count);
     }
-
 
     [Fact]
     public void GetValidSetResults_ReturnsExpected()

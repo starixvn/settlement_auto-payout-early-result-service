@@ -127,9 +127,9 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
     private static List<string> ProviderScore(IEnumerable<Score> scores)
     {
         var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Screenshot).ToList();
-        return provider.Any() ?
-            provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
-            : new List<string>();
+        return provider.Count > 0
+            ? provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
+            : [];
     }
 
     private static string TraderScore(List<Score> scores)

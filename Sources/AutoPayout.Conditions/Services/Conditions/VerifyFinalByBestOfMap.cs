@@ -89,12 +89,9 @@ public class VerifyFinalByBestOfMap(ResultDetailService resultDetailService) : A
             return ValidateBestOfTwo(finalResult, results);
         }
 
-        if (IsOverTimeSession(matchDetail))
-        {
-            return ValidateOverTimeSession(results, finalResult, maxGamePlayed);
-        }
-
-        return ValidateGeneralCase(match, results, matchDetail, settledResults, finalResult, maxGamePlayed);
+        return IsOverTimeSession(matchDetail)
+            ? ValidateOverTimeSession(results, finalResult, maxGamePlayed)
+            : ValidateGeneralCase(match, results, matchDetail, settledResults, finalResult, maxGamePlayed);
     }
 
     private static bool ValidateBestOfTwo(ResultDetail finalResult, List<ResultDetail> results)

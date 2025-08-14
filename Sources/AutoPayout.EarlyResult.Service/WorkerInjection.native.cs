@@ -42,6 +42,7 @@ public static class WorkerInjection
         services.AddSingleton<ResultDetailService, ResultDetailServiceImp>();
         services.AddTransient<ExtraResultService, OverTimeServiceImp>();
         services.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
+        services.AddSingleton<MuayThaiHelperService, MuayThaiHelperServiceImp>();
 
         services.AddTransient<VerifyMatchStatus>();
         services.AddTransient<VerifyRunningOdds>();
@@ -58,6 +59,7 @@ public static class WorkerInjection
         services.AddTransient<VerifyResultWithResourceId>();
         services.AddTransient<VerifyFinalWithBetStatus>();
         services.AddTransient<VerifyFinalKabaddi>();
+        services.AddTransient<VerifyFinalMuayThai>();
 
         services.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
         services.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();

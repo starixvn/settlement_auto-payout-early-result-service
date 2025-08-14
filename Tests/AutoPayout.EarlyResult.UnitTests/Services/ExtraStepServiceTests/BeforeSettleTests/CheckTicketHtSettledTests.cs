@@ -10,12 +10,11 @@ public class CheckTicketHtSettledTests
 {
     private readonly IDynamicRepository repository = Substitute.For<IDynamicRepository>();
     private readonly IOptions<AppSettingsKey> options = Substitute.For<IOptions<AppSettingsKey>>();
-    private readonly AppSettingsKey appSettingsKey;
     private readonly CheckTicketHtSettled service;
 
     public CheckTicketHtSettledTests()
     {
-        appSettingsKey = new AppSettingsKey { SiteDbServer = new List<string> { "Server1", "Server2" } };
+        var appSettingsKey = new AppSettingsKey { SiteDbServer = ["Server1", "Server2"] };
         options.Value.Returns(appSettingsKey);
         service = new CheckTicketHtSettled(repository, options);
     }

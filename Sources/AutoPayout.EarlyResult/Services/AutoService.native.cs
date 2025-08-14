@@ -11,11 +11,12 @@ public class AutoService(ProcessService processService, MatchPoolService matchPo
     public async Task Handle()
     {
         var matches = await matchPoolService.GetNewMatches();
+        await processService.Process(matches[0]);
 
-        matches.ForEach(m =>
-         {
-             Task.Run(() => processService.Process(m))
-                 .ConfigureAwait(false);
-         });
+        //matches.ForEach(m =>
+        // {
+        //     Task.Run(() => processService.Process(m))
+        //         .ConfigureAwait(false);
+        // });
     }
 }
