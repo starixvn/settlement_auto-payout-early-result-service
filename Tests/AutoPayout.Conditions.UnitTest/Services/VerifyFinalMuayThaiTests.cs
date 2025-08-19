@@ -1,6 +1,7 @@
 using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Conditions.Services.HelperService.VerifyFinalResult;
+using AutoPayout.Exceptions;
 using AutoPayout.Models;
 using AutoPayout.Services;
 using Microsoft.Extensions.Options;
@@ -19,9 +20,10 @@ public class VerifyFinalMuayThaiTests
         resultDetailService = Substitute.For<ResultDetailService>();
         muayThaiHelperService = Substitute.For<MuayThaiHelperService>();
         updateResultStatusService = Substitute.For<UpdateResultStatusService>();
+        var scoreMessageService = Substitute.For<ScoreMessageService>();
         var appSettings = new AppSettingsKey { RetryProcessScore = 300000 };
         var options = Options.Create(appSettings);
-        condition = new VerifyFinalMuayThai(resultDetailService, muayThaiHelperService, updateResultStatusService, options);
+        condition = new VerifyFinalMuayThai(resultDetailService, muayThaiHelperService, updateResultStatusService, scoreMessageService, options);
     }
 
     [Fact]
@@ -50,6 +52,7 @@ public class VerifyFinalMuayThaiTests
     public async Task HandleCondition_SingleScoreWithoutSourceId_KeepsOriginalValues()
     {
         var match = CreateMatch();
+        match.MatchDetail.BetStatus = "3";
         var scores = new List<Score>
         {
             new Score { SourceId = 0, ResourceId = "00", HomeValue = "1", AwayValue = "0", BetStatus = "3", SourceName = "Trader" }
@@ -105,11 +108,8 @@ public class VerifyFinalMuayThaiTests
         muayThaiHelperService.MapSboToSettle(5, 0).Returns(("1", "0", "5", true));
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.Empty(resultDetail.ExternalSourceInfo);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -126,12 +126,10 @@ public class VerifyFinalMuayThaiTests
         muayThaiHelperService.MapSboToSettle(5, 0).Returns(("1", "0", "5", true));
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
+        await updateResultStatusService.UpdateResultStatus(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<string>());
 
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.True(resultDetail.Expired);
-        await updateResultStatusService.Received().UpdateResultStatus(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<string>());
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -159,12 +157,8 @@ public class VerifyFinalMuayThaiTests
 
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.Null(resultDetail.HomeValue);
-        Assert.Null(resultDetail.AwayValue);
-        Assert.False(resultDetail.IsValid);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -179,11 +173,8 @@ public class VerifyFinalMuayThaiTests
         muayThaiHelperService.MapSboToSettle(4, 0).Returns(("4", "0", "", false));
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.Empty(resultDetail.ExternalSourceInfo);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -211,7 +202,7 @@ public class VerifyFinalMuayThaiTests
     }
 
     [Fact]
-    public async Task HandleCondition_AllScoresInvalidMapping_MarksAsInvalid()
+    public async Task HandleCondition_AllScoresInvalidMapping_ReturnEmptyResultDetail()
     {
         var match = CreateMatch();
         var scores = new List<Score>
@@ -222,11 +213,8 @@ public class VerifyFinalMuayThaiTests
 
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.Empty(resultDetail.ExternalSourceInfo);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -243,11 +231,8 @@ public class VerifyFinalMuayThaiTests
         muayThaiHelperService.MapSboToSettle(5, 0).Returns(("1", "0", "5", true));
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.False(resultDetail.Expired);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
         await updateResultStatusService.DidNotReceive().UpdateResultStatus(Arg.Any<Match>(), Arg.Any<int>(), Arg.Any<string>());
     }
 
@@ -276,11 +261,8 @@ public class VerifyFinalMuayThaiTests
 
         resultDetailService.GetScores(match).Returns(scores);
 
-        await condition.HandleCondition(match);
-
-        var resultDetail = match.ResultDetails.First();
-        Assert.False(resultDetail.IsValid);
-        Assert.Empty(resultDetail.ExternalSourceInfo);
+        var exception = await Assert.ThrowsAsync<ServiceException>(() => condition.HandleCondition(match));
+        Assert.False(exception.MarkFail);
     }
 
     [Fact]
@@ -380,128 +362,6 @@ public class VerifyFinalMuayThaiTests
         Assert.Equal("4", match.MatchDetail.BetStatus);
         Assert.True(resultDetail.IsValid);
         Assert.Equal(3, resultDetail.ExternalSourceInfo.Count());
-    }
-
-    [Theory]
-    [InlineData("Trader(11-56), PandaScore(12-50), GRID(11-56)")]
-    [InlineData("SBO(4-0), BetRadar(3-1)")]
-    [InlineData("PandaScore(2-1)")]
-    public void GetProviderScores_ReturnsCorrectFormat(string expectedFormat)
-    {
-        var scores = CreateScoresForProviderTest(expectedFormat);
-        var result = GetProviderScores(scores);
-        Assert.Equal(expectedFormat, result);
-    }
-
-    [Fact]
-    public void GetProviderScores_NoProviderScores_ReturnsEmptyString()
-    {
-        var scores = new List<Score>
-        {
-            new Score { SourceId = 0, SourceName = "Trader", HomeValue = "1", AwayValue = "0" },
-            new Score { SourceId = 0, SourceName = "Manual", HomeValue = "2", AwayValue = "1" }
-        };
-
-        var result = GetProviderScores(scores);
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void GetProviderScores_MixedSourceIds_OnlyReturnsProviderScores()
-    {
-        var scores = new List<Score>
-        {
-            new Score { SourceId = 0, SourceName = "Trader", HomeValue = "1", AwayValue = "0" },
-            new Score { SourceId = 1, SourceName = "SBO", HomeValue = "4", AwayValue = "0" },
-            new Score { SourceId = 2, SourceName = "PandaScore", HomeValue = "3", AwayValue = "1" },
-            new Score { SourceId = 0, SourceName = "Manual", HomeValue = "2", AwayValue = "1" }
-        };
-
-        var result = GetProviderScores(scores);
-        Assert.Equal("SBO(4-0), PandaScore(3-1)", result);
-    }
-
-    [Fact]
-    public void GetProviderScores_DuplicateProviderNames_UsesFirstScore()
-    {
-        var scores = new List<Score>
-        {
-            new Score { SourceId = 1, SourceName = "SBO", HomeValue = "4", AwayValue = "0" },
-            new Score { SourceId = 2, SourceName = "SBO", HomeValue = "5", AwayValue = "1" },
-            new Score { SourceId = 3, SourceName = "PandaScore", HomeValue = "3", AwayValue = "1" }
-        };
-
-        var result = GetProviderScores(scores);
-        Assert.Equal("SBO(4-0), PandaScore(3-1)", result);
-    }
-
-    [Fact]
-    public void GetProviderScores_EmptyScoreList_ReturnsEmptyString()
-    {
-        var scores = new List<Score>();
-        var result = GetProviderScores(scores);
-        Assert.Equal(string.Empty, result);
-    }
-
-    [Fact]
-    public void GetProviderScores_NullValues_HandlesGracefully()
-    {
-        var scores = new List<Score>
-        {
-            new Score { SourceId = 1, SourceName = "SBO", HomeValue = null, AwayValue = null },
-            new Score { SourceId = 2, SourceName = "PandaScore", HomeValue = "3", AwayValue = "1" }
-        };
-
-        var result = GetProviderScores(scores);
-        Assert.Equal("SBO(-), PandaScore(3-1)", result);
-    }
-
-    private static List<Score> CreateScoresForProviderTest(string expectedFormat)
-    {
-        var scores = new List<Score>();
-        
-        if (expectedFormat.Contains("Trader(11-56)"))
-        {
-            scores.Add(new Score { SourceId = 1, SourceName = "Trader", HomeValue = "11", AwayValue = "56" });
-        }
-        
-        if (expectedFormat.Contains("PandaScore(12-50)"))
-        {
-            scores.Add(new Score { SourceId = 2, SourceName = "PandaScore", HomeValue = "12", AwayValue = "50" });
-        }
-        
-        if (expectedFormat.Contains("GRID(11-56)"))
-        {
-            scores.Add(new Score { SourceId = 3, SourceName = "GRID", HomeValue = "11", AwayValue = "56" });
-        }
-        
-        if (expectedFormat.Contains("SBO(4-0)"))
-        {
-            scores.Add(new Score { SourceId = 4, SourceName = "SBO", HomeValue = "4", AwayValue = "0" });
-        }
-        
-        if (expectedFormat.Contains("BetRadar(3-1)"))
-        {
-            scores.Add(new Score { SourceId = 5, SourceName = "BetRadar", HomeValue = "3", AwayValue = "1" });
-        }
-        
-        if (expectedFormat.Contains("PandaScore(2-1)"))
-        {
-            scores.Add(new Score { SourceId = 6, SourceName = "PandaScore", HomeValue = "2", AwayValue = "1" });
-        }
-        
-        return scores;
-    }
-
-    private string GetProviderScores(IEnumerable<Score> scores)
-    {
-        var providerScores = scores
-            .Where(score => score.SourceId != 0)
-            .GroupBy(score => score.SourceName)
-            .Select(group => $"{group.Key}({group.First().HomeValue ?? "-"}-{group.First().AwayValue ?? "-"})")
-            .ToList();
-
-        return string.Join(", ", providerScores);
     }
 
     private static Match CreateMatch()

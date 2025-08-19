@@ -6,6 +6,9 @@
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyFinalMuayThaiTests&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.Helpers.MuayThaiHelperServiceTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyTimeResultTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyConfirmScoreTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::594C8EDB-27D5-449B-B02E-AEFC3D0DD37D::net9.0::AutoPayout.EarlyResult.UnitTests.Services.AutoServiceTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

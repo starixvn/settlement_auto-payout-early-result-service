@@ -9,15 +9,16 @@ namespace AutoPayout.Conditions.UnitTests.Services;
 public class VerifyConfirmScoreTests
 {
     private readonly ResultDetailService resultDetailService;
-
+    private readonly ScoreMessageService scoreMessageService;
     private readonly VerifyConfirmScore condition;
 
     public VerifyConfirmScoreTests()
     {
         resultDetailService = Substitute.For<ResultDetailService>();
+        scoreMessageService = Substitute.For<ScoreMessageService>();
         var appSetting = new AppSettingsKey { RetryProcessScore = 300000 };
         var option = Options.Create(appSetting);
-        condition = new VerifyConfirmScore(resultDetailService, option);
+        condition = new VerifyConfirmScore(resultDetailService, scoreMessageService, option);
     }
 
     [Fact]
@@ -283,9 +284,11 @@ public class VerifyConfirmScoreTests
                 CreateDate = DateTime.Now.AddMinutes(-6),
             },
         };
-
-        resultDetailService.GetScores(match).Returns(scores);
         const string errorMessage = "Failed Auto Payout: Result(01,02) values inconsistent between ";
+
+        scoreMessageService.GetScoreMessage(Arg.Any<IEnumerable<Score>>(), Arg.Any<string>()).Returns(errorMessage);
+        resultDetailService.GetScores(match).Returns(scores);
+
         var exception = await Record.ExceptionAsync(() => condition.HandleCondition(match));
 
         Assert.IsType<ServiceException>(exception);
@@ -342,7 +345,7 @@ public class VerifyConfirmScoreTests
         Assert.Equal(string.Empty, firstResultDetail.AwayValue);
         Assert.Equal("2", secondResultDetail.HomeValue);
         Assert.Equal("3", secondResultDetail.AwayValue);
-        await resultDetailService.DidNotReceive().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>());
+        await resultDetailService.Received().UpdateInvalidResultStatus(1, Arg.Any<List<ResultDetail>>());
     }
 
     [Fact]

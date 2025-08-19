@@ -13,6 +13,7 @@ public class ResultDetailServiceTests
     private readonly IDynamicRepository repository;
     private readonly WriteLogService writeLogService;
     private readonly UpdateResultStatusService updateResultStatusService;
+    private readonly ScoreMessageService scoreMessageService;
     private readonly ResultDetailServiceImp service;
 
     public ResultDetailServiceTests()
@@ -20,7 +21,8 @@ public class ResultDetailServiceTests
         repository = Substitute.For<IDynamicRepository>();
         writeLogService = Substitute.For<WriteLogService>();
         updateResultStatusService = Substitute.For<UpdateResultStatusService>();
-        service = new ResultDetailServiceImp(repository, writeLogService, updateResultStatusService);
+        scoreMessageService = Substitute.For<ScoreMessageService>();
+        service = new ResultDetailServiceImp(repository, writeLogService, updateResultStatusService, scoreMessageService);
     }
 
     [Fact]
@@ -144,9 +146,9 @@ public class ResultDetailServiceTests
     }
 
     [Fact]
-    public void WriteLogResultInvalid_Always_WriteCorrectMessage()
+    public async Task WriteLogResultInvalid_Always_WriteCorrectMessage()
     {
-        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
+        const string expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2), SBO(1-2), SEO(2-2)";
 
         var scores = new List<Score>()
         {
@@ -175,59 +177,10 @@ public class ResultDetailServiceTests
             },
         };
 
-        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
+        scoreMessageService.GetScoreMessage(Arg.Any<IEnumerable<Score>>(), Arg.Any<string>()).Returns(expectedMessage);
+        await service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
 
-        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
-    }
-
-    [Fact]
-    public void WriteLogResultInvalid_ProviderOnly_WriteCorrectMessage()
-    {
-        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between SBO(1-2), SEO(2-2)";
-
-        var scores = new List<Score>()
-        {
-            new ()
-            {
-                ResourceId = "01",
-                HomeValue = "1",
-                AwayValue = "2",
-                SourceName = "SBO",
-                SourceId = 1
-            },
-            new ()
-            {
-                ResourceId = "01",
-                HomeValue = "2",
-                AwayValue = "2",
-                SourceName = "SEO",
-                SourceId = 2 },
-        };
-
-        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
-
-        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
-    }
-
-    [Fact]
-    public void WriteLogResultInvalid_TraderOnly_WriteCorrectMessage()
-    {
-        var expectedMessage = "Failed Auto Payout: Result(01) values inconsistent between Trader(2-2)";
-
-        var scores = new List<Score>()
-        {
-            new ()
-            {
-                ResourceId = "01",
-                HomeValue = "2",
-                AwayValue = "2",
-                SourceName = "SEO"
-            },
-        };
-
-        service.WriteLogResultInvalid(1, new ResultDetail() { ResourceId = "01" }, scores);
-
-        writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
+        await writeLogService.Received().WriteLog(Arg.Any<Match>(), expectedMessage);
     }
 
     [Fact]

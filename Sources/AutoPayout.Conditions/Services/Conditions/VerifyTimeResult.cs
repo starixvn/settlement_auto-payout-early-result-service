@@ -4,7 +4,10 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<AppSettingsKey> appSettingsKey)
+public class VerifyTimeResult(
+    ResultDetailService resultDetailService,
+    ScoreMessageService scoreMessageService,
+    IOptions<AppSettingsKey> appSettingsKey)
     : AbstractCondition
 {
     public override async Task HandleCondition(Match match)
@@ -89,7 +92,9 @@ public class VerifyTimeResult(ResultDetailService resultDetailService, IOptions<
         }
         else if (TryGetTraderScore(groupScore, out _, out _) && processTime.TotalMilliseconds > appSettingsKey.Value.RetryProcessScore)
         {
-            var remark = resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, groupScore.ToList());
+            var scores = groupScore.ToList();
+            await resultDetailService.WriteLogResultInvalid(match.MatchId, resultDetail, scores);
+            var remark = scoreMessageService.GetScoreMessage(scores, resultDetail.ResourceId);
             await resultDetailService.UpdateInvalidResultStatus(match.MatchId, new List<ResultDetail> { resultDetail }, remark);
             resultDetail.Expired = true;
         }

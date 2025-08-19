@@ -10,6 +10,7 @@ public class VerifyFinalMuayThai(
     ResultDetailService resultDetailService,
     MuayThaiHelperService muayThaiHelperService,
     UpdateResultStatusService updateResultStatusService,
+    ScoreMessageService scoreMessageService,
     IOptions<AppSettingsKey> options) : AbstractCondition
 {
     public override async Task HandleCondition(Match match)
@@ -18,12 +19,25 @@ public class VerifyFinalMuayThai(
 
         if (scores.Any())
         {
-            var cloneScore = scores.DeepClone();
-            CompareScore(match, scores);
-            await ProcessFailureResults(match, cloneScore);
+            SetBetStatusForTrade(scores, match.MatchDetail.BetStatus);
+            var cloneScores = scores.DeepClone();
+            CompareScore(match, scores, cloneScores);
+            await ProcessFailureResults(match, cloneScores);
+            match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
         }
 
         await HandleNextCondition(match);
+    }
+
+    private static void SetBetStatusForTrade(IEnumerable<Score> scores, string betStatus)
+    {
+        foreach (var score in scores)
+        {
+            if (score.SourceId == SourceId.Trader)
+            {
+                score.BetStatus = betStatus;
+            }
+        }
     }
 
     private async Task ProcessFailureResults(Match match, IEnumerable<Score> scores)
@@ -33,10 +47,9 @@ public class VerifyFinalMuayThai(
 
         if (failureResults.Count > 0)
         {
-            var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
-            var providerScore = GetProviderScores(scores);
+            var remark = scoreMessageService.GetScoreMessage(scores, failureResourceIds[0]);
             var cloneMatch = new Match { MatchId = match.MatchId, ResultDetails = failureResults.ToList() };
-            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, $"{errorMessage}{providerScore}");
+            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
         }
     }
 
@@ -51,18 +64,18 @@ public class VerifyFinalMuayThai(
         return muayThaiHelperService.MapSboToSettle(homeValue, awayValue);
     }
 
-    private void CompareScore(Match match, IEnumerable<Score> scores)
+    private void CompareScore(Match match, IEnumerable<Score> scores, List<Score> cloneScores)
     {
         var scoreList = scores.ToList();
-        var resultDetail = match.ResultDetails.First();
+        var resultDetail = match.ResultDetails[0];
 
         if (scoreList.Count == 1)
         {
-            ProcessSingleScore(match, resultDetail, scoreList.First());
+            ProcessSingleScore(match, resultDetail, scoreList[0]);
         }
         else
         {
-            ProcessMultipleScores(match, resultDetail, scoreList);
+            ProcessMultipleScores(match, resultDetail, scoreList, cloneScores);
         }
     }
 
@@ -80,19 +93,19 @@ public class VerifyFinalMuayThai(
         }
     }
 
-    private void ProcessMultipleScores(Match match, ResultDetail resultDetail, List<Score> scoreList)
+    private void ProcessMultipleScores(Match match, ResultDetail resultDetail, List<Score> scoreList, List<Score> cloneScores)
     {
-        var mappedScores = MapScoresWithBoxingService(scoreList, match);
+        var mappedScores = MapScoresWithBoxingService(scoreList);
         var areConsistent = AreAllScoresConsistent(mappedScores);
 
         if (areConsistent)
         {
-            var specialScore = mappedScores.First();
+            var specialScore = mappedScores[0];
             SetMatchResult(match, resultDetail, specialScore.HomeValue, specialScore.AwayValue, specialScore.BetStatus, scoreList);
         }
         else
         {
-            MarkFail(resultDetail, scoreList, match.MatchId);
+            MarkFail(resultDetail, cloneScores, match.MatchId);
         }
     }
 
@@ -135,7 +148,7 @@ public class VerifyFinalMuayThai(
         return distinctScores.Count == 1;
     }
 
-    private List<Score> MapScoresWithBoxingService(IEnumerable<Score> scores, Match match)
+    private List<Score> MapScoresWithBoxingService(IEnumerable<Score> scores)
     {
         var mappedScores = new List<Score>();
 
@@ -153,10 +166,6 @@ public class VerifyFinalMuayThai(
                 score.HomeValue = mappedScore.settleHome;
                 score.AwayValue = mappedScore.settleAway;
                 score.BetStatus = mappedScore.settleRound;
-            }
-            else
-            {
-                score.BetStatus = match.MatchDetail.BetStatus;
             }
 
             mappedScores.Add(score);
@@ -176,21 +185,5 @@ public class VerifyFinalMuayThai(
         }
 
         resultDetail.IsValid = false;
-    }
-
-    private static string GetProviderScores(IEnumerable<Score> scores)
-    {
-        var providerScores = scores
-            .GroupBy(score => score.SourceName)
-            .Select(group =>
-            {
-                var firstScore = group.First();
-                var baseFormat = $"{group.Key}({firstScore.HomeValue}-{firstScore.AwayValue}";
-
-                return !string.IsNullOrEmpty(firstScore.BetStatus) ? $"{baseFormat}; {firstScore.BetStatus})" : $"{baseFormat})";
-            })
-            .ToList();
-
-        return string.Join(", ", providerScores);
     }
 }

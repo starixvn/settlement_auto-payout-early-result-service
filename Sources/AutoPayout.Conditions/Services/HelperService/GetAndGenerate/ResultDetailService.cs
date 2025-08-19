@@ -9,7 +9,7 @@ public interface ResultDetailService
 
     Task<IEnumerable<Score>> GetSingleScore(ResultDetail resultDetail);
 
-    string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
+    Task WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores);
 
     string WriteLogResultNotTrader(int matchId, ResultDetail result);
 
@@ -36,8 +36,11 @@ public interface ResultDetailService
     Task<IEnumerable<ResourceIndex>> GetResourceIndex(int sportType);
 }
 
-public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogService writeLogService,
-        UpdateResultStatusService updateResultStatusService)
+public class ResultDetailServiceImp(
+    IDynamicRepository repository,
+    WriteLogService writeLogService,
+    UpdateResultStatusService updateResultStatusService,
+    ScoreMessageService scoreMessageService)
     : ResultDetailService
 {
     public async Task<IEnumerable<Score>> GetScores(Match match)
@@ -68,22 +71,12 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         return scores;
     }
 
-    public string WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
+    public async Task WriteLogResultInvalid(int matchId, ResultDetail result, List<Score> scores)
     {
+        var message = scoreMessageService.GetScoreMessage(scores, result.ResourceId);
+
         var cloneMatch = new Match { MatchId = matchId, ResultDetails = [result] };
-        var errorMessage = string.Format(ErrorMessage.InconsistentScore, result.ResourceId);
-        var traderScore = TraderScore(scores);
-        var sourceScore = ProviderScore(scores);
-
-        if (!string.IsNullOrEmpty(traderScore))
-        {
-            sourceScore.Insert(0, traderScore);
-        }
-
-        var message = errorMessage + string.Join(", ", sourceScore);
-        writeLogService.WriteLog(cloneMatch, errorMessage + string.Join(", ", sourceScore));
-
-        return message;
+        await writeLogService.WriteLog(cloneMatch, message);
     }
 
     public string WriteLogResultNotTrader(int matchId, ResultDetail result)
@@ -122,27 +115,6 @@ public class ResultDetailServiceImp(IDynamicRepository repository, WriteLogServi
         totalAwayValue += awayValue;
 
         return totalHomeValue != int.Parse(finalResult.HomeValue) || totalAwayValue != int.Parse(finalResult.AwayValue);
-    }
-
-    private static List<string> ProviderScore(IEnumerable<Score> scores)
-    {
-        var provider = scores.Where(s => s.SourceId > 0 && s.SourceId != SourceId.Screenshot).ToList();
-        return provider.Count > 0
-            ? provider.Select(p => ScoreMessage(p, p.SourceName)).ToList()
-            : [];
-    }
-
-    private static string TraderScore(List<Score> scores)
-    {
-        var trader = scores.Find(r => r.SourceId == SourceId.Trader);
-
-        return trader is not null ? ScoreMessage(trader, "Trader") : string.Empty;
-    }
-
-    private static string ScoreMessage(Score score, string preFix)
-    {
-        var awayValue = !string.IsNullOrEmpty(score.AwayValue) ? '-' + score.AwayValue : string.Empty;
-        return $"{preFix}({score.HomeValue}{awayValue})";
     }
 
     public void WriteLogResult(int matchId, ResultDetail result, string message)

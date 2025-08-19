@@ -43,6 +43,7 @@ public static class WorkerInjection
         services.AddTransient<ExtraResultService, OverTimeServiceImp>();
         services.AddSingleton<MatchDetailService, MatchDetailServiceImp>();
         services.AddSingleton<MuayThaiHelperService, MuayThaiHelperServiceImp>();
+        services.AddSingleton<ScoreMessageService, ScoreMessageServiceImp>();
 
         services.AddTransient<VerifyMatchStatus>();
         services.AddTransient<VerifyRunningOdds>();
