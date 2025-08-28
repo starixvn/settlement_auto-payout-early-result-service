@@ -1,14 +1,7 @@
 ﻿namespace AutoPayout.Conditions.Models;
 
-public class ScoreComparer : IEqualityComparer<Score>
+public class ScoreComparer(bool compareOneValue = false) : IEqualityComparer<Score>
 {
-    private readonly bool compareOneValue;
-
-    public ScoreComparer(bool compareOneValue = false)
-    {
-        this.compareOneValue = compareOneValue;
-    }
-
     public bool Equals(Score first, Score second)
     {
         if (ReferenceEquals(first, second))

@@ -16,9 +16,10 @@ public class VerifyTimeResultTests
     public VerifyTimeResultTests()
     {
         resultDetailService = Substitute.For<ResultDetailService>();
+        var scoreMessageService = Substitute.For<ScoreMessageService>();
         var appSettingsKey = Substitute.For<IOptions<AppSettingsKey>>();
 
-        verifyTimeResult = new VerifyTimeResult(resultDetailService, appSettingsKey);
+        verifyTimeResult = new VerifyTimeResult(resultDetailService, scoreMessageService, appSettingsKey);
 
         appSettingsKey.Value.Returns(new AppSettingsKey { RetryProcessScore = 200 });
 
@@ -33,7 +34,6 @@ public class VerifyTimeResultTests
             EarlyRetryTime = 300
         };
     }
-
 
     [Fact]
     public async Task HandleCondition_ShouldNotProcess_WhenNoTimeResultsExist()
@@ -82,10 +82,8 @@ public class VerifyTimeResultTests
                 AwayValue = "100",
                 SourceId = SourceId.Trader,
                 CreateDate = new(2022,11,11)
-
             }
         }; // No valid scores
-
 
         mockMatch.ResultDetails = mockMatch.ResultDetails.Where(x => x.ResultType == ResultTypes.Time).ToList();
 
@@ -94,5 +92,4 @@ public class VerifyTimeResultTests
         // Act & Assert
         await Assert.ThrowsAsync<ServiceException>(() => verifyTimeResult.HandleCondition(mockMatch));
     }
-
 }

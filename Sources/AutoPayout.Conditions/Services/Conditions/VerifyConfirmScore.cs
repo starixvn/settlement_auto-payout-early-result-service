@@ -4,7 +4,10 @@ using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyConfirmScore(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options)
+public class VerifyConfirmScore(
+    ResultDetailService resultDetailService,
+    ScoreMessageService scoreMessageService,
+    IOptions<AppSettingsKey> options)
     : AbstractCondition
 {
     public override async Task HandleCondition(Match match)
@@ -17,16 +20,21 @@ public class VerifyConfirmScore(ResultDetailService resultDetailService, IOption
 
         CompareScore(match, scores);
 
-        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
-        var failureResourceIds = failureResults.Select(x => x.ResourceId).ToList();
-        var errorMessage = string.Format(ErrorMessage.InconsistentScore, string.Join(",", failureResourceIds));
-
-        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, errorMessage);
+        await ProcessFailureResults(match, scores);
 
         match.ResultDetails = match.ResultDetails.Where(r => r.IsValid && r.ExternalSourceInfo.Any()).ToList();
         match.ResultDetails = [.. match.ResultDetails, .. timeResult];
 
         await HandleNextCondition(match);
+    }
+
+    private async Task ProcessFailureResults(Match match, IEnumerable<Score> scores)
+    {
+        var failureResults = match.ResultDetails.Where(r => !r.IsValid && r.Expired).ToList();
+        var resourceIds = failureResults.Select(x => x.ResourceId).ToList();
+        var remark = scoreMessageService.GetScoreMessage(scores, string.Join(",", resourceIds));
+
+        await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, remark);
     }
 
     private void CompareScore(Match match, IEnumerable<Score> scores)

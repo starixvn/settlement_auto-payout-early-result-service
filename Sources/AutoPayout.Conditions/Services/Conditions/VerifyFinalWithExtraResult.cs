@@ -35,10 +35,9 @@ public class VerifyFinalWithExtraResult(
         }
 
         await HandleNextCondition(match);
-
     }
 
-    public async Task<string> VerifyFinalResult(Match match, ResultDetail finalResult, List<ResultDetail> settledResults)
+    private async Task<string> VerifyFinalResult(Match match, ResultDetail finalResult, List<ResultDetail> settledResults)
     {
         var (setResults, resources) = await resultDetailService.GetResultsChecking(match, match.MatchDetail.GameSession, settledResults);
 
@@ -79,7 +78,6 @@ public class VerifyFinalWithExtraResult(
 
         return !extraResult.IsValid || isTotalScoreInValid;
     }
-
 
     private async Task HandleInValidFinalResult(Match match, ResultDetail finalResult, string errorMessage)
     {

@@ -2,12 +2,21 @@
 	<s:String x:Key="/Default/CodeInspection/Highlighting/SweaWarningsMode/@EntryValue">ShowAndRun</s:String>
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=NonReadonlyMemberInGetHashCode/@EntryIndexedValue">DO_NOT_SHOW</s:String>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/SolBuilderDuo/UseMsbuildSolutionBuilder/@EntryValue">NewVersion</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=862116ed_002Dda50_002D42ab_002D921d_002Da0a720648705/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="HandleCondition_SingleScoreWithSourceId_MapsCorrectly" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyFinalMuayThaiTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.Helpers.MuayThaiHelperServiceTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyTimeResultTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::AB992F23-20E3-4AFC-A8A8-3191DF91C3EF::net9.0::AutoPayout.Conditions.UnitTests.Services.VerifyConfirmScoreTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::594C8EDB-27D5-449B-B02E-AEFC3D0DD37D::net9.0::AutoPayout.EarlyResult.UnitTests.Services.AutoServiceTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	
 	
 	
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f56995e3_002D0d3c_002D4d44_002D93fc_002Dc18934c3e30a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="VerifyConfirmScoreTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f56995e3_002D0d3c_002D4d44_002D93fc_002Dc18934c3e30a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="VerifyConfirmScoreTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>	
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Fanex/@EntryIndexedValue">True</s:Boolean>

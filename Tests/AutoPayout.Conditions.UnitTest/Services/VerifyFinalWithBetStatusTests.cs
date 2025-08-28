@@ -18,7 +18,6 @@ public class VerifyFinalWithBetStatusTests
         sut = new VerifyFinalWithBetStatus(resultDetailServiceSub);
     }
 
-
     [Fact]
     public async Task HandleCondition_WhenNoFullTimeResult_ShouldSkip()
     {
@@ -84,7 +83,6 @@ public class VerifyFinalWithBetStatusTests
     //    };
 
     //    await Assert.ThrowsAsync<ServiceException>(async () => await sut.HandleCondition(match));
-
 
     //    await resultDetailServiceSub.Received(1).UpdateInvalidResultStatus(
     //        Arg.Any<int>(),
@@ -200,17 +198,21 @@ public class VerifyFinalWithBetStatusTests
         var match = new Match
         {
             MatchId = 1,
-            ResultDetails = new List<ResultDetail>
-            {
-                new() { ResourceId = ResourceIds.FullTime, HomeValue = "6", AwayValue = "3" },
-                new() { ResourceId = "other", HomeValue = "1", AwayValue = "1" }
-            }
+            ResultDetails =
+            [
+                new ResultDetail { ResourceId = ResourceIds.FullTime, HomeValue = "6", AwayValue = "3" },
+                new ResultDetail { ResourceId = "other", HomeValue = "1", AwayValue = "1" }
+            ]
         };
         var finalResult = match.ResultDetails[0];
-        var errorMessage = "error";
+        const string errorMessage = "error";
         var method = typeof(VerifyFinalWithBetStatus).GetMethod("HandleInvalidResult", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        var task = (Task)method.Invoke(sut, new object[] { match, finalResult, errorMessage });
-        await task;
+        if (method != null)
+        {
+            var task = (Task)method.Invoke(sut, [match, finalResult, errorMessage]);
+            if (task != null) await task;
+        }
+
         Assert.Single(match.ResultDetails);
         Assert.Equal("other", match.ResultDetails[0].ResourceId);
     }

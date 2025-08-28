@@ -1,10 +1,9 @@
 ﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using AutoPayout.Constants;
-using Microsoft.Extensions.Options;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyFinalKabaddi(ResultDetailService resultDetailService, IOptions<AppSettingsKey> options) : AbstractCondition
+public class VerifyFinalKabaddi(ResultDetailService resultDetailService) : AbstractCondition
 {
     private const byte TossWinner = 2;
     private const byte TeamTotalPoints = 1;
