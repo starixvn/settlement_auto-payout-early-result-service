@@ -14,7 +14,7 @@ public class VerifyConfirmScore(
     {
         match.LogCondition.Add($"{ConditionId.VerifyConfirmScore} - {GetType().Name}");
         var timeResult = match.ResultDetails.Where(x => x.ResultType == ResultTypes.Time);
-        match.ResultDetails = match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time).ToList();
+        match.ResultDetails = [.. match.ResultDetails.Where(x => x.ResultType != ResultTypes.Time)];
 
         var scores = await resultDetailService.GetScores(match);
 
@@ -48,6 +48,8 @@ public class VerifyConfirmScore(
             {
                 resultDetail.HomeValue = group.First().HomeValue;
                 resultDetail.AwayValue = group.First().AwayValue;
+                resultDetail.Scores = [.. group];
+
                 resultDetail.ExternalSourceInfo = group.Select(g => new ExternalSourceInfo
                 { SourceName = g.SourceName, ResourceId = g.ResourceId, SourceId = g.SourceId });
             }

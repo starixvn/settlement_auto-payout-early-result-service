@@ -17,6 +17,8 @@ public class Score
 
     public string BetStatus { get; set; }
 
+    public string OtherInfo { get; set; }
+
     public string AwayValue
     {
         get => _awayValue;

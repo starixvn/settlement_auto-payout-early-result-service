@@ -1,5 +1,5 @@
-﻿using System.Xml.Serialization;
-using AutoPayout.Constants;
+﻿using AutoPayout.Constants;
+using System.Xml.Serialization;
 
 namespace AutoPayout.Models;
 
@@ -22,6 +22,9 @@ public class ResultDetail
 
     [XmlAttribute("Away")]
     public string AwayValue { get; set; }
+
+    [XmlAttribute("OtherInfo")]
+    public string OtherInfo { get; set; }
 
     [XmlIgnore]
     public int ResourceType { get; set; }
@@ -55,6 +58,9 @@ public class ResultDetail
 
     [XmlIgnore]
     public IEnumerable<ExternalSourceInfo> ExternalSourceInfo { get; set; } = [];
+
+    [XmlIgnore]
+    public IEnumerable<Score> Scores { get; set; } = [];
 
     [XmlIgnore]
     public byte ResultType => ResourceIds.TimePattern.Any(ResourceId.StartsWith) ? ResultTypes.Time : default;
