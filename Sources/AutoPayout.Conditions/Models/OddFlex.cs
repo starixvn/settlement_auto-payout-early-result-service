@@ -10,8 +10,14 @@ public class OddFlexModel
     public string BetChoice { get; set; }
     public string OddsInfo { get; set; }
 
-    public OddsInfoModel Info { get; set; }
+    public OddsInfoModel Info => JsonConvert.DeserializeObject<OddsInfoModel>(OddsInfo);
 
+    public override bool Equals(object obj)
+        => obj is OddFlexModel model
+           && model.ResourceId == ResourceId
+           && model.OddsInfo == OddsInfo;
+
+    public override int GetHashCode() => HashCode.Combine(ResourceId, OddsInfo);
 }
 
 public class OddsInfoModel

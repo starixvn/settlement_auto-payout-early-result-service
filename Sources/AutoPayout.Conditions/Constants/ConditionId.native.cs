@@ -31,4 +31,6 @@ public static class ConditionId
     public const string VerifyFinalBetStatus = "91"; // for ice hockey
 
     public const string VerifyFinalKabaddi = "90"; // for football, basketball, tennis, etc.
+
+    public const string VerifyOddFlexPlayerResult = "89"; // for early basketball with player result  
 }

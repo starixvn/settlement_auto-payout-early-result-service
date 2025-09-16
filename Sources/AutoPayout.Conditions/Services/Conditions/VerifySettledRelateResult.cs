@@ -8,7 +8,7 @@ public class VerifySettledRelateResult(IDynamicRepository repository) : Abstract
         match.LogCondition.Add($"{ConditionId.VerifyRelatedSettleResult} - {GetType().Name}");
         await CheckRelatedResults(match);
 
-        match.ResultDetails = match.ResultDetails.Where(x => x.IsValid).ToList();
+        match.ResultDetails = [.. match.ResultDetails.Where(x => x.IsValid)];
 
         await HandleNextCondition(match);
     }
@@ -63,9 +63,9 @@ public class VerifySettledRelateResult(IDynamicRepository repository) : Abstract
         return relatedResults;
     }
 
-    private bool ValidateResultDetail(Match match, ResultDetail item, List<ResultDetail> relatedResults)
+    private static bool ValidateResultDetail(Match match, ResultDetail item, List<ResultDetail> relatedResults)
     {
-        var isExistsRelatedResults = TryGetAllExistsResults(match.ResultDetails, relatedResults.ToList(), out var existingResourceIds);
+        var isExistsRelatedResults = TryGetAllExistsResults(match.ResultDetails, [.. relatedResults], out var existingResourceIds);
 
         var checkingRelatedResults = relatedResults
             .Where(x => !existingResourceIds.Contains(x.ResourceId))
@@ -77,27 +77,27 @@ public class VerifySettledRelateResult(IDynamicRepository repository) : Abstract
         return isExistsRelatedResults || (isCalRelatedResults && isSettleRelatedResults);
     }
 
-    private bool HasRelatedResources(ResultDetail item)
+    private static bool HasRelatedResources(ResultDetail item)
         => item.RelatedSettResourcesIds.Count > 0 || item.RelatedCalResourceIds.Count > 0;
 
-    private bool TryGetAllExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
+    private static bool TryGetAllExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
     {
         var settlingResultsIds = settlingResults.Select(x => x.ResourceId).ToList();
 
-        existingResourceIds = relatedResults
+        existingResourceIds = [.. relatedResults
             .Where(x => settlingResultsIds.Contains(x.ResourceId))
-            .Select(x => x.ResourceId).ToList();
+            .Select(x => x.ResourceId)];
 
         return existingResourceIds.Count == relatedResults.Count;
     }
 
-    private bool IsCalRelatedResults(List<ResultDetail> relatedResults, List<string> relatedCalResourceIds)
+    private static bool IsCalRelatedResults(List<ResultDetail> relatedResults, List<string> relatedCalResourceIds)
     {
         return relatedCalResourceIds.Count == 0
             || relatedResults.TrueForAll(x => relatedCalResourceIds.Contains(x.ResourceId) && x.SettlementStatusId == SettlementStatusId.Calculated);
     }
 
-    private bool IsSettleRelatedResults(List<ResultDetail> relatedResults, List<string> relatedSettResourcesIds)
+    private static bool IsSettleRelatedResults(List<ResultDetail> relatedResults, List<string> relatedSettResourcesIds)
     {
         return relatedSettResourcesIds.Count == 0
             || relatedResults.TrueForAll(x => relatedSettResourcesIds.Contains(x.ResourceId) && (x.ResultStatusId is ResultStatusId.ManualCompleted or ResultStatusId.AutoCompleted));

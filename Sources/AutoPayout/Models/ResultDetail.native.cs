@@ -84,4 +84,10 @@ public class ResultDetail
     public List<string> RelatedSettResourcesIds => string.IsNullOrEmpty(RelatedSettResources) ? [] : [.. RelatedSettResources.Split(",")];
 
     public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";
+
+    public override bool Equals(object obj) => obj is ResultDetail detail
+               && detail.ResourceId == ResourceId
+               && detail.MatchId == MatchId;
+
+    public override int GetHashCode() => HashCode.Combine(MatchId, ResourceId);
 }

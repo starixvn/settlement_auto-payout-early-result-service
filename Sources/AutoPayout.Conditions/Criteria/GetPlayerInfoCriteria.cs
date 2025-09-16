@@ -4,13 +4,9 @@ public class GetPlayerInfoCriteria : CriteriaBase
 {
     public int MatchId { get; set; }
     public int SportType { get; set; }
-    public override string GetSettingKey()
-    {
-        throw new NotImplementedException();
-    }
+    public string ListResourceIds { get; set; } = string.Empty;
 
-    public override bool IsValid()
-    {
-        throw new NotImplementedException();
-    }
+    public override string GetSettingKey() => "NAP_Set_PlayerInfoSel";
+
+    public override bool IsValid() => true;
 }
