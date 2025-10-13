@@ -24,7 +24,7 @@ public class MatchServiceTests
         var xmlConvertService1 = Substitute.For<XmlConvertService>();
         cache = new RedisCache(new RedisCacheOptions
         {
-            ConnectionString = "10.18.200.195:16379,password=foo1@bared,defaultDatabase=11",
+            ConnectionString = "10.18.200.194:16379,password=foo1@bared,defaultDatabase=11",
             ApplicationName = "Settlement-LOCAL"
         });
 
