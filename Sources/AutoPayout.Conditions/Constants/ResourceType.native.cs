@@ -5,4 +5,6 @@ public static class ResourceType
     public const int MainResource = 1;
 
     public const int EarlyResource = 2;
+
+    public const string Final = "00";
 }

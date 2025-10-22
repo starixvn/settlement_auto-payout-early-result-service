@@ -1,4 +1,6 @@
-﻿namespace AutoPayout.Conditions.Services.Conditions;
+﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+
+namespace AutoPayout.Conditions.Services.Conditions;
 
 public class VerifySettledRelateResult(IDynamicRepository repository) : AbstractCondition
 
@@ -65,7 +67,7 @@ public class VerifySettledRelateResult(IDynamicRepository repository) : Abstract
 
     private static bool ValidateResultDetail(Match match, ResultDetail item, List<ResultDetail> relatedResults)
     {
-        var isExistsRelatedResults = TryGetAllExistsResults(match.ResultDetails, [.. relatedResults], out var existingResourceIds);
+        var isExistsRelatedResults = RelatedResultsHelper.TryGetAllExistsResults(match.ResultDetails, [.. relatedResults], out var existingResourceIds);
 
         var checkingRelatedResults = relatedResults
             .Where(x => !existingResourceIds.Contains(x.ResourceId))
@@ -79,17 +81,6 @@ public class VerifySettledRelateResult(IDynamicRepository repository) : Abstract
 
     private static bool HasRelatedResources(ResultDetail item)
         => item.RelatedSettResourcesIds.Count > 0 || item.RelatedCalResourceIds.Count > 0;
-
-    private static bool TryGetAllExistsResults(List<ResultDetail> settlingResults, List<ResultDetail> relatedResults, out List<string> existingResourceIds)
-    {
-        var settlingResultsIds = settlingResults.Select(x => x.ResourceId).ToList();
-
-        existingResourceIds = [.. relatedResults
-            .Where(x => settlingResultsIds.Contains(x.ResourceId))
-            .Select(x => x.ResourceId)];
-
-        return existingResourceIds.Count == relatedResults.Count;
-    }
 
     private static bool IsCalRelatedResults(List<ResultDetail> relatedResults, List<string> relatedCalResourceIds)
     {
