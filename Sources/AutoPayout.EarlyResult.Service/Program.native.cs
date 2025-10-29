@@ -10,6 +10,8 @@ using ONEbook.UM.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
+services.AddMemoryCache();
+
 services.AddRedisCache(builder.Configuration.GetSection("Fanex.Caching.Redis"));
 
 services.AddOneBookUmForService(builder.Configuration);

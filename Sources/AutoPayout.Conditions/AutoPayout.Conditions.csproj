@@ -11,6 +11,7 @@
     <PackageReference Include="Fanex.Logging.Extensions" Version="2.0.2.1" />
     <PackageReference Include="Fanex.Settlement.Converter" Version="1.0.0.1" />
     <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.4.6.4" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoPayout\AutoPayout.csproj" />

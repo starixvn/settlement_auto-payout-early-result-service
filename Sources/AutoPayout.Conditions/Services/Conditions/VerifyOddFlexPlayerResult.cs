@@ -1,18 +1,19 @@
-﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using AutoPayout.Conditions.Services.HelperService;
+using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
 using System.Globalization;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService, IDynamicRepository repository) : AbstractCondition
+public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService) : AbstractCondition
 {
-    private static List<int> PlayerBetTypes => [653, 654, 655, 685, 656, 657, 658, 686, 659, 660, 661, 687, 662, 663, 664, 688,
-        665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 678, 677, 679, 680, 681, 682, 683, 684];
+    public static List<string> Player => ["653", "654", "655", "685", "656", "657", "658", "686", "659", "660", "661", "687", "662", "663", "664", "688", "665", "666"
+        , "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "678", "677", "679", "680", "681", "682", "683", "684"];
 
 
     public async override Task HandleCondition(Match match)
     {
         var playerResults = match.ResultDetails
-            .Where(x => PlayerBetTypes.Exists(p => x.ResourceId.StartsWith(p.ToString(CultureInfo.InvariantCulture))))
+            .Where(x => Player.Exists(p => x.ResourceId.StartsWith(p.ToString(CultureInfo.InvariantCulture))))
             .ToList();
 
         if (playerResults.Count == 0)
@@ -27,6 +28,10 @@ public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService, 
 
         await ValidatePlayerResults(match, playerResults);
 
+        var failedResults = playerResults.Where(x => !x.IsValid).ToList();
+
+        await ProcessFailureResults(match, failedResults);
+
         match.ResultDetails = [.. nonPlayerResults, .. playerResults.Where(x => x.IsValid)];
 
         await HandleNextCondition(match);
@@ -34,40 +39,27 @@ public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService, 
 
     private async Task ValidatePlayerResults(Match match, List<ResultDetail> playerResults)
     {
-        var playerInfo = await GetOddFlex(match.MatchId, [.. playerResults.Select(x => x.ResourceId)]);
         foreach (var result in playerResults)
         {
-            var confirmScore = result.Scores.FirstOrDefault(s => s.SourceId == 0);
-            var playerOtherInfo = GetOrtherInfoByOddFlex(result, playerInfo);
+            var score = result.Scores.FirstOrDefault(x => x.SourceId == 0);
+            var playerOtherInfo = GetOrtherInfoByOddFlex(result, result.OddFlex);
 
-            result.IsValid = confirmScore == null ||
-                string.IsNullOrEmpty(confirmScore.OtherInfo) ||
-                confirmScore.OtherInfo.Equals(playerOtherInfo);
+            var isValidOtherInfo = score == null ||
+                string.IsNullOrEmpty(score.OtherInfo) ||
+                score.OtherInfo.Equals(playerOtherInfo);
 
-            if (result.IsValid)
+            if (isValidOtherInfo)
             {
                 result.OtherInfo = playerOtherInfo;
             }
+
+            var isValidConsistent = result.ValidateByRule();
+
+            result.IsValid = isValidOtherInfo && isValidConsistent;
         }
 
         var invalidResults = playerResults.Where(x => !x.IsValid).ToList();
         await ProcessFailureResults(match, invalidResults);
-    }
-
-    private async Task<IEnumerable<OddFlexModel>> GetOddFlex(int matchId, List<string> resourceIds)
-    {
-        var criteria = new GetPlayerInfoCriteria
-        {
-            MatchId = matchId,
-            SportType = SportType.BasketBall,
-            ListResourceIds = string.Join(",", resourceIds)
-        };
-
-        var oddFlex = (await repository.FetchAsync<OddFlexModel>(criteria))
-            .Distinct()
-            .ToList();
-
-        return oddFlex;
     }
 
     private static string GetOrtherInfoByOddFlex(ResultDetail result, IEnumerable<OddFlexModel> oddFlexs)
@@ -81,7 +73,7 @@ public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService, 
             return string.Empty;
         }
 
-        return string.Join(",", oddFlexs.Select(x => $"{x.Info.PlayerId},${x.Info.TeamId}"));
+        return string.Join(",", oddFlexs.Select(x => $"{x.Info.PlayerId},{x.Info.TeamId}"));
     }
 
     private async Task ProcessFailureResults(Match match, List<ResultDetail> failureResults)
@@ -91,7 +83,7 @@ public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService, 
             return;
         }
 
-        const string remark = "Score mismatch with OddFlex data";
+        var remark = $"Failed Auto Payout: Selected({string.Join(", ", failureResults.Select(x => x.ResourceId))}) due to base result values inconsistency";
         await resultDetailService.UpdateInvalidResultStatus(match.MatchId, failureResults, remark);
     }
 }

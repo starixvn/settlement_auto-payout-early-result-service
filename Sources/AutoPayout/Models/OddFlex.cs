@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace AutoPayout.Conditions.Models;
+namespace AutoPayout.Models;
 
 public class OddFlexModel
 {
@@ -13,6 +13,14 @@ public class OddFlexModel
 
     public OddsInfoModel Info { get; set; }
 
+    public override bool Equals(object obj)
+        => obj is OddFlexModel model &&
+           ResourceId == model.ResourceId &&
+           OddsInfo == model.OddsInfo;
+
+
+    public override int GetHashCode() =>
+        HashCode.Combine(ResourceId, OddsInfo);
 }
 
 public class OddsInfoModel

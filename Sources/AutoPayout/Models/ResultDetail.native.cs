@@ -83,6 +83,12 @@ public class ResultDetail
     [XmlIgnore]
     public List<string> RelatedSettResourcesIds => string.IsNullOrEmpty(RelatedSettResources) ? [] : [.. RelatedSettResources.Split(",")];
 
+    [XmlIgnore]
+    public List<ResultDetail> RelatedResults { get; set; } = [];
+
+
+    public List<OddFlexModel> OddFlex { get; set; } = [];
+
     public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";
 
     public override bool Equals(object obj) => obj is ResultDetail detail

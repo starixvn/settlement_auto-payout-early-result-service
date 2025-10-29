@@ -62,6 +62,8 @@ public static class WorkerInjection
         services.AddTransient<VerifyFinalKabaddi>();
         services.AddTransient<VerifyFinalMuayThai>();
         services.AddTransient<VerifyOddFlexPlayerResult>();
+        services.AddTransient<VerifyRelatePlayerResult>();
+
 
         services.AddSingleton<BasketballHelperService, BasketballHelperServiceImp>();
         services.AddSingleton<InvokeExternalAPI, InvokeExternalAPIImp>();

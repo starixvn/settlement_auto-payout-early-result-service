@@ -34,6 +34,7 @@ public class CreatorImp(IServiceProvider serviceProvider) : Creator
             ConditionId.VerifyFinalBetStatus => provider.GetRequiredService<VerifyFinalWithBetStatus>(),
             ConditionId.VerifyFinalKabaddi => provider.GetRequiredService<VerifyFinalKabaddi>(),
             ConditionId.VerifyOddFlexPlayerResult => provider.GetRequiredService<VerifyOddFlexPlayerResult>(),
+            ConditionId.VerifyRelatedPlayerResult => provider.GetRequiredService<VerifyRelatePlayerResult>(),
             _ => provider.GetRequiredService<IgnoreVerify>(),
         };
     }

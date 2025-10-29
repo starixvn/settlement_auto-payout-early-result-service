@@ -1,16 +1,21 @@
-﻿using AutoPayout.Conditions.Services.HelperService.GetAndGenerate;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyRelatePlayerResult(IDynamicRepository repository) : AbstractCondition
+public class VerifyRelatePlayerResult(
+    IDynamicRepository repository,
+    IMemoryCache memoryCache
+    ) : AbstractCondition
 {
-    public static List<string> DependentResources => ["669", "671", "673", "674", "675", "676", "677", "678", "679", "680", "681", "682", "683", "684"];
+
+    public static List<string> DependentResources => ["669", "671", "673", "674", "675", "676", "677", "678", "679", "680", "681", "682", "683", "684"]; // has oddlex
+    public static List<string> Player => ["653", "654", "655", "685", "656", "657", "658", "686", "659", "660", "661", "687", "662", "663", "664", "688", "665", "666"
+        , "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "678", "677", "679", "680", "681", "682", "683", "684"];
 
     public override async Task HandleCondition(Match match)
     {
-        var playerResults = match.ResultDetails
-            .Where(x => DependentResources.Exists(p => x.ResourceId.StartsWith(p)))
-            .ToList();
+        var playerResults = GetPlayerResults(match.ResultDetails);
 
         if (playerResults.Count == 0)
         {
@@ -18,31 +23,103 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository) : AbstractC
             return;
         }
 
-        var oddFlexs = await GetOddFlex(match.MatchId);
-        var relatedDic = playerResults.Select(x => GenerateRelatedResourceIds(x, oddFlexs)).ToDictionary();
-        var relatedResourceIds = relatedDic.Values.SelectMany(x => x).Distinct().ToList();
-        var relatedResults = await GetRelatedResults(match, string.Join(",", relatedResourceIds));
+        await ValidatePlayerResults(match, playerResults);
 
-        foreach (var item in playerResults)
-        {
-            var itemRelatedResourceIds = relatedDic.GetValueOrDefault(item.ResourceId);
-            var x = RelatedResultsHelper.TryGetAllExistsResults(
-                [.. match.ResultDetails.Select(x => x.ResourceId)],
-                itemRelatedResourceIds,
-                out var existingResourceIds);
+        match.ResultDetails = [.. match.ResultDetails.Where(x => x.IsValid)];
 
-            var itemRelatedResults = relatedResults
-                .Where(x => itemRelatedResourceIds.Contains(x.ResourceId) && !existingResourceIds.Contains(x.ResourceId))
-                .ToList();
-
-            var y = itemRelatedResults.TrueForAll(x => x.SettlementStatusId == SettlementStatusId.Calculated);
-        }
-
-
+        await HandleNextCondition(match);
     }
 
 
-    private async Task<IEnumerable<OddFlexModel>> GetOddFlex(int matchId)
+    private async Task ValidatePlayerResults(Match match, List<ResultDetail> playerResults)
+    {
+        var oddFlexs = await GetOddFlex(match.MatchId);
+        var relatedDic = playerResults.Select(x => GenerateRelatedResourceIds(x, oddFlexs)).ToDictionary();
+        var relatedResults = await GetAllRelatedResults(match, relatedDic);
+
+        foreach (var item in playerResults)
+        {
+            item.OddFlex = [.. oddFlexs.Where(o => o.ResourceId == item.ResourceId && o.BetType is not null)
+                .Distinct()];
+
+            if (DependentResources.Any(item.ResourceId.StartsWith))
+            {
+                var relatedCalResources = relatedDic.GetValueOrDefault(item.ResourceId) ?? [];
+                var isValid = IsPlayerResultValid(relatedCalResources, relatedResults);
+
+                item.IsValid = isValid;
+                item.RelatedCalResources = isValid ? string.Join(",", relatedCalResources) : string.Empty;
+                item.RelatedResults = isValid
+                    ? [.. relatedResults.Where(r => relatedCalResources.Contains(r.ResourceId))]
+                    : [];
+            }
+        }
+    }
+
+    private static bool IsPlayerResultValid(
+        List<string> itemRelatedResourceIds,
+        List<ResultDetail> allRelatedResults)
+    {
+        var relatedResults = allRelatedResults
+            .Where(r => itemRelatedResourceIds.Contains(r.ResourceId))
+            .ToList();
+
+        return itemRelatedResourceIds.Count == relatedResults.Count
+            && relatedResults.TrueForAll(r => r.SettlementStatusId == SettlementStatusId.Calculated);
+    }
+
+    private async Task<List<ResultDetail>> GetAllRelatedResults(Match match, Dictionary<string, List<string>> relatedDictionary)
+    {
+        var allRelatedResourceIds = relatedDictionary.Values
+            .SelectMany(x => x)
+            .Distinct()
+            .ToList();
+
+        var result = await GetRelatedResults(match, string.Join(",", allRelatedResourceIds));
+
+        return result;
+    }
+
+
+    private static List<ResultDetail> GetPlayerResults(List<ResultDetail> results)
+        => [.. results.Where(x => Player.Exists(p => x.ResourceId.StartsWith(p)))];
+
+
+    private async Task<List<OddFlexModel>> GetOddFlex(int matchId)
+    {
+        var cacheKey = $"OddFlex: {matchId}";
+
+        var x = await memoryCache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            return await FetchAndParseOddFlexData(matchId);
+        });
+
+        return x;
+    }
+
+    private async Task<List<OddFlexModel>> FetchAndParseOddFlexData(int matchId)
+    {
+        var rawOddFlexModels = (await FetchRawOddFlexData(matchId))
+            .Distinct()
+            .ToList();
+
+        foreach (var item in rawOddFlexModels)
+        {
+            try
+            {
+                item.Info = JsonConvert.DeserializeObject<OddsInfoModel>(item.OddsInfo);
+            }
+            catch
+            {
+                item.Info = null;
+            }
+        }
+
+        return [.. rawOddFlexModels.Where(x => x.Info is not null)];
+    }
+
+    private async Task<List<OddFlexModel>> FetchRawOddFlexData(int matchId)
     {
         var criteria = new GetPlayerInfoCriteria
         {
@@ -50,16 +127,13 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository) : AbstractC
             SportType = SportType.BasketBall,
         };
 
-        var oddFlex = (await repository.FetchAsync<OddFlexModel>(criteria))
-            .Distinct()
-            .ToList();
-
-        return oddFlex;
+        var oddFlexModels = await repository.FetchAsync<OddFlexModel>(criteria);
+        return oddFlexModels.Distinct().ToList();
     }
 
-    private static (string, List<string>) GenerateRelatedResourceIds(ResultDetail dependentResource, IEnumerable<OddFlexModel> oddFlexs)
+    private static (string, List<string>) GenerateRelatedResourceIds(ResultDetail resultDetail, List<OddFlexModel> oddFlexs)
     {
-        var foundOddFlexs = oddFlexs.Where(o => o.ResourceId == dependentResource.ResourceId && o.BetType is not null).ToList();
+        var foundOddFlexs = oddFlexs.Where(o => o.ResourceId == resultDetail.ResourceId && o.BetType is not null).ToList();
         var relatedBetTypes = foundOddFlexs.SelectMany(r => r.RelatedBettype.Split(',')).Distinct();
         var relatedPlayers = string.Join(',', foundOddFlexs.Select(r => r.Info.PlayerId));
 
@@ -76,7 +150,33 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository) : AbstractC
             relatedResourceIds.AddRange(matchingOddFlex.Select(r => r.ResourceId));
         }
 
-        return (dependentResource.ResourceId, relatedResourceIds);
+        var validRelatedResourceIds = FromStatisticToResourceId(foundOddFlexs, relatedResourceIds);
+
+        return (resultDetail.ResourceId, validRelatedResourceIds);
+    }
+
+    private static List<string> FromStatisticToResourceId(List<OddFlexModel> oddFlexs, List<string> relatedResourceIds)
+    {
+        var statisticToResourceId = new Dictionary<string, string>
+        {
+            { "points", "653" },
+            { "rebounds", "659"},
+            { "assists", "656" },
+            { "steals", "667" },
+            { "blocks", "665" },
+            { "three_points", "662" }
+        };
+
+        var statisticResourceIds = oddFlexs
+            .SelectMany(o => o.Info.Statistics)
+            .Where(s => statisticToResourceId.ContainsKey(s.Type))
+            .Select(s => statisticToResourceId[s.Type])
+            .Distinct()
+            .ToList();
+
+        return statisticResourceIds.Count == 0
+            ? relatedResourceIds
+            : [.. relatedResourceIds.Where(x => statisticResourceIds.Any(z => x.StartsWith(z)) || x == "00")];
     }
 
     private static List<OddFlexModel> FindMatchingOddFlex(List<OddFlexModel> oddFlex, string relatedPlayers, string betType)
@@ -94,7 +194,8 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository) : AbstractC
         {
             MatchId = match.MatchId,
             SportType = (short)match.SportType,
-            RelatedCalResources = relatedCalResourceIds
+            RelatedCalResources = relatedCalResourceIds,
+            RelatedSettResources = string.Empty
         };
 
         var relatedResults = (await repository.FetchAsync<ResultDetail>(criteria)).ToList();
