@@ -1,7 +1,6 @@
 ﻿using AutoPayout.Conditions.Services.HelperService;
 using AutoPayout.Models;
 using AutoPayout.Constants;
-using Xunit;
 
 namespace AutoPayout.Conditions.UnitTests.Services.Helpers
 {
@@ -36,6 +35,21 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
                 }
             };
 
+            Assert.False(result.IsHomeValueSumValid());
+        }
+
+        [Fact]
+        public void IsHomeValueSumValid_NonNumericRelated_ReturnsFalse()
+        {
+            var result = new ResultDetail
+            {
+                HomeValue = "10",
+                RelatedResults = new List<ResultDetail>
+                {
+                    new() { HomeValue = "x" },
+                    new() { HomeValue = "5" }
+                }
+            };
             Assert.False(result.IsHomeValueSumValid());
         }
 
@@ -94,6 +108,22 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
         }
 
         [Fact]
+        public void IsValidDoubleDouble_InvalidHomeValue_ReturnsFalse()
+        {
+            var result = new ResultDetail
+            {
+                HomeValue = "?",
+                RelatedResults = new List<ResultDetail>
+                {
+                    new() { HomeValue = "12" },
+                    new() { HomeValue = "11" },
+                    new() { HomeValue = "10" }
+                }
+            };
+            Assert.False(result.IsValidDoubleDouble());
+        }
+
+        [Fact]
         public void IsValidTrippleDouble_Y_WithThreeStatsAboveThreshold_ReturnsTrue()
         {
             var result = new ResultDetail
@@ -109,6 +139,22 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
             };
 
             Assert.True(result.IsValidTrippleDouble());
+        }
+
+        [Fact]
+        public void IsValidTrippleDouble_Y_NotEnoughAboveThreshold_ReturnsFalse()
+        {
+            var result = new ResultDetail
+            {
+                HomeValue = "Y",
+                RelatedResults = new List<ResultDetail>
+                {
+                    new() { HomeValue = "10" },
+                    new() { HomeValue = "9" },
+                    new() { HomeValue = "8" }
+                }
+            };
+            Assert.False(result.IsValidTrippleDouble());
         }
 
         [Fact]
@@ -149,7 +195,38 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
         }
 
         [Fact]
-        public void IsValidHeadToHead_InvalidSetup_ReturnsFalse()
+        public void IsValidHeadToHead_SecondPlayerWins_MismatchChoice_ReturnsFalse()
+        {
+            var first = new ResultDetail { HomeValue = "10", OtherInfo = "101,1" };
+            var second = new ResultDetail { HomeValue = "18", OtherInfo = "102,2" };
+
+            var main = new ResultDetail
+            {
+                HomeValue = "P1", // expect P2 since second wins
+                OddFlex = new List<OddFlexModel>
+                {
+                    new() { Info = new OddsInfoModel { PlayerId =101, TeamId =1 }, BetChoice = "P1" },
+                    new() { Info = new OddsInfoModel { PlayerId =102, TeamId =2 }, BetChoice = "P2" }
+                },
+                RelatedResults = new List<ResultDetail> { first, second }
+            };
+            Assert.False(main.IsValidHeadToHead());
+        }
+
+        [Fact]
+        public void IsValidHeadToHead_WrongRelatedCount_ReturnsFalse()
+        {
+            var main = new ResultDetail
+            {
+                HomeValue = "P1",
+                OddFlex = new List<OddFlexModel>(),
+                RelatedResults = new List<ResultDetail> { new() { HomeValue = "10" } }
+            };
+            Assert.False(main.IsValidHeadToHead());
+        }
+
+        [Fact]
+        public void IsValidHeadToHead_InvalidScores_ReturnsFalse()
         {
             var main = new ResultDetail
             {
@@ -202,6 +279,97 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
         }
 
         [Fact]
+        public void IsValidPerformanceOther_WinnerMismatch_ReturnsFalseWhenHomeValueY()
+        {
+            var main = new ResultDetail
+            {
+                ResourceId = "67501",
+                HomeValue = "Y",
+                OddFlex = new List<OddFlexModel>
+                {
+                    new()
+                    {
+                        ResourceId = "67501",
+                        Info = new OddsInfoModel
+                        {
+                            TeamId =1,
+                            IsHome = true,
+                            PlayerId =999,
+                            Results = new List<ResultInfo>
+                            {
+                                new() { Type = "winner", Value = "1" }
+                            },
+                            Statistics = new List<Statistic>()
+                        }
+                    }
+                },
+                RelatedResults = new List<ResultDetail>
+                {
+                    new() { ResourceId = ResourceIds.FullTime, HomeValue = "90", AwayValue = "100" } // away wins
+                }
+            };
+            Assert.False(main.IsValidPerformanceOther());
+        }
+
+        [Fact]
+        public void IsValidPerformanceOther_StatisticConditionFails_ReturnsFalseWhenHomeValueY()
+        {
+            var main = new ResultDetail
+            {
+                ResourceId = "67501",
+                HomeValue = "Y",
+                OddFlex = new List<OddFlexModel>
+                {
+                    new()
+                    {
+                        ResourceId = "67501",
+                        Info = new OddsInfoModel
+                        {
+                            TeamId =1,
+                            IsHome = true,
+                            PlayerId =999,
+                            Statistics = new List<Statistic>
+                            {
+                                new() { Type = "points", Value = "30+" }
+                            }
+                        }
+                    }
+                },
+                RelatedResults = new List<ResultDetail>
+                {
+                    new() { ResourceId = "65301", HomeValue = "20" }
+                }
+            };
+            Assert.False(main.IsValidPerformanceOther());
+        }
+
+        [Fact]
+        public void IsValidPerformanceOther_NoGameResultsNoStats_ReturnsYWhenHomeValueY()
+        {
+            var main = new ResultDetail
+            {
+                ResourceId = "67501",
+                HomeValue = "Y",
+                OddFlex = new List<OddFlexModel>
+                {
+                    new()
+                    {
+                        ResourceId = "67501",
+                        Info = new OddsInfoModel
+                        {
+                            TeamId =1,
+                            IsHome = true,
+                            PlayerId =999,
+                            Results = new List<ResultInfo>(),
+                            Statistics = new List<Statistic>()
+                        }
+                    }
+                }
+            };
+            Assert.True(main.IsValidPerformanceOther());
+        }
+
+        [Fact]
         public void ValidateByConsistenceRule_RoutesToCorrectRule()
         {
             // Sum rule (669)
@@ -237,6 +405,10 @@ namespace AutoPayout.Conditions.UnitTests.Services.Helpers
                 RelatedResults = new List<ResultDetail> { first, second }
             };
             Assert.True(h2h.ValidateByConsistenceRule());
+
+            // Unknown goes default true
+            var unknown = new ResultDetail { ResourceId = "99999", HomeValue = "X" };
+            Assert.True(unknown.ValidateByConsistenceRule());
         }
     }
 }
