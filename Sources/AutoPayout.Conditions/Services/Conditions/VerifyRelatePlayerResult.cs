@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using AutoPayout.Constants;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 
 namespace AutoPayout.Conditions.Services.Conditions;
@@ -167,7 +168,7 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository, IMemoryCach
 
         return statisticResourceIds.Count == 0
             ? relatedResourceIds
-            : [.. relatedResourceIds.Where(x => statisticResourceIds.Any(z => x.StartsWith(z)) || x == "00")];
+            : [.. relatedResourceIds.Where(x => statisticResourceIds.Exists(z => x.StartsWith(z)) || x == ResourceIds.FullTime)];
     }
 
     private static List<OddFlexModel> FindMatchingOddFlex(List<OddFlexModel> oddFlex, string relatedPlayers, string betType)

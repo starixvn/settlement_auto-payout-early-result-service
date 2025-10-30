@@ -4,6 +4,25 @@ namespace AutoPayout.Conditions.Services.HelperService;
 
 public static class ValidateRelatedPlayerResult
 {
+    private static readonly IReadOnlyDictionary<string, Func<ResultDetail, bool>> RuleDispatch
+    = new Dictionary<string, Func<ResultDetail, bool>>
+    {
+        ["669"] = IsHomeValueSumValid,
+        ["671"] = IsHomeValueSumValid,
+        ["673"] = IsHomeValueSumValid,
+        ["674"] = IsHomeValueSumValid,
+
+        ["677"] = IsValidDoubleDouble,
+        ["679"] = IsValidTrippleDouble,
+        ["675"] = IsValidPerformanceOther,
+
+        ["680"] = IsValidHeadToHead,
+        ["681"] = IsValidHeadToHead,
+        ["682"] = IsValidHeadToHead,
+        ["683"] = IsValidHeadToHead,
+        ["684"] = IsValidHeadToHead,
+    };
+
     // 669XX ＠player_name Points-Rebounds-Assist
     // 671XX ＠player _name Rebounds-Assists
     // 673XX ＠player_name Points-Rebounds
@@ -118,7 +137,7 @@ public static class ValidateRelatedPlayerResult
     // winner/handicap/over 675XXYY ＠player_name ＠performance and ＠others
     private static string GetExpectedHomeValue(ResultDetail resultDetail)
     {
-        var oddFlex = resultDetail.OddFlex.First();
+        var oddFlex = resultDetail.OddFlex[0];
         var isValidFinalResult = ValidateFinalResult(resultDetail, oddFlex);
         var isValidStatistics = ValidateStatistics(resultDetail, oddFlex);
 
@@ -135,19 +154,11 @@ public static class ValidateRelatedPlayerResult
     /// </summary>
     public static bool ValidateByConsistenceRule(this ResultDetail resultDetail)
     {
-        return resultDetail.ResourceId switch
-        {
-            var id when id.StartsWith("669") || id.StartsWith("671")
-                || id.StartsWith("673") || id.StartsWith("674") => resultDetail.IsHomeValueSumValid(),
-            var id when id.StartsWith("677") => resultDetail.IsValidDoubleDouble(),
-            var id when id.StartsWith("679") => resultDetail.IsValidTrippleDouble(),
-            var id when id.StartsWith("675") => resultDetail.IsValidPerformanceOther(),
-            var id when id.StartsWith("680") || id.StartsWith("681")
-                || id.StartsWith("682") || id.StartsWith("683") || id.StartsWith("684") => resultDetail.IsValidHeadToHead(),
-            _ => true
-        };
-    }
+        var id = resultDetail.ResourceId ?? string.Empty;
+        var key = id.Length >= 3 ? id[..3] : id;
 
+        return !RuleDispatch.TryGetValue(key, out var rule) || rule(resultDetail);
+    }
 
     private static bool CompareWithCondition(int value, string condition)
     {
@@ -158,7 +169,7 @@ public static class ValidateRelatedPlayerResult
 
         condition = condition.Trim();
 
-        if (condition.EndsWith("+"))
+        if (condition.EndsWith('+'))
         {
             var thresholdStr = condition[..^1]; // Remove "+"
             if (int.TryParse(thresholdStr, out var threshold))
@@ -166,7 +177,8 @@ public static class ValidateRelatedPlayerResult
                 return value >= threshold;
             }
         }
-        else if (condition.EndsWith("-"))
+
+        if (condition.EndsWith('-'))
         {
             var thresholdStr = condition[..^1]; // Remove "-"
             if (int.TryParse(thresholdStr, out var threshold))
@@ -174,7 +186,8 @@ public static class ValidateRelatedPlayerResult
                 return value < threshold;
             }
         }
-        else if (int.TryParse(condition, out var exactValue))
+
+        if (int.TryParse(condition, out var exactValue))
         {
             return value == exactValue;
         }
@@ -225,7 +238,7 @@ public static class ValidateRelatedPlayerResult
     private static bool ValidateFinalResult(ResultDetail resultDetail, OddFlexModel oddFlex)
     {
         var hasGameResults = oddFlex.Info.Results
-            .Any(x => x.Type == "winner" || x.Type == "over" || x.Type == "handicap");
+            .Exists(x => x.Type == "winner" || x.Type == "over" || x.Type == "handicap");
 
         if (!hasGameResults)
         {
@@ -249,7 +262,7 @@ public static class ValidateRelatedPlayerResult
 
     private static bool ValidateWinnerCondition(OddFlexModel oddFlex, int ftHomeValue, int ftAwayValue)
     {
-        var winnerResult = oddFlex.Info.Results.FirstOrDefault(x => x.Type == "winner");
+        var winnerResult = oddFlex.Info.Results.Find(x => x.Type == "winner");
         if (winnerResult == null)
         {
             return true;
@@ -268,7 +281,7 @@ public static class ValidateRelatedPlayerResult
 
     private static bool ValidateOverCondition(OddFlexModel oddFlex, int ftHomeValue, int ftAwayValue)
     {
-        var overResult = oddFlex.Info.Results.FirstOrDefault(x => x.Type == "over");
+        var overResult = oddFlex.Info.Results.Find(x => x.Type == "over");
         if (overResult == null)
         {
             return true;
@@ -285,7 +298,7 @@ public static class ValidateRelatedPlayerResult
 
     private static bool ValidateHandicapCondition(OddFlexModel oddFlex, int ftHomeValue, int ftAwayValue)
     {
-        var handicapResult = oddFlex.Info.Results.FirstOrDefault(x => x.Type == "handicap");
+        var handicapResult = oddFlex.Info.Results.Find(x => x.Type == "handicap");
         if (handicapResult == null)
         {
             return true;
