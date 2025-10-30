@@ -1,6 +1,8 @@
-﻿namespace AutoPayout.Conditions.Services.HelperService;
+﻿using AutoPayout.Constants;
 
-public static class ValidateRelatedResult
+namespace AutoPayout.Conditions.Services.HelperService;
+
+public static class ValidateRelatedPlayerResult
 {
     // 669XX ＠player_name Points-Rebounds-Assist
     // 671XX ＠player _name Rebounds-Assists
@@ -24,43 +26,42 @@ public static class ValidateRelatedResult
     // 677XX ＠player_name Double Double => Yes
     public static bool IsValidDoubleDouble(this ResultDetail resultDetail)
     {
-        var isGreaterThanTen = resultDetail.RelatedResults
-            .Where(related =>
-                int.TryParse(related.HomeValue, out var homeValue) &&
-                homeValue >= 10)
-            .Count() >= 2;
+        const int doubleDoubleThreshold = 10;
+        const int requiredStatsForDoubleDouble = 2;
+        const int requiredStatsToAvoidDoubleDouble = 4;
 
-        var isLessThanTen = resultDetail.RelatedResults
-            .Where(related =>
-                int.TryParse(related.HomeValue, out var homeValue) &&
-                homeValue < 10)
-            .Count() >= 4;
+        var homeValues = GetValidHomeValues(resultDetail.RelatedResults);
+        var statsAboveThreshold = homeValues.Count(value => value >= doubleDoubleThreshold);
 
-        return isGreaterThanTen && resultDetail.HomeValue == "Y"
-            || isLessThanTen && resultDetail.HomeValue == "N";
+        var statsBelowThreshold = homeValues.Count(value => value < doubleDoubleThreshold);
+
+        return resultDetail.HomeValue switch
+        {
+            "Y" when statsAboveThreshold >= requiredStatsForDoubleDouble => true,
+            "N" when statsBelowThreshold >= requiredStatsToAvoidDoubleDouble => true,
+            _ => false
+        };
     }
 
 
     /// <summary>
-    /// Kiểm tra có ít nhất 2 RelatedResults với HomeValue ≥ 10 và thỏa mãn status 
-    /// 677XX ＠player_name Double Double => Yes
+    /// 677XX ＠player_name Double Double
     /// </summary>
     public static bool IsValidTrippleDouble(this ResultDetail resultDetail)
     {
-        var isGreaterTen = resultDetail.RelatedResults
-            .Where(related =>
-                int.TryParse(related.HomeValue, out var homeValue) &&
-                homeValue >= 10)
-            .Count() >= 3;
+        const int threshold = 10;
+        const int requiredStatsForTrippleDouble = 3;
 
-        var isLessTen = resultDetail.RelatedResults
-            .Where(related =>
-                int.TryParse(related.HomeValue, out var homeValue) &&
-                homeValue < 10)
-            .Count() >= 3;
+        var homeValues = GetValidHomeValues(resultDetail.RelatedResults);
+        var aboveThreshold = homeValues.Count(value => value >= threshold);
 
-        return isGreaterTen && resultDetail.HomeValue == "Y"
-            || isLessTen && resultDetail.HomeValue == "N";
+
+        return resultDetail.HomeValue switch
+        {
+            "Y" when aboveThreshold >= requiredStatsForTrippleDouble => true,
+            "N" when aboveThreshold < requiredStatsForTrippleDouble => true,
+            _ => false
+        };
     }
 
     /// <summary>
@@ -75,7 +76,6 @@ public static class ValidateRelatedResult
     }
 
     /// <summary>
-    ///  
     /// 680XX Most Points Scored - ＠player_1 vs. ＠player_2
     /// 684XX Most 3-Point Shots Scored - ＠player_1 vs. ＠player_2
     /// 683XX Most Assists - ＠player_1 vs. ＠player_2
@@ -133,9 +133,8 @@ public static class ValidateRelatedResult
     /// <summary>
     /// Validate dựa trên ResourceId pattern
     /// </summary>
-    public static bool ValidateByRule(this ResultDetail resultDetail)
+    public static bool ValidateByConsistenceRule(this ResultDetail resultDetail)
     {
-        // Dựa vào ResourceId để quyết định rule nào sử dụng
         return resultDetail.ResourceId switch
         {
             var id when id.StartsWith("669") || id.StartsWith("671")
@@ -145,7 +144,7 @@ public static class ValidateRelatedResult
             var id when id.StartsWith("675") => resultDetail.IsValidPerformanceOther(),
             var id when id.StartsWith("680") || id.StartsWith("681")
                 || id.StartsWith("682") || id.StartsWith("683") || id.StartsWith("684") => resultDetail.IsValidHeadToHead(),
-            _ => true // Không có rule đặc biệt
+            _ => true
         };
     }
 
@@ -186,14 +185,14 @@ public static class ValidateRelatedResult
     private static bool ValidateStatistics(ResultDetail resultDetail, OddFlexModel oddFlex)
     {
         var statisticToResourceId = new Dictionary<string, string>
-    {
-        { "points", "653" },
-        { "rebounds", "659"},
-        { "assists", "656" },
-        { "steals", "667" },
-        { "blocks", "665" },
-        { "three_points", "662" }
-    };
+        {
+            { "points", "653" },
+            { "rebounds", "659"},
+            { "assists", "656" },
+            { "steals", "667" },
+            { "blocks", "665" },
+            { "three_points", "662" }
+        };
 
         return oddFlex.Info.Statistics.TrueForAll(statistic =>
         {
@@ -216,6 +215,13 @@ public static class ValidateRelatedResult
         });
     }
 
+    private static List<int> GetValidHomeValues(List<ResultDetail> relatedResults)
+    {
+        return [.. relatedResults
+            .Where(related => int.TryParse(related.HomeValue, out _))
+            .Select(related => int.Parse(related.HomeValue))];
+    }
+
     private static bool ValidateFinalResult(ResultDetail resultDetail, OddFlexModel oddFlex)
     {
         var hasGameResults = oddFlex.Info.Results
@@ -227,7 +233,7 @@ public static class ValidateRelatedResult
         }
 
         var ftResult = resultDetail.RelatedResults
-            .Find(x => x.ResourceId == "00");
+            .Find(x => x.ResourceId == ResourceIds.FullTime);
 
         if (ftResult == null ||
             !int.TryParse(ftResult.HomeValue, out var ftHomeValue) ||
@@ -280,20 +286,20 @@ public static class ValidateRelatedResult
     private static bool ValidateHandicapCondition(OddFlexModel oddFlex, int ftHomeValue, int ftAwayValue)
     {
         var handicapResult = oddFlex.Info.Results.FirstOrDefault(x => x.Type == "handicap");
-        if (handicapResult == null) return true;
+        if (handicapResult == null)
+        {
+            return true;
+        }
 
         if (!double.TryParse(handicapResult.Value, out var handicapValue))
         {
             return false;
         }
 
-
         var isCheckHomeWin = oddFlex.Info.IsHome;
 
-        var x = ftHomeValue - ftAwayValue;
-
-        return isCheckHomeWin ? ftHomeValue - ftAwayValue > handicapValue
-                                          : ftAwayValue - ftHomeValue > handicapValue;
+        return isCheckHomeWin
+            ? ftHomeValue - ftAwayValue > handicapValue
+            : ftAwayValue - ftHomeValue > handicapValue;
     }
-
 }

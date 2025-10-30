@@ -3,16 +3,8 @@ using Newtonsoft.Json;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyRelatePlayerResult(
-    IDynamicRepository repository,
-    IMemoryCache memoryCache
-    ) : AbstractCondition
+public class VerifyRelatePlayerResult(IDynamicRepository repository, IMemoryCache memoryCache) : AbstractCondition
 {
-
-    public static List<string> DependentResources => ["669", "671", "673", "674", "675", "676", "677", "678", "679", "680", "681", "682", "683", "684"]; // has oddlex
-    public static List<string> Player => ["653", "654", "655", "685", "656", "657", "658", "686", "659", "660", "661", "687", "662", "663", "664", "688", "665", "666"
-        , "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "678", "677", "679", "680", "681", "682", "683", "684"];
-
     public override async Task HandleCondition(Match match)
     {
         var playerResults = GetPlayerResults(match.ResultDetails);
@@ -30,7 +22,6 @@ public class VerifyRelatePlayerResult(
         await HandleNextCondition(match);
     }
 
-
     private async Task ValidatePlayerResults(Match match, List<ResultDetail> playerResults)
     {
         var oddFlexs = await GetOddFlex(match.MatchId);
@@ -39,26 +30,27 @@ public class VerifyRelatePlayerResult(
 
         foreach (var item in playerResults)
         {
-            item.OddFlex = [.. oddFlexs.Where(o => o.ResourceId == item.ResourceId && o.BetType is not null)
+            item.OddFlex = [.. oddFlexs
+                .Where(o => o.ResourceId == item.ResourceId && o.BetType is not null)
                 .Distinct()];
 
-            if (DependentResources.Any(item.ResourceId.StartsWith))
+            if (!BetTypes.PlayerDependentResources.Exists(item.ResourceId.StartsWith))
             {
-                var relatedCalResources = relatedDic.GetValueOrDefault(item.ResourceId) ?? [];
-                var isValid = IsPlayerResultValid(relatedCalResources, relatedResults);
-
-                item.IsValid = isValid;
-                item.RelatedCalResources = isValid ? string.Join(",", relatedCalResources) : string.Empty;
-                item.RelatedResults = isValid
-                    ? [.. relatedResults.Where(r => relatedCalResources.Contains(r.ResourceId))]
-                    : [];
+                continue;
             }
+
+            var relatedCalResources = relatedDic.GetValueOrDefault(item.ResourceId) ?? [];
+            var isValid = IsPlayerResultValid(relatedCalResources, relatedResults);
+
+            item.IsValid = isValid;
+            item.RelatedCalResources = isValid ? string.Join(",", relatedCalResources) : string.Empty;
+            item.RelatedResults = isValid
+                ? [.. relatedResults.Where(r => relatedCalResources.Contains(r.ResourceId))]
+                : [];
         }
     }
 
-    private static bool IsPlayerResultValid(
-        List<string> itemRelatedResourceIds,
-        List<ResultDetail> allRelatedResults)
+    private static bool IsPlayerResultValid(List<string> itemRelatedResourceIds, List<ResultDetail> allRelatedResults)
     {
         var relatedResults = allRelatedResults
             .Where(r => itemRelatedResourceIds.Contains(r.ResourceId))
@@ -82,20 +74,19 @@ public class VerifyRelatePlayerResult(
 
 
     private static List<ResultDetail> GetPlayerResults(List<ResultDetail> results)
-        => [.. results.Where(x => Player.Exists(p => x.ResourceId.StartsWith(p)))];
-
+        => [.. results.Where(x => BetTypes.Player.Exists(p => x.ResourceId.StartsWith(p)))];
 
     private async Task<List<OddFlexModel>> GetOddFlex(int matchId)
     {
         var cacheKey = $"OddFlex: {matchId}";
 
-        var x = await memoryCache.GetOrCreateAsync(cacheKey, async entry =>
+        var result = await memoryCache.GetOrCreateAsync(cacheKey, async entry =>
         {
             entry.SetAbsoluteExpiration(TimeSpan.FromHours(1));
             return await FetchAndParseOddFlexData(matchId);
         });
 
-        return x;
+        return result;
     }
 
     private async Task<List<OddFlexModel>> FetchAndParseOddFlexData(int matchId)
@@ -182,10 +173,9 @@ public class VerifyRelatePlayerResult(
     private static List<OddFlexModel> FindMatchingOddFlex(List<OddFlexModel> oddFlex, string relatedPlayers, string betType)
     {
         const int bettypeIndex = 3;
-        return oddFlex
+        return [.. oddFlex
             .Where(o => relatedPlayers.Contains(o.Info.PlayerId.ToString()) && o.ResourceId[..bettypeIndex] == betType)
-            .DistinctBy(r => r.ResourceId)
-            .ToList();
+            .DistinctBy(r => r.ResourceId)];
     }
 
     private async Task<List<ResultDetail>> GetRelatedResults(Match match, string relatedCalResourceIds)

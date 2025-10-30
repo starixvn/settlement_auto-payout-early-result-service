@@ -86,7 +86,7 @@ public class ResultDetail
     [XmlIgnore]
     public List<ResultDetail> RelatedResults { get; set; } = [];
 
-
+    [XmlIgnore]
     public List<OddFlexModel> OddFlex { get; set; } = [];
 
     public override string ToString() => $"{ResourceId}({HomeValue}-{AwayValue})";

@@ -4,16 +4,12 @@ using System.Globalization;
 
 namespace AutoPayout.Conditions.Services.Conditions;
 
-public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService) : AbstractCondition
+public class VerifyConsistencePlayerResult(ResultDetailService resultDetailService) : AbstractCondition
 {
-    public static List<string> Player => ["653", "654", "655", "685", "656", "657", "658", "686", "659", "660", "661", "687", "662", "663", "664", "688", "665", "666"
-        , "667", "668", "669", "670", "671", "672", "673", "674", "675", "676", "678", "677", "679", "680", "681", "682", "683", "684"];
-
-
     public async override Task HandleCondition(Match match)
     {
         var playerResults = match.ResultDetails
-            .Where(x => Player.Exists(p => x.ResourceId.StartsWith(p.ToString(CultureInfo.InvariantCulture))))
+            .Where(x => BetTypes.Player.Exists(p => x.ResourceId.StartsWith(p.ToString(CultureInfo.InvariantCulture))))
             .ToList();
 
         if (playerResults.Count == 0)
@@ -53,7 +49,7 @@ public class VerifyOddFlexPlayerResult(ResultDetailService resultDetailService) 
                 result.OtherInfo = playerOtherInfo;
             }
 
-            var isValidConsistent = result.ValidateByRule();
+            var isValidConsistent = result.ValidateByConsistenceRule();
 
             result.IsValid = isValidOtherInfo && isValidConsistent;
         }

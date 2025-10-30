@@ -32,7 +32,7 @@ public static class ConditionId
 
     public const string VerifyFinalKabaddi = "90"; // for football, basketball, tennis, etc.
 
-    public const string VerifyOddFlexPlayerResult = "89"; // for early basketball with player result  
+    public const string VerifyConsistencePlayerResult = "89"; // for early basketball with player result  
 
     public const string VerifyRelatedPlayerResult = "6";
 }

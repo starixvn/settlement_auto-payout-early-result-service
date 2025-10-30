@@ -61,7 +61,7 @@ public static class WorkerInjection
         services.AddTransient<VerifyFinalWithBetStatus>();
         services.AddTransient<VerifyFinalKabaddi>();
         services.AddTransient<VerifyFinalMuayThai>();
-        services.AddTransient<VerifyOddFlexPlayerResult>();
+        services.AddTransient<VerifyConsistencePlayerResult>();
         services.AddTransient<VerifyRelatePlayerResult>();
 
 
