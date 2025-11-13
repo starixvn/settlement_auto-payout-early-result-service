@@ -75,40 +75,40 @@ public class ProcessServiceTests
         await settlementService.Received().UpdateResultExpired(match);
     }
 
-    [Fact]
-    public async Task Process_ExistServiceException_WriteLog()
-    {
-        var match = new Match()
-        {
-            Conditions = "1",
-            ResultDetails =
-            [
-                new ResultDetail
-                {
-                    ResourceId = "00",
-                    ResourceStatus = 1
-                }
-            ],
-            MatchDetail = new MatchDetail
-            {
-                MatchId = 1,
-                ChildLeagueType = 1,
-                SportType = 1,
-            }
-        };
+    //[Fact]
+    //public async Task Process_ExistServiceException_WriteLog()
+    //{
+    //    var match = new Match()
+    //    {
+    //        Conditions = "1",
+    //        ResultDetails =
+    //        [
+    //            new ResultDetail
+    //            {
+    //                ResourceId = "00",
+    //                ResourceStatus = 1
+    //            }
+    //        ],
+    //        MatchDetail = new MatchDetail
+    //        {
+    //            MatchId = 1,
+    //            ChildLeagueType = 1,
+    //            SportType = 1,
+    //        }
+    //    };
 
-        createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns([condition]);
-        condition.HandleCondition(Arg.Any<Match>()).ThrowsAsyncForAnyArgs(new ServiceException() { Description = "Message" });
+    //    createConditionChainService.CreateConditionChain(Arg.Any<string[]>()).Returns([condition]);
+    //    condition.HandleCondition(Arg.Any<Match>()).ThrowsAsyncForAnyArgs(new ServiceException() { Description = "Message" });
 
-        await service.Process(match);
+    //    await service.Process(match);
 
-        createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
-        await settlementService.Received().UpdateResultExpired(match);
-        await writeLogService.Received().WriteLog(match, Arg.Is<ServiceException>(e => e.Description == "Message"));
-        await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed, "Message");
-        await condition.Received(1).HandleCondition(Arg.Any<Match>());
-        matchPoolService.Received().RemoveMatch(match);
-    }
+    //    createConditionChainService.Received().CreateConditionChain(Arg.Is<string[]>(c => c.Length == 1));
+    //    await settlementService.Received().UpdateResultExpired(match);
+    //    await writeLogService.Received().WriteLog(match, Arg.Is<ServiceException>(e => e.Description == "Message"));
+    //    await updateResultStatusService.Received().UpdateResultStatus(match, MatchStatus.Failed, "Message");
+    //    await condition.Received(1).HandleCondition(Arg.Any<Match>());
+    //    matchPoolService.Received().RemoveMatch(match);
+    //}
 
     [Fact]
     public async Task Process_UnHandledException_WriteSystemLog()

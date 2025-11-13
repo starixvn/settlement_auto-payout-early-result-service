@@ -1,6 +1,7 @@
 ﻿using AutoPayout.Conditions.Services.Conditions;
 using AutoPayout.Exceptions;
 using AutoPayout.Services;
+using Fanex.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.EarlyResult.Services;
@@ -30,6 +31,7 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
         catch (ServiceException exception)
         {
+            LogService.Info($"ResultDetails: {match.Conditions}");
             await ProcessError(match, exception);
         }
         catch (Exception exception)
@@ -58,6 +60,8 @@ public class ProcessServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         }
 
         await HandleAndRetryCondition(match, conditions);
+        LogService.Info($"After conditions, MatchId: {match.MatchId}, ResultDetails count: {match.ResultDetails.Count}");
+        LogService.Info($"ResultDetails: {match.Conditions}");
         await settlementService.Push(match);
     }
 
