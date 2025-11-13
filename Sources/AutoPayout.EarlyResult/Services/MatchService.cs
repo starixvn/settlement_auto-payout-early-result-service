@@ -4,6 +4,7 @@ using AutoPayout.EarlyResult.Constants;
 using AutoPayout.EarlyResult.Criteria;
 using Fanex.Caching;
 using Fanex.Data.Repository;
+using Fanex.Logging;
 using Fanex.Settlement.Converter.Services;
 using Microsoft.Extensions.Options;
 
@@ -39,6 +40,7 @@ public class MatchServiceImp(
         }
 
         var (_, response) = await cache.TryGetAsync<string>(CacheKey.LeagueId);
+        LogService.Info($"MatchBranching: {response}");
         var leagueIds = (response ?? "").Split(",");
 
         return appSettingsKey.Value.EnvironmentName switch
@@ -63,6 +65,7 @@ public class MatchServiceImp(
         var (firstResultSet, secondResultSet, thirdResults) =
             await repository.FetchMultipleAsync<ConditionSetting, ResultDetail, ResultDetail>(criteria);
 
+        LogService.Info($"FetchMatch: {string.Join(",", secondResultSet.Select(x => x.MatchId))}");
         await InsertProviderExternal(thirdResults);
 
         return IgnoreResult(secondResultSet)
