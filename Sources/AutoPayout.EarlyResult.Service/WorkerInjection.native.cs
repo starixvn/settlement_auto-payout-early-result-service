@@ -33,6 +33,7 @@ public static class WorkerInjection
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddSingleton<CreateConditionChainService, CreateConditionChainServiceImp>();
+        services.AddSingleton<SettlementDependencies>();
         services.AddSingleton<SettlementService, SettlementServiceImp>();
         services.AddSingleton<CreateQueryService, CreateQueryServiceImp>();
         services.AddSingleton<WriteLogService, WriteLogServiceImp>();
