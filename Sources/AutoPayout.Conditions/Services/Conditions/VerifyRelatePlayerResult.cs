@@ -73,7 +73,6 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository, IMemoryCach
         return result;
     }
 
-
     private static List<ResultDetail> GetPlayerResults(List<ResultDetail> results)
         => [.. results.Where(x => BetTypes.Player.Exists(p => x.ResourceId.StartsWith(p)))];
 
@@ -92,9 +91,7 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository, IMemoryCach
 
     private async Task<List<OddFlexModel>> FetchAndParseOddFlexData(int matchId)
     {
-        var rawOddFlexModels = (await FetchRawOddFlexData(matchId))
-            .Distinct()
-            .ToList();
+        var rawOddFlexModels = await FetchRawOddFlexData(matchId);
 
         foreach (var item in rawOddFlexModels)
         {
@@ -120,7 +117,7 @@ public class VerifyRelatePlayerResult(IDynamicRepository repository, IMemoryCach
         };
 
         var oddFlexModels = await repository.FetchAsync<OddFlexModel>(criteria);
-        return oddFlexModels.Distinct().ToList();
+        return [.. oddFlexModels.Distinct()];
     }
 
     private static (string, List<string>) GenerateRelatedResourceIds(ResultDetail resultDetail, List<OddFlexModel> oddFlexs)
