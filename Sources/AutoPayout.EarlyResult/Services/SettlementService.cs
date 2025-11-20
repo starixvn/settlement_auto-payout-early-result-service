@@ -5,8 +5,10 @@ using AutoPayout.EarlyResult.Models;
 using AutoPayout.EarlyResult.Services.ExtraStepService;
 using AutoPayout.Services;
 using Fanex.Data.Repository;
+using Fanex.Settlement.MessageBridge.JackTime;
 using Fanex.Settlement.ScaleOut.Request;
 using Fanex.Settlement.ScaleOut.Services;
+using MassTransit;
 using Microsoft.Extensions.Options;
 
 namespace AutoPayout.EarlyResult.Services;
@@ -18,24 +20,34 @@ public interface SettlementService
     Task UpdateResultExpired(Match match);
 }
 
+public class SettlementDependencies(
+    ScaleOutSettleService scaleOutSettleService,
+    CreateQueryService createQueryService,
+    UpdateResultStatusService updateResultStatusService,
+    CreateExtraStepService createExtraStepService)
+{
+    public ScaleOutSettleService ScaleOutSettleService { get; } = scaleOutSettleService;
+    public CreateQueryService CreateQueryService { get; } = createQueryService;
+    public UpdateResultStatusService UpdateResultStatusService { get; } = updateResultStatusService;
+    public CreateExtraStepService CreateExtraStepService { get; } = createExtraStepService;
+}
+
 public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         WriteLogService writeLogService,
         IDynamicRepository repository,
-        ScaleOutSettleService scaleOutSettleService,
-        CreateQueryService createQueryService,
-        UpdateResultStatusService updateResultStatusService,
-        CreateExtraStepService createExtraStepService)
+        SettlementDependencies dependencies,
+        IPublishEndpoint publishEndpoint)
     : SettlementService
 {
     public async Task Push(Match match)
     {
         if (match.ResultDetails.Count != 0)
         {
-            var settleCriteria = createQueryService.QuerySettle(match);
+            var settleCriteria = dependencies.CreateQueryService.QuerySettle(match);
             var isExistedFinalResource = IsExistedFinalResource(match.ResultDetails);
             await ProcessBeforeSettle(match, settleCriteria);
             await Execute(settleCriteria, match, isExistedFinalResource);
-            await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
+            await dependencies.UpdateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
             await SettleHedgeMatch(settleCriteria, match, isExistedFinalResource);
             await ProcessAfterSettle(match, settleCriteria);
         }
@@ -56,7 +68,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
             var remark = string.Format(ErrorMessage.ResultExpired, resultExpiredIds);
             await writeLogService.WriteLog(cloneMatch, remark);
-            await updateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
+            await dependencies.UpdateResultStatusService.UpdateResultStatus(cloneMatch, MatchStatus.Failed, remark);
         }
     }
 
@@ -67,7 +79,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         {
             criteria.MatchId = hedgeMatchDetail.MatchId;
             await Execute(criteria, match, isExistedFinalResource, false);
-            await updateResultStatusService.UpdateResultStatus(new Match
+            await dependencies.UpdateResultStatusService.UpdateResultStatus(new Match
             {
                 MatchId = hedgeMatchDetail.MatchId,
                 ResultDetails = match.ResultDetails
@@ -79,7 +91,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         await SetUnderSettleFlag(criteria, isExistedFinalResource);
 
-        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Waiting);
+        await dependencies.UpdateResultStatusService.UpdateResultStatus(match, MatchStatus.Waiting);
 
         await UpdateMatchInfo(match, criteria);
 
@@ -87,6 +99,25 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
         await writeLogService.InsertResettleLog(criteria, match.SportType, isMainMatch);
         await ExecuteSettleAllSite(criteria);
 
+        if (match.SportType == SportType.BasketBall)
+        {
+            await HybridParlayPublish(criteria);
+        }
+    }
+
+    private async Task HybridParlayPublish(SettleCriteria criteria)
+    {
+        var request = new HybridMatch
+        {
+            MatchId = criteria.MatchId,
+            LogDate = DateTimeOffset.Now,
+            Action = criteria.Action,
+            UserId = criteria.AdminId
+        };
+
+        await publishEndpoint.Publish(
+            request,
+            new CancellationTokenSource(TimeSpan.FromSeconds(3)).Token);
     }
 
     private async Task ExecuteSettleAllSite(SettleCriteria criteria)
@@ -104,18 +135,18 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
 
     private async Task ProcessBeforeSettle(Match match, SettleCriteria settleCriteria)
     {
-        var extraStepBeforeSettle = createExtraStepService.Create(match);
+        var extraStepBeforeSettle = dependencies.CreateExtraStepService.Create(match);
         await extraStepBeforeSettle.Process(match, settleCriteria);
     }
 
     private async Task ProcessAfterSettle(Match match, SettleCriteria settleCriteria)
     {
-        var extraStepsBeforeSettle = createExtraStepService.CreateStepsServiceAfterSettle(match);
+        var extraStepsBeforeSettle = dependencies.CreateExtraStepService.CreateStepsServiceAfterSettle(match);
         foreach (var extraStepBeforeSettle in extraStepsBeforeSettle)
         {
             await extraStepBeforeSettle.Process(match, settleCriteria);
         }
-        await updateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
+        await dependencies.UpdateResultStatusService.UpdateResultStatus(match, MatchStatus.Complete);
     }
 
     private async Task<HedgeMatchDetail> GetHedgeMatch(int matchId)
@@ -133,7 +164,7 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
     {
         if (isExistedFinalResource)
         {
-            await scaleOutSettleService.UpdateUnderSettlementFlag(criteria.MatchId, criteria.AdminId, criteria.Action);
+            await dependencies.ScaleOutSettleService.UpdateUnderSettlementFlag(criteria.MatchId, criteria.AdminId, criteria.Action);
         }
     }
 
@@ -160,10 +191,9 @@ public class SettlementServiceImp(IOptions<AppSettingsKey> appSettingsKey,
             requestUpdateInfo.HalfTimeHome = match.MatchDetail.HalfTimeHomeScore;
             requestUpdateInfo.FullTimeHome = int.Parse(ftResult.HomeValue);
             requestUpdateInfo.FullTimeAway = int.Parse(ftResult.AwayValue);
-            requestUpdateInfo.IsHtTicketSettled = match.IsHtTicketSettled; // true
-
+            requestUpdateInfo.IsHtTicketSettled = match.IsHtTicketSettled;
         }
 
-        await scaleOutSettleService.UpdateMatchInfo(requestUpdateInfo);
+        await dependencies.ScaleOutSettleService.UpdateMatchInfo(requestUpdateInfo);
     }
 }
