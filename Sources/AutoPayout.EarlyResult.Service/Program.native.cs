@@ -20,6 +20,8 @@ services.AddFanexSql(builder.Configuration);
 
 services.InitializeServices(builder.Configuration);
 
+services.AddMassTransit(builder.Configuration);
+
 services.AddAutoMapper();
 
 services.Configure<AppSettingsKey>(builder.Configuration);
